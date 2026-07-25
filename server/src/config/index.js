@@ -41,6 +41,7 @@ module.exports = {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
     from: process.env.EMAIL_FROM || 'AfriRoar <noreply@afriroar.com>',
+    support: process.env.SUPPORT_EMAIL || 'afriroar.support@gmail.com',
   },
 
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',

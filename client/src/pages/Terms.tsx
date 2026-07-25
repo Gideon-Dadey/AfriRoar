@@ -21,6 +21,7 @@ const RELATED = [
   { to: '/privacy', label: 'Privacy Policy' },
   { to: '/disclaimer', label: 'Disclaimer' },
   { to: '/about', label: 'About AfriRoar' },
+  { to: '/contact', label: 'Contact' },
 ] as const;
 
 export default function Terms() {
@@ -245,13 +246,18 @@ export default function Terms() {
 
             <Section id="contact" title="12. Contact" last>
               <p>
-                Questions about these terms:{' '}
+                Questions about these terms: use our{' '}
+                <Link to="/contact" className="font-medium text-[var(--color-sr-navy)] underline-offset-2 hover:underline">
+                  contact form
+                </Link>{' '}
+                or email{' '}
                 <a
                   href="mailto:afriroar.support@gmail.com"
                   className="font-medium text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
                 >
                   afriroar.support@gmail.com
                 </a>
+                .
               </p>
               <p className="!mb-0">
                 Related policies:{' '}

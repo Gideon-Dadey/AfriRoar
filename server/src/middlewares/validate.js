@@ -162,6 +162,23 @@ const updateProfileSchema = z.object({
   }),
 });
 
+const contactSchema = z.object({
+  body: z.object({
+    name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100),
+    email: z.string().trim().email('Invalid email address').max(254),
+    topic: z.enum(['account', 'application', 'listing', 'privacy', 'partnership', 'other'], {
+      required_error: 'Choose a topic',
+    }),
+    message: z
+      .string()
+      .trim()
+      .min(20, 'Message must be at least 20 characters')
+      .max(4000, 'Message must be under 4000 characters'),
+    // Honeypot - must stay empty
+    company: z.string().max(200).optional().or(z.literal('')),
+  }),
+});
+
 module.exports = {
   validate,
   registerSchema,
@@ -175,4 +192,5 @@ module.exports = {
   updateScholarshipSchema,
   createApplicationSchema,
   updateProfileSchema,
+  contactSchema,
 };

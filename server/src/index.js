@@ -18,6 +18,7 @@ const applicationRoutes = require('./routes/applications');
 const paymentRoutes = require('./routes/payments');
 const adminRoutes = require('./routes/admin');
 const notificationRoutes = require('./routes/notifications');
+const contactRoutes = require('./routes/contact');
 
 const app = express();
 
@@ -53,6 +54,13 @@ const authLimiter = rateLimit({
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/google', authLimiter);
+
+const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: config.env === 'development' ? 40 : 8,
+  message: { status: 'fail', message: 'Too many contact messages. Please try again later.' },
+});
+app.use('/api/contact', contactLimiter);
 
 // Stripe webhook needs raw body (before json parser)
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
@@ -100,6 +108,7 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

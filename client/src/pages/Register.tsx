@@ -176,13 +176,7 @@ export default function Register() {
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-sr-navy-deeper)] via-[var(--color-sr-navy-deeper)]/80 to-[var(--color-sr-navy)]/45" />
           <div className="relative flex h-full min-h-[70vh] flex-col justify-between p-10 xl:p-14">
             <Link to="/" className="inline-flex items-center gap-3 text-white">
-              <img src="/sr/logo.png" alt="" className="h-10 w-auto object-contain" />
-              <span
-                className="text-[1.35rem] font-bold tracking-tight"
-                style={{ fontFamily: 'var(--font-hero)' }}
-              >
-                AfriRoar
-              </span>
+              <img src="/sr/logo.png" alt="AfriRoar" className="h-10 w-auto object-contain" />
             </Link>
 
             <div className="max-w-md">

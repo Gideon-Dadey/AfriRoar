@@ -20,6 +20,7 @@ const RELATED = [
   { to: '/terms', label: 'Terms of Use' },
   { to: '/disclaimer', label: 'Disclaimer' },
   { to: '/about', label: 'About AfriRoar' },
+  { to: '/contact', label: 'Contact' },
 ] as const;
 
 export default function Privacy() {
@@ -261,13 +262,18 @@ export default function Privacy() {
 
             <Section id="contact" title="11. Contact" last>
               <p>
-                Privacy questions or data requests:{' '}
+                Privacy questions or data requests: use our{' '}
+                <Link to="/contact" className="font-medium text-[var(--color-sr-navy)] underline-offset-2 hover:underline">
+                  contact form
+                </Link>{' '}
+                (topic: Privacy request) or email{' '}
                 <a
                   href="mailto:afriroar.support@gmail.com"
                   className="font-medium text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
                 >
                   afriroar.support@gmail.com
                 </a>
+                .
               </p>
               <p className="!mb-0">
                 Related:{' '}

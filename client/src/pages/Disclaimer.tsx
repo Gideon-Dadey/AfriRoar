@@ -19,6 +19,7 @@ const RELATED = [
   { to: '/terms', label: 'Terms of Use' },
   { to: '/privacy', label: 'Privacy Policy' },
   { to: '/about', label: 'About AfriRoar' },
+  { to: '/contact', label: 'Contact' },
 ] as const;
 
 export default function Disclaimer() {
@@ -212,13 +213,18 @@ export default function Disclaimer() {
 
             <Section id="contact" title="10. Contact" last>
               <p>
-                Questions about this Disclaimer:{' '}
+                Questions about this Disclaimer: use our{' '}
+                <Link to="/contact" className="font-medium text-[var(--color-sr-navy)] underline-offset-2 hover:underline">
+                  contact form
+                </Link>{' '}
+                or email{' '}
                 <a
                   href="mailto:afriroar.support@gmail.com"
                   className="font-medium text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
                 >
                   afriroar.support@gmail.com
                 </a>
+                .
               </p>
               <p className="!mb-0">
                 Related:{' '}

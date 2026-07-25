@@ -98,35 +98,35 @@ export default function Navbar() {
             </button>
             {scholarOpen && (
               <div className="absolute left-0 top-full pt-1 min-w-[280px]">
-                <div className="bg-white text-[var(--color-sr-text)] shadow-xl border border-[var(--color-sr-border)] py-2 text-[15px] font-normal">
+                <div className="border border-white/10 bg-[var(--color-sr-navy)] py-2 text-[15px] font-normal text-white shadow-xl">
                   <Link
                     to={scholarshipMenu.byCountries.to}
-                    className="block px-4 py-2 hover:bg-[var(--color-sr-bg)]"
+                    className="block px-4 py-2 transition-colors hover:bg-white/10 hover:text-[var(--color-sr-yellow)]"
                     onClick={closeAll}
                   >
                     {scholarshipMenu.byCountries.label}
                   </Link>
-                  <div className="px-4 pt-2 pb-1 text-[15px] uppercase tracking-wide text-[var(--color-sr-muted)]">
+                  <div className="px-4 pt-2 pb-1 text-[12px] font-semibold uppercase tracking-[0.14em] text-white/55">
                     Level of Study
                   </div>
                   {scholarshipMenu.levels.map((item) => (
                     <Link
                       key={item.to}
                       to={item.to}
-                      className="block px-4 py-2 hover:bg-[var(--color-sr-bg)]"
+                      className="block px-4 py-2 transition-colors hover:bg-white/10 hover:text-[var(--color-sr-yellow)]"
                       onClick={closeAll}
                     >
                       {item.label}
                     </Link>
                   ))}
-                  <div className="px-4 pt-2 pb-1 text-[15px] uppercase tracking-wide text-[var(--color-sr-muted)]">
+                  <div className="px-4 pt-2 pb-1 text-[12px] font-semibold uppercase tracking-[0.14em] text-white/55">
                     Deadlines
                   </div>
                   {scholarshipMenu.deadlines.map((item) => (
                     <Link
                       key={item.to}
                       to={item.to}
-                      className="block px-4 py-2 hover:bg-[var(--color-sr-bg)]"
+                      className="block px-4 py-2 transition-colors hover:bg-white/10 hover:text-[var(--color-sr-yellow)]"
                       onClick={closeAll}
                     >
                       {item.label}
@@ -267,11 +267,13 @@ export default function Navbar() {
                 <ChevronDown className={`w-4 h-4 transition-transform ${scholarOpen ? 'rotate-180' : ''}`} />
               </button>
               {scholarOpen && (
-                <div className="bg-black/20 pb-2 text-[15px] font-normal">
+                <div className="pb-2 text-[15px] font-normal">
                   <Link to="/countries" className="block px-5 py-2.5 hover:bg-white/10" onClick={closeAll}>
                     Scholarships by Countries
                   </Link>
-                  <p className="px-5 pt-2 text-[15px] uppercase text-white/60">Level of Study</p>
+                  <p className="px-5 pt-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                    Level of Study
+                  </p>
                   {scholarshipMenu.levels.map((item) => (
                     <Link
                       key={item.to}
