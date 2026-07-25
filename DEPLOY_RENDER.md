@@ -22,7 +22,20 @@ AfriRoar deploys as **one Web Service**: Express API + built React app.
    - `EMAIL_USER` / `EMAIL_PASS` — Gmail + app password (for verify / contact)  
    - `GOOGLE_CLIENT_ID` — same as your local Google Web client ID  
    - `CLIENT_URL` — leave blank first deploy (auto uses `RENDER_EXTERNAL_URL`), then set to `https://YOUR-SERVICE.onrender.com`
-6. Create Blueprint → wait for the first build (often 5–10 minutes on free tier).
+
+**Build Command** (paste exactly if creating the service manually):
+
+```bash
+npm install --prefix server && npm install --prefix client --include=dev && npm run build --prefix client
+```
+
+**Start Command:**
+
+```bash
+npm start --prefix server
+```
+
+`--include=dev` matters: with `NODE_ENV=production`, npm skips Vite/TypeScript unless you force devDependencies.
 
 ## After deploy
 
