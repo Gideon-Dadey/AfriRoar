@@ -120,10 +120,24 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Handle unmatched routes (Express 5 requires named wildcards)
-app.all('/{*splat}', (req, res, next) => {
-  next(new NotFoundError(`Cannot find ${req.originalUrl} on this server.`));
-});
+// Serve the Vite client build when present (Render / production single-service)
+const fs = require('fs');
+const clientDist = path.join(__dirname, '../../client/dist');
+const serveClient = fs.existsSync(path.join(clientDist, 'index.html'));
+
+if (serveClient) {
+  app.use(express.static(clientDist, { index: false, maxAge: '1d' }));
+  app.get('/{*splat}', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+      return next(new NotFoundError(`Cannot find ${req.originalUrl} on this server.`));
+    }
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+} else {
+  app.all('/{*splat}', (req, res, next) => {
+    next(new NotFoundError(`Cannot find ${req.originalUrl} on this server.`));
+  });
+}
 
 // Global error handler
 app.use(errorHandler);

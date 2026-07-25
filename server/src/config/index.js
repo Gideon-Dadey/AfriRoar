@@ -44,7 +44,10 @@ module.exports = {
     support: process.env.SUPPORT_EMAIL || 'afriroar.support@gmail.com',
   },
 
-  clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
+  clientUrl:
+    process.env.CLIENT_URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    'http://localhost:5173',
 
   redis: {
     url: process.env.REDIS_URL,
