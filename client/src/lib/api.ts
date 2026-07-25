@@ -22,7 +22,7 @@ function redirectToLogin() {
     path.startsWith('/login') || path.startsWith('/register')
       ? '/dashboard'
       : path || '/dashboard';
-  window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`;
+  window.location.href = `/login?redirect=${encodeURIComponent(redirect)}&reason=expired`;
 }
 
 function isAuthFailure(error: unknown) {

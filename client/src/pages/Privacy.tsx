@@ -23,7 +23,7 @@ export default function Privacy() {
         </section>
         <section>
           <h2 className="text-lg font-semibold text-[var(--color-text)] mb-2">5. Your Rights</h2>
-          <p>You can access, update, or delete your account data at any time. Contact privacy@scholarhive.com for data requests.</p>
+          <p>You can access, update, or delete your account data at any time. Contact privacy@afriroar.com for data requests.</p>
         </section>
         <section>
           <h2 className="text-lg font-semibold text-[var(--color-text)] mb-2">6. Cookies</h2>

@@ -6,6 +6,7 @@ const {
   validate,
   registerSchema,
   loginSchema,
+  googleAuthSchema,
   verifyEmailSchema,
   resendVerificationSchema,
   updateProfileSchema,
@@ -19,6 +20,7 @@ router.post('/register', validate(registerSchema), authController.register);
 router.post('/verify-email', validate(verifyEmailSchema), authController.verifyEmail);
 router.post('/resend-verification', validate(resendVerificationSchema), authController.resendVerification);
 router.post('/login', validate(loginSchema), authController.login);
+router.post('/google', validate(googleAuthSchema), authController.googleAuth);
 router.post('/refresh', authController.refreshToken);
 
 // Protected routes

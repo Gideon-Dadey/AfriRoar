@@ -6,11 +6,11 @@ export default function About() {
       {/* Hero */}
       <div className="text-center max-w-3xl mx-auto mb-16">
         <h1 className="text-4xl sm:text-5xl font-bold mb-6">
-          About <span className="gradient-text">ScholarHive</span>
+          About <span className="gradient-text">AfriRoar</span>
         </h1>
         <p className="text-lg text-[var(--color-text-secondary)] leading-relaxed">
           We believe every international student deserves access to quality education.
-          ScholarHive connects students with life-changing scholarship opportunities worldwide,
+          AfriRoar connects students with life-changing scholarship opportunities worldwide,
           making the search and application process seamless and accessible.
         </p>
       </div>

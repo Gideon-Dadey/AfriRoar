@@ -145,9 +145,17 @@ const resendVerificationCode = async ({ email }) => {
 };
 
 const login = async ({ email, password }, req) => {
-  const user = await User.findOne({ email }).select('+password +refreshToken');
+  const user = await User.findOne({ email }).select('+password +refreshToken +googleId');
 
-  if (!user || !(await user.comparePassword(password))) {
+  if (!user) {
+    throw new UnauthorizedError('Invalid email or password.');
+  }
+
+  if (!user.password) {
+    throw new UnauthorizedError('This account uses Google Sign-In. Continue with Google instead.');
+  }
+
+  if (!(await user.comparePassword(password))) {
     throw new UnauthorizedError('Invalid email or password.');
   }
 
@@ -178,8 +186,109 @@ const login = async ({ email, password }, req) => {
 
   user.password = undefined;
   user.refreshToken = undefined;
+  user.googleId = undefined;
 
   return { user, accessToken, refreshToken };
+};
+
+/**
+ * Verify Google ID token (GIS credential) and issue AfriRoar session tokens.
+ * Links to an existing email account when Google verifies the email.
+ */
+const loginWithGoogle = async ({ credential }, req) => {
+  if (!config.google.clientId) {
+    throw new BadRequestError(
+      'Google Sign-In is not configured. Set GOOGLE_CLIENT_ID on the server.',
+    );
+  }
+
+  if (!credential) {
+    throw new BadRequestError('Google credential is required.');
+  }
+
+  const { OAuth2Client } = require('google-auth-library');
+  const client = new OAuth2Client(config.google.clientId);
+
+  let ticket;
+  try {
+    ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: config.google.clientId,
+    });
+  } catch (err) {
+    logger.warn(`Google token verification failed: ${err.message}`);
+    throw new UnauthorizedError('Google sign-in failed. Please try again.');
+  }
+
+  const payload = ticket.getPayload();
+  if (!payload?.sub || !payload?.email) {
+    throw new UnauthorizedError('Google account is missing required profile data.');
+  }
+
+  if (payload.email_verified === false) {
+    throw new UnauthorizedError('Your Google email is not verified.');
+  }
+
+  const googleId = payload.sub;
+  const email = String(payload.email).toLowerCase().trim();
+  const name = (payload.name || email.split('@')[0] || 'Student').trim().slice(0, 100);
+  const avatar = payload.picture || '';
+
+  let user = await User.findOne({ googleId }).select('+googleId +refreshToken');
+  let isNewUser = false;
+
+  if (!user) {
+    user = await User.findOne({ email }).select('+googleId +refreshToken +password');
+  }
+
+  if (user) {
+    if (user.isSuspended) {
+      throw new UnauthorizedError('Your account has been suspended. Contact support.');
+    }
+
+    // Link Google identity to existing local account
+    if (!user.googleId) {
+      user.googleId = googleId;
+    } else if (user.googleId !== googleId) {
+      throw new ConflictError('This email is already linked to a different Google account.');
+    }
+
+    if (!user.isEmailVerified) user.isEmailVerified = true;
+    if (avatar && !user.profile?.avatar) {
+      user.profile = user.profile || {};
+      user.profile.avatar = avatar;
+    }
+  } else {
+    isNewUser = true;
+    user = new User({
+      name,
+      email,
+      authProvider: 'google',
+      googleId,
+      role: 'student',
+      isEmailVerified: true,
+      profile: { avatar },
+    });
+    await user.save({ validateBeforeSave: false });
+  }
+
+  const { accessToken, refreshToken } = generateTokens(user._id);
+  user.refreshToken = refreshToken;
+  user.lastLogin = new Date();
+  await user.save({ validateBeforeSave: false });
+
+  await createAuditLog({
+    action: isNewUser ? 'user.register.google' : 'user.login.google',
+    userId: user._id,
+    targetId: user._id,
+    targetModel: 'User',
+    metadata: { email, googleId, isNewUser },
+    req,
+  });
+
+  const safeUser = await User.findById(user._id);
+
+  return { user: safeUser, accessToken, refreshToken, isNewUser };
 };
 
 const refreshAccessToken = async (token) => {
@@ -221,6 +330,7 @@ const logout = async (userId, req) => {
 module.exports = {
   register,
   login,
+  loginWithGoogle,
   verifyEmail,
   resendVerificationCode,
   refreshAccessToken,

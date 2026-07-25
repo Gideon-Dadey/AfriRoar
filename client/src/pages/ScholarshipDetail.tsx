@@ -61,9 +61,9 @@ export default function ScholarshipDetail() {
   return (
     <>
       <Helmet>
-        <title>{scholarship.title} - ScholarHive</title>
+        <title>{scholarship.title} - AfriRoar</title>
         <meta name="description" content={scholarship.shortDescription || scholarship.description.substring(0, 160)} />
-        <meta property="og:title" content={`${scholarship.title} - ScholarHive`} />
+        <meta property="og:title" content={`${scholarship.title} - AfriRoar`} />
         <meta property="og:description" content={scholarship.shortDescription} />
         <meta property="og:type" content="article" />
       </Helmet>
@@ -176,7 +176,7 @@ export default function ScholarshipDetail() {
             <p className="text-sm text-[var(--color-text-secondary)]">{formatDate(scholarship.createdAt)}</p>
             <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
               <p className="text-xs text-[var(--color-text-muted)]">
-                ScholarHive verifies all scholarship listings. Report any suspicious activity.
+                AfriRoar verifies all scholarship listings. Report any suspicious activity.
               </p>
             </div>
           </div>

@@ -18,6 +18,10 @@ module.exports = {
     refreshExpire: process.env.JWT_REFRESH_EXPIRE || '7d',
   },
 
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID || '',
+  },
+
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY,
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
@@ -36,7 +40,7 @@ module.exports = {
     port: parseInt(process.env.EMAIL_PORT, 10) || 587,
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
-    from: process.env.EMAIL_FROM || 'ScholarHive <noreply@scholarhive.com>',
+    from: process.env.EMAIL_FROM || 'AfriRoar <noreply@afriroar.com>',
   },
 
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',

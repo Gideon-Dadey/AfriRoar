@@ -58,6 +58,20 @@ const login = catchAsync(async (req, res) => {
   }
 });
 
+const googleAuth = catchAsync(async (req, res) => {
+  const { user, accessToken, refreshToken, isNewUser } = await authService.loginWithGoogle(
+    req.body,
+    req,
+  );
+
+  res.cookie('refreshToken', refreshToken, cookieOptions);
+
+  res.status(isNewUser ? 201 : 200).json({
+    status: 'success',
+    data: { user, accessToken, isNewUser },
+  });
+});
+
 const refreshToken = catchAsync(async (req, res) => {
   const token = req.cookies.refreshToken || req.body.refreshToken;
 
@@ -139,6 +153,7 @@ module.exports = {
   verifyEmail,
   resendVerification,
   login,
+  googleAuth,
   refreshToken,
   logout,
   getMe,

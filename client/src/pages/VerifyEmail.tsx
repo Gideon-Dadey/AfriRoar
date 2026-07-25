@@ -24,7 +24,10 @@ export default function VerifyEmail() {
     try {
       await api.post('/auth/verify-email', { email, code });
       toast.success('Email verified. You can now log in.');
-      navigate(`/login?email=${encodeURIComponent(email)}`);
+      const redirect = params.get('redirect');
+      const loginParams = new URLSearchParams({ email });
+      if (redirect) loginParams.set('redirect', redirect);
+      navigate(`/login?${loginParams.toString()}`);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Verification failed.');
     } finally {
@@ -91,7 +94,6 @@ export default function VerifyEmail() {
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   className="w-full border border-[var(--color-sr-border)] px-3 py-3 outline-none focus:border-[var(--color-sr-navy)] tracking-[0.35em] text-center text-2xl font-bold"
-                  placeholder="000000"
                   inputMode="numeric"
                   required
                   minLength={6}

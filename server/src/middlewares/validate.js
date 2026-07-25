@@ -14,11 +14,14 @@ const validate = (schema) => (req, res, next) => {
     next();
   } catch (err) {
     if (err instanceof z.ZodError) {
-      const errors = err.errors.map((e) => ({
-        field: e.path.join('.'),
+      const issues = err.issues || err.errors || [];
+      const errors = issues.map((e) => ({
+        field: (e.path || []).join('.'),
         message: e.message,
       }));
-      throw new BadRequestError(`Validation error: ${errors.map(e => e.message).join(', ')}`);
+      throw new BadRequestError(
+        `Validation error: ${errors.map((e) => e.message).join(', ') || 'Invalid request.'}`,
+      );
     }
     next(err);
   }
@@ -40,6 +43,12 @@ const loginSchema = z.object({
   body: z.object({
     email: z.string().email('Invalid email address'),
     password: z.string().min(1, 'Password is required'),
+  }),
+});
+
+const googleAuthSchema = z.object({
+  body: z.object({
+    credential: z.string().min(20, 'Google credential is required'),
   }),
 });
 
@@ -139,6 +148,7 @@ module.exports = {
   validate,
   registerSchema,
   loginSchema,
+  googleAuthSchema,
   verifyEmailSchema,
   resendVerificationSchema,
   createScholarshipSchema,

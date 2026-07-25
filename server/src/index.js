@@ -52,6 +52,7 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/google', authLimiter);
 
 // Stripe webhook needs raw body (before json parser)
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));

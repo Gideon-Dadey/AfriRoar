@@ -7,11 +7,11 @@ export default function Disclaimer() {
       <div className="glass-card p-8 space-y-6 text-[var(--color-text-secondary)] text-sm leading-relaxed">
         <section>
           <h2 className="text-lg font-semibold text-[var(--color-text)] mb-2">Important Notice</h2>
-          <p>ScholarHive is a scholarship discovery and application management platform. We aggregate scholarship information from various sources and scholarship providers.</p>
+          <p>AfriRoar is a scholarship discovery and application management platform. We aggregate scholarship information from various sources and scholarship providers.</p>
         </section>
         <section>
           <h2 className="text-lg font-semibold text-[var(--color-text)] mb-2">No Guarantee</h2>
-          <p>ScholarHive does not guarantee the accuracy, completeness, or availability of any scholarship listing. Scholarship decisions are made solely by the scholarship providers.</p>
+          <p>AfriRoar does not guarantee the accuracy, completeness, or availability of any scholarship listing. Scholarship decisions are made solely by the scholarship providers.</p>
         </section>
         <section>
           <h2 className="text-lg font-semibold text-[var(--color-text)] mb-2">Verification</h2>

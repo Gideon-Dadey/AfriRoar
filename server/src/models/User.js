@@ -39,8 +39,24 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
+      required: [
+        function requiredPassword() {
+          return this.authProvider !== 'google';
+        },
+        'Password is required',
+      ],
       minlength: [8, 'Password must be at least 8 characters'],
+      select: false,
+    },
+    authProvider: {
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local',
+    },
+    googleId: {
+      type: String,
+      sparse: true,
+      unique: true,
       select: false,
     },
     role: {
@@ -101,9 +117,9 @@ userSchema.index({ role: 1 });
 userSchema.index({ 'profile.country': 1 });
 userSchema.index({ subscriptionPlan: 1 });
 
-// Hash password before saving
+// Hash password before saving (skip Google / passwordless accounts)
 userSchema.pre('save', async function () {
-  if (!this.isModified('password')) return;
+  if (!this.isModified('password') || !this.password) return;
   this.password = await bcrypt.hash(this.password, 12);
   this.passwordChangedAt = Date.now() - 1000;
 });
@@ -133,6 +149,7 @@ userSchema.pre('save', function () {
 
 // Compare passwords
 userSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!this.password) return false;
   return bcrypt.compare(candidatePassword, this.password);
 };
 
