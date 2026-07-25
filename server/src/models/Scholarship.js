@@ -117,9 +117,9 @@ scholarshipSchema.index({ isFeatured: 1 });
 scholarshipSchema.index({ slug: 1 });
 scholarshipSchema.index({ createdAt: -1 });
 
-// Generate slug
+// Generate slug only when missing — never overwrite a provided catalogue slug
 scholarshipSchema.pre('save', function () {
-  if (this.isModified('title')) {
+  if (!this.slug && this.title) {
     this.slug = slugify(this.title, { lower: true, strict: true }) + '-' + Date.now().toString(36);
   }
   // Auto-generate short description

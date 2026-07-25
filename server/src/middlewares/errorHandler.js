@@ -52,23 +52,23 @@ const sendErrorProd = (err, res) => {
 };
 
 const errorHandler = (err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
+  let error = err;
 
-  logger.error(`${err.statusCode} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+  // Normalize JWT failures in all environments (including development)
+  if (err.name === 'JsonWebTokenError') error = handleJWTError();
+  if (err.name === 'TokenExpiredError') error = handleJWTExpiredError();
+  if (err.name === 'CastError') error = handleCastErrorDB(err);
+  if (err.code === 11000) error = handleDuplicateFieldsDB(err);
+  if (err.name === 'ValidationError') error = handleValidationErrorDB(err);
+
+  error.statusCode = error.statusCode || 500;
+  error.status = error.status || 'error';
+
+  logger.error(`${error.statusCode} - ${error.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
 
   if (config.env === 'development') {
-    sendErrorDev(err, res);
+    sendErrorDev(error, res);
   } else {
-    let error = { ...err };
-    error.message = err.message;
-
-    if (err.name === 'CastError') error = handleCastErrorDB(error);
-    if (err.code === 11000) error = handleDuplicateFieldsDB(error);
-    if (err.name === 'ValidationError') error = handleValidationErrorDB(error);
-    if (err.name === 'JsonWebTokenError') error = handleJWTError();
-    if (err.name === 'TokenExpiredError') error = handleJWTExpiredError();
-
     sendErrorProd(error, res);
   }
 };

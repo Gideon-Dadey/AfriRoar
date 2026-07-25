@@ -10,9 +10,10 @@ const createTransporter = () => {
       return null;
     }
     transporter = nodemailer.createTransport({
-      host: config.email.host,
-      port: config.email.port,
-      secure: config.email.port === 465,
+      service: 'gmail',
+      host: config.email.host || 'smtp.gmail.com',
+      port: config.email.port || 587,
+      secure: false,
       auth: {
         user: config.email.user,
         pass: config.email.pass,

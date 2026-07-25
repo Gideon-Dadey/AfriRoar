@@ -20,7 +20,15 @@ const protect = catchAsync(async (req, res, next) => {
   }
 
   // Verify token
-  const decoded = jwt.verify(token, config.jwt.secret);
+  let decoded;
+  try {
+    decoded = jwt.verify(token, config.jwt.secret);
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      throw new UnauthorizedError('Your token has expired. Please log in again.');
+    }
+    throw new UnauthorizedError('Invalid token. Please log in again.');
+  }
 
   // Check if user still exists
   const user = await User.findById(decoded.id).select('+password');

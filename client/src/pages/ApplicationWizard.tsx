@@ -1,36 +1,57 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
-import api from '@/lib/api';
-import toast from 'react-hot-toast';
 import {
   ArrowLeft,
   ArrowRight,
+  Check,
   CheckCircle2,
+  Clock,
   FileText,
   Loader2,
-  Upload,
+  MapPin,
+  Save,
+  Search,
   Trash2,
+  Upload,
 } from 'lucide-react';
-import type { Application, Scholarship } from '@/types';
+import toast from 'react-hot-toast';
+import api from '@/lib/api';
+import { formatDate, formatDeadline, getFundingTypeLabel, getLevelLabel } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
+import type { Application, Document, Scholarship } from '@/types';
 
 const STEPS = [
-  'Personal Information',
-  'Academic Background',
-  'Statement & Motivation',
-  'Documents',
-  'Review & Submit',
-];
+  { title: 'Personal', blurb: 'Identity and contact details' },
+  { title: 'Academic', blurb: 'Education background' },
+  { title: 'Statements', blurb: 'Personal statement and motivation' },
+  { title: 'Documents', blurb: 'Supporting uploads' },
+  { title: 'Review', blurb: 'Confirm and submit' },
+] as const;
 
 const DOC_HINTS = [
-  'Passport / National ID (PDF or image)',
+  'Passport or national ID',
   'Academic transcripts',
-  'Degree certificate / diploma',
-  'Curriculum Vitae (CV) / Resume',
+  'Degree certificate or diploma',
+  'CV / resume',
   'Recommendation letters (optional)',
 ];
+
+const COUNTRIES = [
+  'Algeria', 'Angola', 'Benin', 'Botswana', 'Burkina Faso', 'Burundi', 'Cameroon',
+  'Cape Verde', 'Central African Republic', 'Chad', 'Comoros', 'Congo',
+  'Democratic Republic of the Congo', 'Djibouti', 'Egypt', 'Equatorial Guinea',
+  'Eritrea', 'Eswatini', 'Ethiopia', 'Gabon', 'Gambia', 'Ghana', 'Guinea',
+  'Guinea-Bissau', 'Ivory Coast', 'Kenya', 'Lesotho', 'Liberia', 'Libya',
+  'Madagascar', 'Malawi', 'Mali', 'Mauritania', 'Mauritius', 'Morocco',
+  'Mozambique', 'Namibia', 'Niger', 'Nigeria', 'Rwanda', 'Sao Tome and Principe',
+  'Senegal', 'Seychelles', 'Sierra Leone', 'Somalia', 'South Africa', 'South Sudan',
+  'Sudan', 'Tanzania', 'Togo', 'Tunisia', 'Uganda', 'Zambia', 'Zimbabwe',
+  'Bangladesh', 'Brazil', 'Colombia', 'India', 'Indonesia', 'Mexico', 'Nepal',
+  'Pakistan', 'Peru', 'Philippines', 'Sri Lanka', 'Vietnam', 'United Kingdom',
+  'United States', 'Canada', 'Germany', 'France', 'Netherlands', 'China', 'Japan',
+] as const;
 
 type PersonalData = {
   fullName: string;
@@ -68,32 +89,189 @@ const emptyAcademic = (): AcademicData => ({
   languages: '',
 });
 
+const inputClass =
+  'w-full border border-[var(--color-sr-border)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-sr-text)] outline-none transition-colors placeholder:text-[var(--color-sr-muted)]/70 focus:border-[var(--color-sr-navy)] disabled:cursor-not-allowed disabled:bg-[var(--color-sr-bg)] disabled:text-[var(--color-sr-muted)]';
+
+function Field({
+  id,
+  label,
+  hint,
+  className = '',
+  children,
+}: {
+  id: string;
+  label: string;
+  hint?: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={className}>
+      <label htmlFor={id} className="mb-1.5 block text-[13px] font-semibold text-[var(--color-sr-navy)]">
+        {label}
+      </label>
+      {children}
+      {hint ? <p className="mt-1.5 text-[12px] leading-snug text-[var(--color-sr-muted)]">{hint}</p> : null}
+    </div>
+  );
+}
+
+function formatBytes(bytes?: number) {
+  if (!bytes || bytes <= 0) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function statusLabel(status: string) {
+  return status.replace(/_/g, ' ');
+}
+
+function statusTone(status: string) {
+  switch (status) {
+    case 'submitted':
+      return 'border-sky-200 bg-sky-50 text-sky-900';
+    case 'under_review':
+      return 'border-amber-200 bg-amber-50 text-amber-900';
+    case 'accepted':
+      return 'border-emerald-200 bg-emerald-50 text-emerald-900';
+    case 'rejected':
+      return 'border-red-200 bg-red-50 text-red-900';
+    case 'withdrawn':
+      return 'border-[var(--color-sr-border)] bg-[var(--color-sr-bg)] text-[var(--color-sr-muted)]';
+    default:
+      return 'border-[var(--color-sr-border)] bg-white text-[var(--color-sr-navy)]';
+  }
+}
+
+function ReviewBlock({
+  title,
+  onEdit,
+  locked,
+  children,
+}: {
+  title: string;
+  onEdit?: () => void;
+  locked: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="border border-[var(--color-sr-border)] p-4 md:p-5">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-[var(--color-sr-muted)]">
+          {title}
+        </h3>
+        {!locked && onEdit ? (
+          <button
+            type="button"
+            onClick={onEdit}
+            className="text-[12px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
+          >
+            Edit
+          </button>
+        ) : null}
+      </div>
+      {children}
+    </div>
+  );
+}
+
 export default function ApplicationWizard() {
   const { id } = useParams();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const seedScholarshipId = params.get('scholarshipId') || params.get('scholarship') || '';
 
   const [application, setApplication] = useState<Application | null>(null);
-  const [scholarshipId, setScholarshipId] = useState(params.get('scholarshipId') || '');
+  const [scholarshipId, setScholarshipId] = useState(seedScholarshipId);
   const [step, setStep] = useState(1);
+  const [loadError, setLoadError] = useState(false);
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [pickerQuery, setPickerQuery] = useState('');
+  const [pickerLevel, setPickerLevel] = useState('');
+  const [pickerFunding, setPickerFunding] = useState('');
 
   const [personal, setPersonal] = useState<PersonalData>(emptyPersonal());
   const [academic, setAcademic] = useState<AcademicData>(emptyAcademic());
   const [personalStatement, setPersonalStatement] = useState('');
   const [motivation, setMotivation] = useState('');
+  const [baselineKey, setBaselineKey] = useState('');
 
-  const { data: scholarships = [], isLoading: loadingScholarships } = useQuery({
+  const pickerMode = !id && !scholarshipId;
+
+  const {
+    data: scholarships = [],
+    isLoading: loadingScholarships,
+    isError: scholarshipsError,
+    refetch: refetchScholarships,
+  } = useQuery({
     queryKey: ['apply-scholarships'],
     queryFn: async () => {
-      const { data } = await api.get('/scholarships', { params: { limit: 50, status: 'approved' } });
+      const { data } = await api.get('/scholarships', { params: { limit: 100, status: 'approved' } });
       return (data.data?.scholarships || data.data || []) as Scholarship[];
     },
-    enabled: !id && !scholarshipId,
+    enabled: pickerMode,
   });
+
+  const { data: existingApps = [] } = useQuery({
+    queryKey: ['applications', 'picker-existing'],
+    queryFn: async () => {
+      const { data } = await api.get('/applications', { params: { limit: 100 } });
+      return (data.data?.applications || []) as Application[];
+    },
+    enabled: pickerMode,
+    staleTime: 30_000,
+  });
+
+  const existingByScholarship = useMemo(() => {
+    const map = new Map<string, Application>();
+    for (const app of existingApps) {
+      const sid =
+        typeof app.scholarshipId === 'object' && app.scholarshipId
+          ? (app.scholarshipId as Scholarship)._id
+          : String(app.scholarshipId || '');
+      if (!sid) continue;
+      const prev = map.get(sid);
+      if (!prev) {
+        map.set(sid, app);
+        continue;
+      }
+      // Prefer draft so the student can continue unfinished work.
+      if (prev.status !== 'draft' && app.status === 'draft') map.set(sid, app);
+    }
+    return map;
+  }, [existingApps]);
+
+  const filteredScholarships = useMemo(() => {
+    const q = pickerQuery.trim().toLowerCase();
+    return scholarships
+      .filter((s) => {
+        if (pickerLevel && s.level !== pickerLevel) return false;
+        if (pickerFunding && s.fundingType !== pickerFunding) return false;
+        if (!q) return true;
+        const hay = [s.title, s.country, s.field, s.shortDescription, ...(s.tags || [])]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return hay.includes(q);
+      })
+      .slice()
+      .sort((a, b) => {
+        const da = a.deadline ? new Date(a.deadline).getTime() : Number.POSITIVE_INFINITY;
+        const db = b.deadline ? new Date(b.deadline).getTime() : Number.POSITIVE_INFINITY;
+        return da - db;
+      });
+  }, [scholarships, pickerQuery, pickerLevel, pickerFunding]);
+
+  const profileScore = user?.profileCompletionScore ?? 0;
+  const needsProfile = profileScore < 60;
 
   const scholarship = useMemo(() => {
     const fromApp = application?.scholarshipId;
@@ -101,14 +279,32 @@ export default function ApplicationWizard() {
     return scholarships.find((s) => s._id === scholarshipId);
   }, [application, scholarships, scholarshipId]);
 
+  const snapshotKey = useMemo(
+    () =>
+      JSON.stringify({
+        personal,
+        academic,
+        personalStatement,
+        motivation,
+        docs: (application?.documents || []).map((d) => d.url),
+      }),
+    [personal, academic, personalStatement, motivation, application?.documents],
+  );
+
+  const dirty = Boolean(baselineKey) && snapshotKey !== baselineKey;
+  const locked = ['submitted', 'under_review', 'accepted', 'rejected'].includes(
+    application?.status || '',
+  );
+
   useEffect(() => {
-    if (!user) return;
+    if (!user || application) return;
     setPersonal((prev) => ({
       ...prev,
       fullName: prev.fullName || user.name || '',
       phone: prev.phone || user.profile?.phone || '',
       country: prev.country || user.profile?.country || '',
       dateOfBirth: prev.dateOfBirth || (user.profile?.dateOfBirth || '').slice(0, 10),
+      nationality: prev.nationality || user.profile?.country || '',
     }));
     setAcademic((prev) => ({
       ...prev,
@@ -118,45 +314,87 @@ export default function ApplicationWizard() {
       gpa: prev.gpa || (user.profile?.gpa != null ? String(user.profile.gpa) : ''),
       languages: prev.languages || (user.profile?.languages || []).join(', '),
     }));
-  }, [user]);
+  }, [user, application]);
 
   useEffect(() => {
     const load = async () => {
       if (!id) return;
+      setLoadError(false);
       try {
         const { data } = await api.get(`/applications/${id}`);
         const app = data.data.application as Application;
         setApplication(app);
-        setStep(app.currentStep || 1);
+        const lockedStatuses = ['submitted', 'under_review', 'accepted', 'rejected'];
+        const isLocked = lockedStatuses.includes(app.status);
+        setStep(isLocked ? 5 : Math.min(5, Math.max(1, app.currentStep || 1)));
         setPersonalStatement(app.personalStatement || '');
         setMotivation(app.motivation || '');
+        setLastSavedAt(app.lastSavedAt || app.updatedAt || null);
 
-        const p = app.steps?.find((s) => s.stepNumber === 1)?.data || {};
-        const a = app.steps?.find((s) => s.stepNumber === 2)?.data || {};
-        setPersonal({ ...emptyPersonal(), ...(p as PersonalData) });
-        setAcademic({ ...emptyAcademic(), ...(a as AcademicData) });
-      } catch (err: any) {
-        toast.error(err.response?.data?.message || 'Could not load application.');
-        navigate('/dashboard/applications');
+        const p = (app.steps?.find((s) => s.stepNumber === 1)?.data || {}) as Partial<PersonalData>;
+        const a = (app.steps?.find((s) => s.stepNumber === 2)?.data || {}) as Partial<AcademicData>;
+        const statements = (app.steps?.find((s) => s.stepNumber === 3)?.data || {}) as {
+          personalStatement?: string;
+          motivation?: string;
+        };
+
+        const nextPersonal = { ...emptyPersonal(), ...p };
+        const nextAcademic = { ...emptyAcademic(), ...a };
+        const nextStatement = app.personalStatement || statements.personalStatement || '';
+        const nextMotivation = app.motivation || statements.motivation || '';
+
+        setPersonal(nextPersonal);
+        setAcademic(nextAcademic);
+        setPersonalStatement(nextStatement);
+        setMotivation(nextMotivation);
+
+        setBaselineKey(
+          JSON.stringify({
+            personal: nextPersonal,
+            academic: nextAcademic,
+            personalStatement: nextStatement,
+            motivation: nextMotivation,
+            docs: (app.documents || []).map((d) => d.url),
+          }),
+        );
+      } catch (err: unknown) {
+        setLoadError(true);
+        const message =
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          'Could not load application.';
+        toast.error(message);
       }
     };
     load();
-  }, [id, navigate]);
+  }, [id]);
+
+  useEffect(() => {
+    if (!dirty || locked) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [dirty, locked]);
 
   const startApplication = async (selectedId: string) => {
     setSaving(true);
     try {
       const { data } = await api.post('/applications', { scholarshipId: selectedId });
       const app = data.data.application as Application;
-      toast.success('Application draft created.');
+      toast.success('Draft created.');
       navigate(`/dashboard/applications/${app._id}`, { replace: true });
-    } catch (err: any) {
-      const msg = err.response?.data?.message || 'Could not start application.';
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Could not start application.';
       if (String(msg).toLowerCase().includes('already applied')) {
         toast.error('You already have an application for this scholarship.');
         navigate('/dashboard/applications');
       } else {
         toast.error(msg);
+        setScholarshipId('');
       }
     } finally {
       setSaving(false);
@@ -164,9 +402,7 @@ export default function ApplicationWizard() {
   };
 
   useEffect(() => {
-    if (!id && scholarshipId) {
-      startApplication(scholarshipId);
-    }
+    if (!id && scholarshipId) startApplication(scholarshipId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, scholarshipId]);
 
@@ -174,31 +410,31 @@ export default function ApplicationWizard() {
     const steps = [
       {
         stepNumber: 1,
-        title: STEPS[0],
+        title: STEPS[0].title,
         data: personal,
-        completed: markCurrentComplete ? step > 1 || step === 1 : step > 1,
+        completed: step > 1,
       },
       {
         stepNumber: 2,
-        title: STEPS[1],
+        title: STEPS[1].title,
         data: academic,
         completed: step > 2,
       },
       {
         stepNumber: 3,
-        title: STEPS[2],
+        title: STEPS[2].title,
         data: { personalStatement, motivation },
         completed: step > 3,
       },
       {
         stepNumber: 4,
-        title: STEPS[3],
+        title: STEPS[3].title,
         data: { documentCount: application?.documents?.length || 0 },
         completed: (application?.documents?.length || 0) > 0,
       },
       {
         stepNumber: 5,
-        title: STEPS[4],
+        title: STEPS[4].title,
         data: {},
         completed: false,
       },
@@ -212,26 +448,26 @@ export default function ApplicationWizard() {
     return steps;
   };
 
-  const validateStep = () => {
+  const validateStep = useCallback(() => {
     if (step === 1) {
-      if (!personal.fullName || !personal.phone || !personal.country || !personal.nationality) {
-        toast.error('Please complete all required personal fields.');
+      if (!personal.fullName.trim() || !personal.phone.trim() || !personal.country.trim() || !personal.nationality.trim()) {
+        toast.error('Complete the required personal fields.');
         return false;
       }
     }
     if (step === 2) {
-      if (!academic.educationLevel || !academic.institution || !academic.fieldOfStudy) {
-        toast.error('Please complete all required academic fields.');
+      if (!academic.educationLevel || !academic.institution.trim() || !academic.fieldOfStudy.trim()) {
+        toast.error('Complete the required academic fields.');
         return false;
       }
     }
     if (step === 3) {
       if (personalStatement.trim().length < 100) {
-        toast.error('Personal statement must be at least 100 characters.');
+        toast.error('Personal statement needs at least 100 characters.');
         return false;
       }
       if (motivation.trim().length < 50) {
-        toast.error('Motivation statement must be at least 50 characters.');
+        toast.error('Motivation needs at least 50 characters.');
         return false;
       }
     }
@@ -240,10 +476,10 @@ export default function ApplicationWizard() {
       return false;
     }
     return true;
-  };
+  }, [step, personal, academic, personalStatement, motivation, application?.documents]);
 
-  const saveProgress = async (nextStep?: number, markComplete = true) => {
-    if (!application) return;
+  const saveProgress = async (nextStep?: number, markComplete = true, silent = false) => {
+    if (!application || locked) return application;
     setSaving(true);
     try {
       const { data } = await api.patch(`/applications/${application._id}`, {
@@ -252,10 +488,25 @@ export default function ApplicationWizard() {
         motivation,
         steps: buildStepsPayload(markComplete),
       });
-      setApplication(data.data.application);
-      return data.data.application as Application;
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Could not save progress.');
+      const saved = data.data.application as Application;
+      setApplication(saved);
+      setLastSavedAt(saved.lastSavedAt || saved.updatedAt || new Date().toISOString());
+      setBaselineKey(
+        JSON.stringify({
+          personal,
+          academic,
+          personalStatement,
+          motivation,
+          docs: (saved.documents || []).map((d) => d.url),
+        }),
+      );
+      if (!silent) toast.success('Draft saved.');
+      return saved;
+    } catch (err: unknown) {
+      toast.error(
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          'Could not save progress.',
+      );
       throw err;
     } finally {
       setSaving(false);
@@ -263,34 +514,89 @@ export default function ApplicationWizard() {
   };
 
   const goNext = async () => {
-    if (!validateStep()) return;
+    if (locked || !validateStep()) return;
     const next = Math.min(step + 1, 5);
-    await saveProgress(next, true);
+    await saveProgress(next, true, true);
     setStep(next);
   };
 
   const goBack = () => setStep((s) => Math.max(1, s - 1));
 
-  const onUpload = async (files: FileList | null) => {
-    if (!files?.length || !application) return;
+  const goToStep = (n: number) => {
+    if (locked) {
+      setStep(n);
+      return;
+    }
+    if (n <= step) setStep(n);
+  };
+
+  const discardChanges = () => {
+    if (!baselineKey) return;
+    try {
+      const parsed = JSON.parse(baselineKey) as {
+        personal: PersonalData;
+        academic: AcademicData;
+        personalStatement: string;
+        motivation: string;
+      };
+      setPersonal(parsed.personal);
+      setAcademic(parsed.academic);
+      setPersonalStatement(parsed.personalStatement);
+      setMotivation(parsed.motivation);
+      toast.success('Changes discarded.');
+    } catch {
+      toast.error('Could not discard changes.');
+    }
+  };
+
+  const onUpload = async (files: FileList | File[] | null) => {
+    if (!files || !application || locked) return;
+    const list = Array.from(files);
+    if (!list.length) return;
+
+    const tooBig = list.find((f) => f.size > 5 * 1024 * 1024);
+    if (tooBig) {
+      toast.error(`“${tooBig.name}” is over 5 MB.`);
+      return;
+    }
+
     setUploading(true);
     try {
       const formData = new FormData();
-      Array.from(files).forEach((file) => formData.append('documents', file));
+      list.forEach((file) => formData.append('documents', file));
       const { data } = await api.post(`/applications/${application._id}/documents`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setApplication(data.data.application || { ...application, documents: data.data.documents });
-      toast.success('Documents uploaded.');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Upload failed.');
+      const nextApp = (data.data.application || {
+        ...application,
+        documents: data.data.documents,
+      }) as Application;
+      setApplication(nextApp);
+      setBaselineKey((prev) => {
+        try {
+          const parsed = JSON.parse(prev || '{}');
+          return JSON.stringify({
+            ...parsed,
+            docs: (nextApp.documents || []).map((d: Document) => d.url),
+          });
+        } catch {
+          return prev;
+        }
+      });
+      toast.success(list.length === 1 ? 'Document uploaded.' : `${list.length} documents uploaded.`);
+    } catch (err: unknown) {
+      toast.error(
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          'Upload failed.',
+      );
     } finally {
       setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
   const removeDocument = async (index: number) => {
-    if (!application) return;
+    if (!application || locked) return;
     const docs = [...(application.documents || [])];
     docs.splice(index, 1);
     setSaving(true);
@@ -300,27 +606,66 @@ export default function ApplicationWizard() {
         currentStep: step,
         steps: buildStepsPayload(false),
       });
-      setApplication(data.data.application);
+      const saved = data.data.application as Application;
+      setApplication(saved);
+      setBaselineKey(
+        JSON.stringify({
+          personal,
+          academic,
+          personalStatement,
+          motivation,
+          docs: (saved.documents || []).map((d) => d.url),
+        }),
+      );
       toast.success('Document removed.');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Could not remove document.');
+    } catch (err: unknown) {
+      toast.error(
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          'Could not remove document.',
+      );
     } finally {
       setSaving(false);
     }
   };
 
   const submitApplication = async () => {
-    if (!application) return;
-    if (!validateStep()) return;
+    if (!application || locked) return;
+
+    if (!personal.fullName.trim() || !personal.phone.trim() || !personal.country.trim() || !personal.nationality.trim()) {
+      toast.error('Personal details are incomplete.');
+      setStep(1);
+      return;
+    }
+    if (!academic.educationLevel || !academic.institution.trim() || !academic.fieldOfStudy.trim()) {
+      toast.error('Academic details are incomplete.');
+      setStep(2);
+      return;
+    }
+    if (personalStatement.trim().length < 100 || motivation.trim().length < 50) {
+      toast.error('Statements are incomplete.');
+      setStep(3);
+      return;
+    }
+    if (!application.documents?.length) {
+      toast.error('Upload at least one document before submitting.');
+      setStep(4);
+      return;
+    }
+
+    setStep(5);
     setSubmitting(true);
     try {
-      await saveProgress(5, true);
+      await saveProgress(5, true, true);
       const { data } = await api.post(`/applications/${application._id}/submit`);
       setApplication(data.data.application);
-      toast.success('Application submitted successfully!');
+      setBaselineKey(snapshotKey);
+      toast.success('Application submitted.');
       navigate('/dashboard/applications');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Submit failed.');
+    } catch (err: unknown) {
+      toast.error(
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          'Submit failed.',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -328,126 +673,655 @@ export default function ApplicationWizard() {
 
   // Scholarship picker
   if (!id && !scholarshipId) {
+    const levelOptions = Array.from(new Set(scholarships.map((s) => s.level).filter(Boolean))).sort();
+    const fundingOptions = Array.from(
+      new Set(scholarships.map((s) => s.fundingType).filter(Boolean)),
+    ).sort();
+
     return (
-      <div className="sr-container py-10">
+      <>
         <Helmet>
           <title>Start application | AfriRoar</title>
         </Helmet>
-        <h1 className="text-[26px] font-bold text-[var(--color-sr-navy)] mb-2">Start a scholarship application</h1>
-        <p className="text-[var(--color-sr-muted)] mb-6">
-          Choose a program to begin. You can save as draft and return anytime.
-        </p>
-        {loadingScholarships ? (
-          <div className="flex items-center gap-2 text-[var(--color-sr-muted)]">
-            <Loader2 className="w-4 h-4 animate-spin" /> Loading scholarships…
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {scholarships.map((s) => (
-              <button
-                key={s._id}
-                type="button"
-                disabled={saving}
-                onClick={() => setScholarshipId(s._id)}
-                className="text-left bg-white border border-[var(--color-sr-border)] p-5 hover:border-[var(--color-sr-navy)] transition-colors"
+        <div className="min-h-[70vh] bg-[var(--color-sr-bg)] pb-16">
+          <div className="border-b border-[var(--color-sr-border)] bg-white">
+            <div className="sr-container py-7 md:py-9">
+              <Link
+                to="/dashboard/applications"
+                className="mb-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-[var(--color-sr-muted)] hover:text-[var(--color-sr-navy)]"
               >
-                <div className="font-bold text-[var(--color-sr-navy)] text-lg">{s.title}</div>
-                <div className="text-sm text-[var(--color-sr-muted)] mt-1">
-                  {s.country} · {s.level} · Deadline {new Date(s.deadline).toLocaleDateString()}
+                <ArrowLeft className="h-4 w-4" />
+                Applications
+              </Link>
+
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div className="min-w-0 max-w-2xl">
+                  <p className="mb-1 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-sr-muted)]">
+                    New application
+                  </p>
+                  <h1 className="text-[1.7rem] font-bold leading-tight text-[var(--color-sr-navy-deeper)] md:text-[1.95rem]">
+                    Choose a scholarship
+                  </h1>
+                  <p className="mt-2 text-[15px] leading-relaxed text-[var(--color-sr-muted)]">
+                    Open a draft for one programme. Save as you go — you can return any time before you submit.
+                  </p>
                 </div>
-              </button>
-            ))}
-            {scholarships.length === 0 && (
-              <p className="text-[var(--color-sr-muted)]">No scholarships available yet. Please check back soon.</p>
-            )}
+                <Link
+                  to="/scholarships"
+                  className="inline-flex items-center gap-1.5 self-start text-[14px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline lg:self-auto"
+                >
+                  Browse full listings
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
           </div>
-        )}
+
+          <div className="sr-container mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+            <div className="space-y-4">
+              <div className="border border-[var(--color-sr-border)] bg-white p-4">
+                <label htmlFor="picker-search" className="sr-only">
+                  Search scholarships
+                </label>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-sr-muted)]" />
+                  <input
+                    id="picker-search"
+                    value={pickerQuery}
+                    onChange={(e) => setPickerQuery(e.target.value)}
+                    placeholder="Search by title, country, or field…"
+                    className="w-full border border-[var(--color-sr-border)] bg-white py-2.5 pl-10 pr-3 text-[15px] text-[var(--color-sr-text)] outline-none placeholder:text-[var(--color-sr-muted)]/70 focus:border-[var(--color-sr-navy)]"
+                  />
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <select
+                    value={pickerLevel}
+                    onChange={(e) => setPickerLevel(e.target.value)}
+                    className="border border-[var(--color-sr-border)] bg-white px-3 py-2 text-[13px] font-medium text-[var(--color-sr-navy)] outline-none focus:border-[var(--color-sr-navy)]"
+                    aria-label="Filter by level"
+                  >
+                    <option value="">All levels</option>
+                    {levelOptions.map((level) => (
+                      <option key={level} value={level}>
+                        {getLevelLabel(level)}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={pickerFunding}
+                    onChange={(e) => setPickerFunding(e.target.value)}
+                    className="border border-[var(--color-sr-border)] bg-white px-3 py-2 text-[13px] font-medium text-[var(--color-sr-navy)] outline-none focus:border-[var(--color-sr-navy)]"
+                    aria-label="Filter by funding"
+                  >
+                    <option value="">All funding</option>
+                    {fundingOptions.map((funding) => (
+                      <option key={funding} value={funding}>
+                        {getFundingTypeLabel(funding)}
+                      </option>
+                    ))}
+                  </select>
+                  {pickerQuery || pickerLevel || pickerFunding ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPickerQuery('');
+                        setPickerLevel('');
+                        setPickerFunding('');
+                      }}
+                      className="px-3 py-2 text-[13px] font-semibold text-[var(--color-sr-muted)] hover:text-[var(--color-sr-navy)]"
+                    >
+                      Clear filters
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+
+              {loadingScholarships ? (
+                <div className="space-y-3" aria-busy="true">
+                  {[0, 1, 2, 3].map((i) => (
+                    <div key={i} className="border border-[var(--color-sr-border)] bg-white p-5">
+                      <div className="h-5 w-2/3 animate-pulse bg-[var(--color-sr-border)]" />
+                      <div className="mt-3 h-4 w-1/2 animate-pulse bg-[var(--color-sr-border)]" />
+                    </div>
+                  ))}
+                </div>
+              ) : scholarshipsError ? (
+                <div className="border border-red-200 bg-red-50 p-8 text-center">
+                  <p className="font-semibold text-red-900">Could not load scholarships</p>
+                  <p className="mt-1 text-[14px] text-red-800/80">
+                    The server may be busy or rate-limited. Wait a moment, then retry.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => refetchScholarships()}
+                    className="mt-4 border border-red-300 bg-white px-4 py-2 text-[14px] font-semibold text-red-900"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : scholarships.length === 0 ? (
+                <div className="border border-[var(--color-sr-border)] bg-white px-6 py-14 text-center">
+                  <FileText className="mx-auto h-10 w-10 text-[var(--color-sr-muted)]" />
+                  <p className="mt-4 font-semibold text-[var(--color-sr-navy-deeper)]">No scholarships available</p>
+                  <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">
+                    Check back soon, or browse the public listings.
+                  </p>
+                  <Link
+                    to="/scholarships"
+                    className="mt-5 inline-flex text-[14px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
+                  >
+                    Browse listings →
+                  </Link>
+                </div>
+              ) : filteredScholarships.length === 0 ? (
+                <div className="border border-[var(--color-sr-border)] bg-white px-6 py-12 text-center">
+                  <p className="font-semibold text-[var(--color-sr-navy-deeper)]">No matches</p>
+                  <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">
+                    Try a broader search or clear the filters.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPickerQuery('');
+                      setPickerLevel('');
+                      setPickerFunding('');
+                    }}
+                    className="mt-4 text-[14px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
+                  >
+                    Clear filters
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <p className="text-[13px] text-[var(--color-sr-muted)]">
+                    {filteredScholarships.length} programme
+                    {filteredScholarships.length === 1 ? '' : 's'} · sorted by deadline
+                  </p>
+                  <ul className="divide-y divide-[var(--color-sr-border)] border border-[var(--color-sr-border)] bg-white">
+                    {filteredScholarships.map((s) => {
+                      const existing = existingByScholarship.get(s._id);
+                      const isDraft = existing?.status === 'draft';
+                      const isLocked =
+                        existing &&
+                        ['submitted', 'under_review', 'accepted', 'rejected'].includes(existing.status);
+
+                      return (
+                        <li key={s._id}>
+                          <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                {s.isFeatured ? (
+                                  <span className="border border-[var(--color-sr-yellow)] bg-[var(--color-sr-yellow)]/20 px-2 py-0.5 text-[11px] font-bold text-[var(--color-sr-navy-deeper)]">
+                                    Featured
+                                  </span>
+                                ) : null}
+                                {isDraft ? (
+                                  <span className="border border-[var(--color-sr-border)] bg-[var(--color-sr-bg)] px-2 py-0.5 text-[11px] font-semibold text-[var(--color-sr-navy)]">
+                                    Draft in progress
+                                  </span>
+                                ) : null}
+                                {isLocked ? (
+                                  <span className="border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] font-semibold capitalize text-sky-900">
+                                    {existing.status.replace(/_/g, ' ')}
+                                  </span>
+                                ) : null}
+                              </div>
+
+                              <h2 className="mt-2 text-[1.05rem] font-bold leading-snug text-[var(--color-sr-navy-deeper)]">
+                                {s.title}
+                              </h2>
+
+                              <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-[var(--color-sr-muted)]">
+                                {s.country ? (
+                                  <span className="inline-flex items-center gap-1">
+                                    <MapPin className="h-3.5 w-3.5" />
+                                    {s.country}
+                                  </span>
+                                ) : null}
+                                {s.level ? <span>{getLevelLabel(s.level)}</span> : null}
+                                {s.fundingType ? <span>{getFundingTypeLabel(s.fundingType)}</span> : null}
+                                {s.deadline ? (
+                                  <span className="inline-flex items-center gap-1">
+                                    <Clock className="h-3.5 w-3.5" />
+                                    {formatDeadline(s.deadline)}
+                                  </span>
+                                ) : null}
+                              </div>
+
+                              {s.shortDescription ? (
+                                <p className="mt-2 line-clamp-2 text-[14px] leading-relaxed text-[var(--color-sr-text)]/80">
+                                  {s.shortDescription}
+                                </p>
+                              ) : null}
+                            </div>
+
+                            <div className="flex shrink-0 flex-wrap items-center gap-2">
+                              {s.slug || s._id ? (
+                                <Link
+                                  to={`/scholarships/${s.slug || s._id}`}
+                                  className="border border-[var(--color-sr-border)] px-3 py-2 text-[13px] font-semibold text-[var(--color-sr-navy)] transition hover:border-[var(--color-sr-navy)]"
+                                >
+                                  Details
+                                </Link>
+                              ) : null}
+
+                              {isDraft && existing ? (
+                                <Link
+                                  to={`/dashboard/applications/${existing._id}`}
+                                  className="inline-flex items-center gap-1.5 bg-[var(--color-sr-navy)] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[var(--color-sr-navy-dark)]"
+                                >
+                                  Continue draft
+                                  <ArrowRight className="h-3.5 w-3.5" />
+                                </Link>
+                              ) : isLocked && existing ? (
+                                <Link
+                                  to={`/dashboard/applications/${existing._id}`}
+                                  className="inline-flex items-center gap-1.5 border border-[var(--color-sr-navy)] px-4 py-2 text-[13px] font-semibold text-[var(--color-sr-navy)]"
+                                >
+                                  View application
+                                  <ArrowRight className="h-3.5 w-3.5" />
+                                </Link>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled={saving}
+                                  onClick={() => setScholarshipId(s._id)}
+                                  className="inline-flex items-center gap-1.5 bg-[var(--color-sr-yellow)] px-4 py-2 text-[13px] font-bold text-[var(--color-sr-navy-deeper)] transition hover:bg-[var(--color-sr-yellow-hover)] disabled:opacity-60"
+                                >
+                                  Start draft
+                                  <ArrowRight className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </>
+              )}
+            </div>
+
+            <aside className="h-fit space-y-4 lg:sticky lg:top-24">
+              <div className="border border-[var(--color-sr-border)] bg-white p-5">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--color-sr-muted)]">
+                  Before you start
+                </p>
+                <ul className="mt-3 space-y-2.5 text-[14px] text-[var(--color-sr-text)]">
+                  {[
+                    'Legal name and contact details',
+                    'Education history and field of study',
+                    'Personal statement (100+ characters)',
+                    'Motivation for this programme',
+                    'ID, transcripts, CV (PDF or images)',
+                  ].map((item) => (
+                    <li key={item} className="flex gap-2">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-sr-navy)]" strokeWidth={2.5} />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="border border-[var(--color-sr-border)] bg-white p-5">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--color-sr-muted)]">
+                  Profile readiness
+                </p>
+                <p className="mt-2 text-[1.5rem] font-bold tabular-nums text-[var(--color-sr-navy)]">
+                  {profileScore}%
+                </p>
+                <div className="mt-2 h-1.5 overflow-hidden bg-[var(--color-sr-border)]">
+                  <div
+                    className="h-full bg-[var(--color-sr-yellow)]"
+                    style={{ width: `${Math.min(100, Math.max(0, profileScore))}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-[13px] leading-relaxed text-[var(--color-sr-muted)]">
+                  {needsProfile
+                    ? 'A stronger profile prefills your draft and improves matching.'
+                    : 'Your profile will prefill personal and academic fields.'}
+                </p>
+                {needsProfile ? (
+                  <Link
+                    to="/dashboard/profile"
+                    className="mt-3 inline-flex text-[13px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
+                  >
+                    Strengthen profile →
+                  </Link>
+                ) : null}
+              </div>
+
+              <div className="border border-[var(--color-sr-navy)] bg-[var(--color-sr-navy)] p-5 text-white">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--color-sr-yellow)]">
+                  How it works
+                </p>
+                <ol className="mt-3 space-y-2 text-[14px] leading-relaxed text-white/90">
+                  <li>1. Pick a programme and open a draft.</li>
+                  <li>2. Complete five short steps.</li>
+                  <li>3. Upload documents, review, and submit.</li>
+                </ol>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="sr-container py-16 text-center">
+        <p className="font-semibold text-[var(--color-sr-navy)]">Application could not be loaded</p>
+        <Link to="/dashboard/applications" className="mt-4 inline-flex text-[14px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline">
+          Back to applications →
+        </Link>
       </div>
     );
   }
 
   if (!application) {
     return (
-      <div className="sr-container py-16 flex items-center justify-center gap-2 text-[var(--color-sr-muted)]">
-        <Loader2 className="w-5 h-5 animate-spin" /> Preparing your application…
-      </div>
+      <>
+        <Helmet>
+          <title>Preparing application | AfriRoar</title>
+        </Helmet>
+        <div className="min-h-[50vh] bg-[var(--color-sr-bg)]">
+          <div className="sr-container flex flex-col items-center justify-center gap-3 py-24 text-center">
+            <Loader2 className="h-6 w-6 animate-spin text-[var(--color-sr-navy)]" />
+            <p className="font-semibold text-[var(--color-sr-navy-deeper)]">Opening your draft…</p>
+            <p className="max-w-sm text-[14px] text-[var(--color-sr-muted)]">
+              Prefilling profile details and setting up the five-step wizard.
+            </p>
+          </div>
+        </div>
+      </>
     );
   }
 
-  const locked = ['submitted', 'accepted', 'rejected'].includes(application.status);
+  const progressPct = Math.round(((step - 1) / (STEPS.length - 1)) * 100);
 
   return (
     <>
       <Helmet>
-        <title>Application | AfriRoar</title>
+        <title>
+          {scholarship?.title ? `${scholarship.title} · Application` : 'Application'} | AfriRoar
+        </title>
       </Helmet>
 
-      <div className="bg-[var(--color-sr-navy)] text-white">
-        <div className="sr-container py-6">
-          <Link to="/dashboard/applications" className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-[var(--color-sr-yellow)] mb-3">
-            <ArrowLeft className="w-4 h-4" /> Back to applications
-          </Link>
-          <h1 className="text-2xl font-bold">{scholarship?.title || 'Scholarship application'}</h1>
-          <p className="text-white/80 mt-1 text-sm capitalize">Status: {application.status.replace('_', ' ')}</p>
-        </div>
-      </div>
+      <div className={['min-h-[70vh] bg-[var(--color-sr-bg)]', dirty && !locked ? 'pb-36' : 'pb-28'].join(' ')}>
+        <div className="border-b border-[var(--color-sr-border)] bg-white">
+          <div className="sr-container py-7 md:py-9">
+            <Link
+              to="/dashboard/applications"
+              className="mb-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-[var(--color-sr-muted)] hover:text-[var(--color-sr-navy)]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Applications
+            </Link>
 
-      <div className="sr-container py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
-          <aside className="bg-white border border-[var(--color-sr-border)] p-4 h-fit">
-            <ol className="space-y-3">
-              {STEPS.map((label, idx) => {
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div className="min-w-0 max-w-3xl">
+                <p className="mb-1 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-sr-muted)]">
+                  {locked ? 'Submitted application' : 'Application wizard'}
+                </p>
+                <h1 className="text-[1.6rem] font-bold leading-tight text-[var(--color-sr-navy-deeper)] md:text-[1.9rem]">
+                  {scholarship?.title || 'Scholarship application'}
+                </h1>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span
+                    className={[
+                      'inline-flex items-center border px-2.5 py-1 text-[12px] font-semibold capitalize',
+                      statusTone(application.status),
+                    ].join(' ')}
+                  >
+                    {statusLabel(application.status)}
+                  </span>
+                  {scholarship?.deadline ? (
+                    <span className="text-[13px] text-[var(--color-sr-muted)]">
+                      Deadline {formatDeadline(scholarship.deadline)}
+                    </span>
+                  ) : null}
+                  {application.submittedAt ? (
+                    <span className="text-[13px] text-[var(--color-sr-muted)]">
+                      Submitted {formatDate(application.submittedAt)}
+                    </span>
+                  ) : lastSavedAt && !locked ? (
+                    <span className="inline-flex items-center gap-1 text-[13px] text-[var(--color-sr-muted)]">
+                      <Clock className="h-3.5 w-3.5" />
+                      Saved {formatDate(lastSavedAt)}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+
+              {locked ? (
+                <div className="max-w-sm border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] leading-relaxed text-emerald-900">
+                  <p className="inline-flex items-center gap-2 font-semibold">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    Locked for review
+                  </p>
+                  <p className="mt-1.5 text-emerald-800/90">
+                    Edits are closed. You can still read every section and download your documents.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+
+            {!locked ? (
+              <div className="mt-6">
+                <div className="mb-2 flex items-center justify-between text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--color-sr-muted)]">
+                  <span>
+                    Step {step} of {STEPS.length}
+                  </span>
+                  <span className="tabular-nums">{progressPct}%</span>
+                </div>
+                <div className="h-1.5 overflow-hidden bg-[var(--color-sr-border)]">
+                  <div
+                    className="h-full bg-[var(--color-sr-yellow)] transition-all duration-500"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="sr-container mt-8 grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+          <aside className="h-fit border border-[var(--color-sr-border)] bg-white p-4 lg:sticky lg:top-24">
+            <div className="mb-3 flex gap-1 overflow-x-auto pb-1 lg:hidden" role="tablist" aria-label="Application steps">
+              {STEPS.map((item, idx) => {
                 const n = idx + 1;
                 const active = step === n;
-                const done = application.steps?.find((s) => s.stepNumber === n)?.completed;
+                const clickable = locked || n <= step;
                 return (
-                  <li key={label} className={`flex items-start gap-2 text-sm ${active ? 'font-bold text-[var(--color-sr-navy)]' : 'text-[var(--color-sr-muted)]'}`}>
-                    <span className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center text-xs ${done || active ? 'bg-[var(--color-sr-navy)] text-white' : 'bg-slate-200'}`}>
-                      {done ? <CheckCircle2 className="w-3.5 h-3.5" /> : n}
-                    </span>
-                    {label}
+                  <button
+                    key={`m-${item.title}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    disabled={!clickable}
+                    onClick={() => goToStep(n)}
+                    className={[
+                      'shrink-0 border px-3 py-1.5 text-[12px] font-semibold',
+                      active
+                        ? 'border-[var(--color-sr-navy)] bg-[var(--color-sr-navy)] text-white'
+                        : 'border-[var(--color-sr-border)] text-[var(--color-sr-navy)]',
+                      !clickable ? 'opacity-40' : '',
+                    ].join(' ')}
+                  >
+                    {n}. {item.title}
+                  </button>
+                );
+              })}
+            </div>
+            <ol className="hidden space-y-1 lg:block">
+              {STEPS.map((item, idx) => {
+                const n = idx + 1;
+                const active = step === n;
+                const done = Boolean(application.steps?.find((s) => s.stepNumber === n)?.completed) || n < step;
+                const clickable = locked || n <= step;
+                return (
+                  <li key={item.title}>
+                    <button
+                      type="button"
+                      disabled={!clickable}
+                      onClick={() => goToStep(n)}
+                      className={[
+                        'flex w-full items-start gap-3 px-2 py-2.5 text-left transition',
+                        active ? 'bg-[var(--color-sr-bg)]' : 'hover:bg-[var(--color-sr-bg)]/70',
+                        !clickable ? 'cursor-not-allowed opacity-45' : '',
+                      ].join(' ')}
+                    >
+                      <span
+                        className={[
+                          'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center text-[11px] font-bold',
+                          done || active
+                            ? 'bg-[var(--color-sr-navy)] text-white'
+                            : 'border border-[var(--color-sr-border)] text-[var(--color-sr-muted)]',
+                        ].join(' ')}
+                      >
+                        {done && !active ? <Check className="h-3 w-3" strokeWidth={3} /> : n}
+                      </span>
+                      <span>
+                        <span
+                          className={[
+                            'block text-[13px] font-semibold',
+                            active ? 'text-[var(--color-sr-navy-deeper)]' : 'text-[var(--color-sr-text)]',
+                          ].join(' ')}
+                        >
+                          {item.title}
+                        </span>
+                        <span className="mt-0.5 block text-[11px] text-[var(--color-sr-muted)]">{item.blurb}</span>
+                      </span>
+                    </button>
                   </li>
                 );
               })}
             </ol>
+
+            {scholarship ? (
+              <div className="mt-5 border-t border-[var(--color-sr-border)] pt-4 text-[12px] text-[var(--color-sr-muted)]">
+                <p className="font-semibold uppercase tracking-[0.12em] text-[var(--color-sr-navy)]">Programme</p>
+                <p className="mt-2 leading-relaxed">
+                  {scholarship.country}
+                  {scholarship.level ? ` · ${getLevelLabel(scholarship.level)}` : ''}
+                </p>
+                {scholarship.fundingType ? (
+                  <p className="mt-1">{getFundingTypeLabel(scholarship.fundingType)}</p>
+                ) : null}
+                {scholarship.slug || scholarship._id ? (
+                  <Link
+                    to={`/scholarships/${scholarship.slug || scholarship._id}`}
+                    className="mt-3 inline-flex text-[13px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
+                  >
+                    View listing →
+                  </Link>
+                ) : null}
+              </div>
+            ) : null}
           </aside>
 
-          <section className="bg-white border border-[var(--color-sr-border)] p-6 md:p-8">
-            <h2 className="text-xl font-bold text-[var(--color-sr-navy)] mb-6">{STEPS[step - 1]}</h2>
+          <section className="border border-[var(--color-sr-border)] bg-white p-6 md:p-8">
+            <header className="mb-6 border-b border-[var(--color-sr-border)] pb-4">
+              <h2 className="text-[1.25rem] font-bold text-[var(--color-sr-navy-deeper)]">
+                {STEPS[step - 1].title}
+              </h2>
+              <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">{STEPS[step - 1].blurb}</p>
+            </header>
 
             {step === 1 && (
-              <div className="grid sm:grid-cols-2 gap-4">
-                {[
-                  ['fullName', 'Full legal name *'],
-                  ['phone', 'Phone number *'],
-                  ['country', 'Country of residence *'],
-                  ['nationality', 'Nationality *'],
-                  ['dateOfBirth', 'Date of birth'],
-                  ['address', 'Mailing address'],
-                ].map(([key, label]) => (
-                  <div key={key} className={key === 'address' ? 'sm:col-span-2' : ''}>
-                    <label className="block text-sm font-semibold mb-1">{label}</label>
-                    <input
-                      type={key === 'dateOfBirth' ? 'date' : 'text'}
-                      disabled={locked}
-                      value={(personal as any)[key]}
-                      onChange={(e) => setPersonal({ ...personal, [key]: e.target.value })}
-                      className="w-full border border-[var(--color-sr-border)] px-3 py-2.5 outline-none focus:border-[var(--color-sr-navy)]"
-                    />
-                  </div>
-                ))}
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Field id="app-fullName" label="Full legal name *" className="sm:col-span-2">
+                  <input
+                    id="app-fullName"
+                    disabled={locked}
+                    value={personal.fullName}
+                    onChange={(e) => setPersonal({ ...personal, fullName: e.target.value })}
+                    className={inputClass}
+                    autoComplete="name"
+                  />
+                </Field>
+                <Field id="app-phone" label="Phone *">
+                  <input
+                    id="app-phone"
+                    disabled={locked}
+                    value={personal.phone}
+                    onChange={(e) => setPersonal({ ...personal, phone: e.target.value })}
+                    className={inputClass}
+                    autoComplete="tel"
+                  />
+                </Field>
+                <Field id="app-dob" label="Date of birth">
+                  <input
+                    id="app-dob"
+                    type="date"
+                    disabled={locked}
+                    value={personal.dateOfBirth}
+                    onChange={(e) => setPersonal({ ...personal, dateOfBirth: e.target.value })}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field id="app-country" label="Country of residence *">
+                  <select
+                    id="app-country"
+                    disabled={locked}
+                    value={personal.country}
+                    onChange={(e) => setPersonal({ ...personal, country: e.target.value })}
+                    className={inputClass}
+                  >
+                    <option value="">Select country…</option>
+                    {personal.country && !(COUNTRIES as readonly string[]).includes(personal.country) ? (
+                      <option value={personal.country}>{personal.country}</option>
+                    ) : null}
+                    {COUNTRIES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field id="app-nationality" label="Nationality *">
+                  <select
+                    id="app-nationality"
+                    disabled={locked}
+                    value={personal.nationality}
+                    onChange={(e) => setPersonal({ ...personal, nationality: e.target.value })}
+                    className={inputClass}
+                  >
+                    <option value="">Select nationality…</option>
+                    {personal.nationality &&
+                    !(COUNTRIES as readonly string[]).includes(personal.nationality) ? (
+                      <option value={personal.nationality}>{personal.nationality}</option>
+                    ) : null}
+                    {COUNTRIES.map((c) => (
+                      <option key={`nat-${c}`} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field id="app-address" label="Mailing address" className="sm:col-span-2" hint="Optional, but useful for offer letters.">
+                  <input
+                    id="app-address"
+                    disabled={locked}
+                    value={personal.address}
+                    onChange={(e) => setPersonal({ ...personal, address: e.target.value })}
+                    className={inputClass}
+                  />
+                </Field>
               </div>
             )}
 
             {step === 2 && (
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Education level *</label>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Field id="app-education" label="Education level *">
                   <select
+                    id="app-education"
                     disabled={locked}
                     value={academic.educationLevel}
                     onChange={(e) => setAcademic({ ...academic, educationLevel: e.target.value })}
-                    className="w-full border border-[var(--color-sr-border)] px-3 py-2.5"
+                    className={inputClass}
                   >
                     <option value="">Select…</option>
                     <option value="high-school">High school</option>
@@ -456,144 +1330,444 @@ export default function ApplicationWizard() {
                     <option value="phd">PhD</option>
                     <option value="postdoc">Postdoc</option>
                   </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Institution *</label>
-                  <input disabled={locked} value={academic.institution} onChange={(e) => setAcademic({ ...academic, institution: e.target.value })} className="w-full border border-[var(--color-sr-border)] px-3 py-2.5" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Field of study *</label>
-                  <input disabled={locked} value={academic.fieldOfStudy} onChange={(e) => setAcademic({ ...academic, fieldOfStudy: e.target.value })} className="w-full border border-[var(--color-sr-border)] px-3 py-2.5" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1">GPA / Grade</label>
-                  <input disabled={locked} value={academic.gpa} onChange={(e) => setAcademic({ ...academic, gpa: e.target.value })} className="w-full border border-[var(--color-sr-border)] px-3 py-2.5" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Graduation year</label>
-                  <input disabled={locked} value={academic.graduationYear} onChange={(e) => setAcademic({ ...academic, graduationYear: e.target.value })} className="w-full border border-[var(--color-sr-border)] px-3 py-2.5" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Languages</label>
-                  <input disabled={locked} value={academic.languages} onChange={(e) => setAcademic({ ...academic, languages: e.target.value })} placeholder="English, French, Swahili" className="w-full border border-[var(--color-sr-border)] px-3 py-2.5" />
-                </div>
+                </Field>
+                <Field id="app-institution" label="Institution *">
+                  <input
+                    id="app-institution"
+                    disabled={locked}
+                    value={academic.institution}
+                    onChange={(e) => setAcademic({ ...academic, institution: e.target.value })}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field id="app-field" label="Field of study *">
+                  <input
+                    id="app-field"
+                    disabled={locked}
+                    value={academic.fieldOfStudy}
+                    onChange={(e) => setAcademic({ ...academic, fieldOfStudy: e.target.value })}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field id="app-gpa" label="GPA / grade" hint="Optional. Use your institution’s scale if not 4.0.">
+                  <input
+                    id="app-gpa"
+                    disabled={locked}
+                    value={academic.gpa}
+                    onChange={(e) => setAcademic({ ...academic, gpa: e.target.value })}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field id="app-grad-year" label="Graduation year">
+                  <input
+                    id="app-grad-year"
+                    disabled={locked}
+                    value={academic.graduationYear}
+                    onChange={(e) => setAcademic({ ...academic, graduationYear: e.target.value })}
+                    className={inputClass}
+                    placeholder="2026"
+                  />
+                </Field>
+                <Field id="app-languages" label="Languages">
+                  <input
+                    id="app-languages"
+                    disabled={locked}
+                    value={academic.languages}
+                    onChange={(e) => setAcademic({ ...academic, languages: e.target.value })}
+                    className={inputClass}
+                    placeholder="English, French, Twi"
+                  />
+                </Field>
               </div>
             )}
 
             {step === 3 && (
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Personal statement * (min 100 characters)</label>
+              <div className="space-y-6">
+                <Field
+                  id="app-statement"
+                  label="Personal statement *"
+                  hint="Tell your academic story, achievements, and goals. Minimum 100 characters."
+                >
                   <textarea
+                    id="app-statement"
                     disabled={locked}
-                    rows={8}
+                    rows={9}
                     value={personalStatement}
                     onChange={(e) => setPersonalStatement(e.target.value)}
-                    className="w-full border border-[var(--color-sr-border)] px-3 py-2.5 outline-none focus:border-[var(--color-sr-navy)]"
-                    placeholder="Tell your academic story, achievements, and goals…"
+                    className={`${inputClass} resize-y`}
+                    placeholder="I am a final-year student focused on…"
                   />
-                  <p className="text-xs text-[var(--color-sr-muted)] mt-1">{personalStatement.length} characters</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Motivation for this scholarship * (min 50 characters)</label>
+                  <p
+                    className={[
+                      'mt-1.5 text-right text-[12px] tabular-nums',
+                      personalStatement.trim().length < 100
+                        ? 'text-amber-700'
+                        : 'text-[var(--color-sr-muted)]',
+                    ].join(' ')}
+                  >
+                    {personalStatement.length} characters
+                  </p>
+                </Field>
+
+                <Field
+                  id="app-motivation"
+                  label="Motivation for this scholarship *"
+                  hint="Why this programme, and how the funding returns impact home. Minimum 50 characters."
+                >
                   <textarea
+                    id="app-motivation"
                     disabled={locked}
-                    rows={5}
+                    rows={6}
                     value={motivation}
                     onChange={(e) => setMotivation(e.target.value)}
-                    className="w-full border border-[var(--color-sr-border)] px-3 py-2.5 outline-none focus:border-[var(--color-sr-navy)]"
-                    placeholder="Why this program, and how will it impact your community in Africa?"
+                    className={`${inputClass} resize-y`}
+                    placeholder="This scholarship matters because…"
                   />
-                  <p className="text-xs text-[var(--color-sr-muted)] mt-1">{motivation.length} characters</p>
-                </div>
+                  <p
+                    className={[
+                      'mt-1.5 text-right text-[12px] tabular-nums',
+                      motivation.trim().length < 50 ? 'text-amber-700' : 'text-[var(--color-sr-muted)]',
+                    ].join(' ')}
+                  >
+                    {motivation.length} characters
+                  </p>
+                </Field>
               </div>
             )}
 
             {step === 4 && (
               <div>
-                <p className="text-sm text-[var(--color-sr-muted)] mb-4">
-                  Upload clear scans or PDFs. Accepted: PDF, DOC, DOCX, JPG, PNG (max 5MB each).
+                <p className="mb-4 text-[14px] text-[var(--color-sr-muted)]">
+                  Upload clear scans or PDFs. Accepted: PDF, DOC, DOCX, JPG, PNG — max 5 MB each.
                 </p>
-                <ul className="mb-5 space-y-1 text-sm text-[var(--color-sr-text)]">
+                <ul className="mb-5 grid gap-2 sm:grid-cols-2">
                   {DOC_HINTS.map((hint) => (
-                    <li key={hint} className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-[var(--color-sr-navy)]" /> {hint}
+                    <li key={hint} className="flex items-center gap-2 text-[13px] text-[var(--color-sr-text)]">
+                      <FileText className="h-4 w-4 shrink-0 text-[var(--color-sr-navy)]" />
+                      {hint}
                     </li>
                   ))}
                 </ul>
 
-                {!locked && (
-                  <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[var(--color-sr-border)] p-8 cursor-pointer hover:border-[var(--color-sr-navy)] mb-5">
-                    {uploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Upload className="w-6 h-6 text-[var(--color-sr-navy)]" />}
-                    <span className="font-semibold text-[var(--color-sr-navy)]">Click to upload documents</span>
-                    <input type="file" multiple className="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp" onChange={(e) => onUpload(e.target.files)} />
-                  </label>
-                )}
+                {!locked ? (
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setDragOver(true);
+                    }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setDragOver(false);
+                      onUpload(e.dataTransfer.files);
+                    }}
+                    className={[
+                      'mb-5 flex flex-col items-center justify-center gap-2 border-2 border-dashed px-6 py-10 transition',
+                      dragOver
+                        ? 'border-[var(--color-sr-navy)] bg-[var(--color-sr-bg)]'
+                        : 'border-[var(--color-sr-border)] bg-white',
+                    ].join(' ')}
+                  >
+                    {uploading ? (
+                      <Loader2 className="h-6 w-6 animate-spin text-[var(--color-sr-navy)]" />
+                    ) : (
+                      <Upload className="h-6 w-6 text-[var(--color-sr-navy)]" />
+                    )}
+                    <p className="font-semibold text-[var(--color-sr-navy)]">
+                      {uploading ? 'Uploading…' : 'Drop files here or browse'}
+                    </p>
+                    <button
+                      type="button"
+                      disabled={uploading}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="mt-1 text-[13px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline disabled:opacity-50"
+                    >
+                      Choose files
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      className="hidden"
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
+                      onChange={(e) => onUpload(e.target.files)}
+                    />
+                  </div>
+                ) : null}
 
-                <div className="space-y-2">
-                  {(application.documents || []).map((doc, index) => (
-                    <div key={`${doc.url}-${index}`} className="flex items-center justify-between border border-[var(--color-sr-border)] px-3 py-2">
-                      <a href={doc.url} target="_blank" rel="noreferrer" className="text-[var(--color-sr-link)] hover:underline text-sm font-medium">
-                        {doc.name}
-                      </a>
-                      {!locked && (
-                        <button type="button" onClick={() => removeDocument(index)} className="text-red-600 p-1">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                {(application.documents || []).length === 0 ? (
+                  <p className="text-[14px] text-[var(--color-sr-muted)]">No documents uploaded yet.</p>
+                ) : (
+                  <ul className="divide-y divide-[var(--color-sr-border)] border border-[var(--color-sr-border)]">
+                    {(application.documents || []).map((doc, index) => (
+                      <li key={`${doc.url}-${index}`} className="flex items-center justify-between gap-3 px-4 py-3">
+                        <div className="min-w-0">
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="truncate text-[14px] font-semibold text-[var(--color-sr-link)] hover:underline"
+                          >
+                            {doc.name}
+                          </a>
+                          <p className="mt-0.5 text-[12px] text-[var(--color-sr-muted)]">
+                            {[doc.fileType, formatBytes(doc.fileSize)].filter(Boolean).join(' · ')}
+                          </p>
+                        </div>
+                        {!locked ? (
+                          <button
+                            type="button"
+                            onClick={() => removeDocument(index)}
+                            className="inline-flex h-9 w-9 items-center justify-center text-red-600 transition hover:bg-red-50"
+                            aria-label={`Remove ${doc.name}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
 
             {step === 5 && (
-              <div className="space-y-4 text-sm">
-                <div className="border border-[var(--color-sr-border)] p-4">
-                  <h3 className="font-bold mb-2">Personal</h3>
-                  <p>{personal.fullName} · {personal.nationality} · {personal.country}</p>
-                  <p>{personal.phone}</p>
+              <div className="space-y-4">
+                {locked ? (
+                  <div className="border border-[var(--color-sr-navy)]/15 bg-[var(--color-sr-bg)] p-4 md:p-5">
+                    <p className="text-[12px] font-bold uppercase tracking-[0.14em] text-[var(--color-sr-navy)]">
+                      What happens next
+                    </p>
+                    <ol className="mt-3 space-y-2 text-[14px] leading-relaxed text-[var(--color-sr-text)]">
+                      <li className="flex gap-2">
+                        <span className="font-semibold text-[var(--color-sr-navy)]">1.</span>
+                        AfriRoar confirms your packet is complete.
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="font-semibold text-[var(--color-sr-navy)]">2.</span>
+                        Reviewers assess eligibility against the programme criteria.
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="font-semibold text-[var(--color-sr-navy)]">3.</span>
+                        You’ll be notified here and by email when the status changes.
+                      </li>
+                    </ol>
+                  </div>
+                ) : null}
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <ReviewBlock title="Personal" locked={locked} onEdit={() => setStep(1)}>
+                    <p className="font-semibold text-[var(--color-sr-navy-deeper)]">
+                      {personal.fullName || '—'}
+                    </p>
+                    <dl className="mt-3 space-y-1.5 text-[14px]">
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-[var(--color-sr-muted)]">Nationality</dt>
+                        <dd className="text-right text-[var(--color-sr-text)]">{personal.nationality || '—'}</dd>
+                      </div>
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-[var(--color-sr-muted)]">Residence</dt>
+                        <dd className="text-right text-[var(--color-sr-text)]">{personal.country || '—'}</dd>
+                      </div>
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-[var(--color-sr-muted)]">Phone</dt>
+                        <dd className="text-right text-[var(--color-sr-text)]">{personal.phone || '—'}</dd>
+                      </div>
+                      {personal.dateOfBirth ? (
+                        <div className="flex justify-between gap-3">
+                          <dt className="text-[var(--color-sr-muted)]">Date of birth</dt>
+                          <dd className="text-right text-[var(--color-sr-text)]">{personal.dateOfBirth}</dd>
+                        </div>
+                      ) : null}
+                      {personal.address ? (
+                        <div className="flex justify-between gap-3">
+                          <dt className="text-[var(--color-sr-muted)]">Address</dt>
+                          <dd className="max-w-[60%] text-right text-[var(--color-sr-text)]">{personal.address}</dd>
+                        </div>
+                      ) : null}
+                    </dl>
+                  </ReviewBlock>
+
+                  <ReviewBlock title="Academic" locked={locked} onEdit={() => setStep(2)}>
+                    <p className="font-semibold text-[var(--color-sr-navy-deeper)]">
+                      {academic.fieldOfStudy || '—'}
+                    </p>
+                    <dl className="mt-3 space-y-1.5 text-[14px]">
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-[var(--color-sr-muted)]">Level</dt>
+                        <dd className="text-right text-[var(--color-sr-text)]">
+                          {getLevelLabel(academic.educationLevel) || '—'}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-[var(--color-sr-muted)]">Institution</dt>
+                        <dd className="max-w-[60%] text-right text-[var(--color-sr-text)]">
+                          {academic.institution || '—'}
+                        </dd>
+                      </div>
+                      {academic.gpa ? (
+                        <div className="flex justify-between gap-3">
+                          <dt className="text-[var(--color-sr-muted)]">GPA</dt>
+                          <dd className="text-right text-[var(--color-sr-text)]">{academic.gpa}</dd>
+                        </div>
+                      ) : null}
+                      {academic.graduationYear ? (
+                        <div className="flex justify-between gap-3">
+                          <dt className="text-[var(--color-sr-muted)]">Graduation</dt>
+                          <dd className="text-right text-[var(--color-sr-text)]">{academic.graduationYear}</dd>
+                        </div>
+                      ) : null}
+                      {academic.languages ? (
+                        <div className="flex justify-between gap-3">
+                          <dt className="text-[var(--color-sr-muted)]">Languages</dt>
+                          <dd className="max-w-[60%] text-right text-[var(--color-sr-text)]">{academic.languages}</dd>
+                        </div>
+                      ) : null}
+                    </dl>
+                  </ReviewBlock>
                 </div>
-                <div className="border border-[var(--color-sr-border)] p-4">
-                  <h3 className="font-bold mb-2">Academic</h3>
-                  <p>{academic.educationLevel} · {academic.fieldOfStudy}</p>
-                  <p>{academic.institution}</p>
-                </div>
-                <div className="border border-[var(--color-sr-border)] p-4">
-                  <h3 className="font-bold mb-2">Documents</h3>
-                  <p>{application.documents?.length || 0} file(s) uploaded</p>
-                </div>
-                <p className="text-[var(--color-sr-muted)]">
-                  By submitting, you confirm that the information provided is accurate and that documents are authentic.
-                </p>
+
+                <ReviewBlock title="Personal statement" locked={locked} onEdit={() => setStep(3)}>
+                  <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-[var(--color-sr-text)]">
+                    {personalStatement.trim() || '—'}
+                  </p>
+                </ReviewBlock>
+
+                <ReviewBlock title="Motivation" locked={locked} onEdit={() => setStep(3)}>
+                  <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-[var(--color-sr-text)]">
+                    {motivation.trim() || '—'}
+                  </p>
+                </ReviewBlock>
+
+                <ReviewBlock title="Documents" locked={locked} onEdit={() => setStep(4)}>
+                  {(application.documents || []).length === 0 ? (
+                    <p className="text-[14px] text-[var(--color-sr-muted)]">No documents attached.</p>
+                  ) : (
+                    <ul className="divide-y divide-[var(--color-sr-border)] border border-[var(--color-sr-border)]">
+                      {(application.documents || []).map((doc, index) => (
+                        <li key={`${doc.url}-review-${index}`} className="flex items-center justify-between gap-3 px-3 py-2.5">
+                          <div className="min-w-0">
+                            <a
+                              href={doc.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="truncate text-[14px] font-semibold text-[var(--color-sr-link)] hover:underline"
+                            >
+                              {doc.name}
+                            </a>
+                            <p className="mt-0.5 text-[12px] text-[var(--color-sr-muted)]">
+                              {[doc.fileType, formatBytes(doc.fileSize)].filter(Boolean).join(' · ')}
+                            </p>
+                          </div>
+                          <FileText className="h-4 w-4 shrink-0 text-[var(--color-sr-muted)]" />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </ReviewBlock>
+
+                {!locked ? (
+                  <p className="text-[13px] leading-relaxed text-[var(--color-sr-muted)]">
+                    By submitting, you confirm the information is accurate and the documents are authentic.
+                    Submitted applications cannot be edited.
+                  </p>
+                ) : null}
               </div>
             )}
 
-            {!locked && (
-              <div className="flex flex-wrap items-center justify-between gap-3 mt-8 pt-6 border-t border-[var(--color-sr-border)]">
-                <button type="button" onClick={goBack} disabled={step === 1 || saving} className="px-4 py-2 border border-[var(--color-sr-border)] font-semibold disabled:opacity-40 inline-flex items-center gap-2">
-                  <ArrowLeft className="w-4 h-4" /> Back
+            {!locked ? (
+              <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color-sr-border)] pt-6">
+                <button
+                  type="button"
+                  onClick={goBack}
+                  disabled={step === 1 || saving || submitting}
+                  className="inline-flex items-center gap-2 border border-[var(--color-sr-border)] px-4 py-2.5 text-[14px] font-semibold text-[var(--color-sr-navy)] disabled:opacity-40"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back
                 </button>
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => saveProgress(step, false)} disabled={saving} className="px-4 py-2 border border-[var(--color-sr-navy)] text-[var(--color-sr-navy)] font-semibold disabled:opacity-60">
-                    {saving ? 'Saving…' : 'Save draft'}
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => saveProgress(step, false)}
+                    disabled={saving || submitting || !dirty}
+                    className="inline-flex items-center gap-2 border border-[var(--color-sr-navy)] px-4 py-2.5 text-[14px] font-semibold text-[var(--color-sr-navy)] disabled:opacity-40"
+                  >
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    Save draft
                   </button>
+
                   {step < 5 ? (
-                    <button type="button" onClick={goNext} disabled={saving} className="px-4 py-2 bg-[var(--color-sr-navy)] text-white font-semibold inline-flex items-center gap-2 disabled:opacity-60">
-                      Continue <ArrowRight className="w-4 h-4" />
+                    <button
+                      type="button"
+                      onClick={goNext}
+                      disabled={saving || submitting}
+                      className="inline-flex items-center gap-2 bg-[var(--color-sr-navy)] px-4 py-2.5 text-[14px] font-semibold text-white disabled:opacity-60"
+                    >
+                      Continue
+                      <ArrowRight className="h-4 w-4" />
                     </button>
                   ) : (
-                    <button type="button" onClick={submitApplication} disabled={submitting || saving} className="px-4 py-2 bg-[var(--color-sr-yellow)] text-[var(--color-sr-navy-deeper)] font-bold inline-flex items-center gap-2 disabled:opacity-60">
-                      {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                    <button
+                      type="button"
+                      onClick={submitApplication}
+                      disabled={submitting || saving}
+                      className="inline-flex items-center gap-2 bg-[var(--color-sr-yellow)] px-5 py-2.5 text-[14px] font-bold text-[var(--color-sr-navy-deeper)] disabled:opacity-60"
+                    >
+                      {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                       Submit application
                     </button>
                   )}
                 </div>
               </div>
+            ) : (
+              <div className="mt-8 border-t border-[var(--color-sr-border)] pt-6">
+                <Link
+                  to="/dashboard/applications"
+                  className="inline-flex items-center gap-2 text-[14px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
+                >
+                  Back to applications
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
             )}
           </section>
         </div>
       </div>
+
+      {!locked ? (
+        <div
+          className={[
+            'fixed inset-x-0 bottom-0 z-40 border-t bg-white/95 backdrop-blur-sm transition-transform duration-300',
+            dirty ? 'translate-y-0 border-[var(--color-sr-border)]' : 'translate-y-full border-transparent',
+          ].join(' ')}
+          aria-hidden={!dirty}
+        >
+          <div className="sr-container flex flex-wrap items-center justify-between gap-3 py-3">
+            <p className="text-[14px] text-[var(--color-sr-muted)]">You have unsaved changes on this draft.</p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={discardChanges}
+                disabled={saving || submitting}
+                className="border border-[var(--color-sr-border)] px-4 py-2.5 text-[14px] font-semibold text-[var(--color-sr-navy)] transition hover:border-[var(--color-sr-navy)] disabled:opacity-50"
+              >
+                Discard
+              </button>
+              <button
+                type="button"
+                onClick={() => saveProgress(step, false)}
+                disabled={saving || submitting || !dirty}
+                className="inline-flex items-center gap-2 bg-[var(--color-sr-yellow)] px-5 py-2.5 text-[14px] font-bold text-[var(--color-sr-navy-deeper)] transition hover:bg-[var(--color-sr-yellow-hover)] disabled:opacity-50"
+              >
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                Save draft
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

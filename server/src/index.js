@@ -33,10 +33,11 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Rate limiting
+// Rate limiting — generous in development so dashboard polling / Strict Mode
+// remounts do not lock out the local UI.
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
+  max: config.env === 'development' ? 2000 : 300,
   message: { status: 'fail', message: 'Too many requests. Please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
