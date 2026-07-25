@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowRight, Check, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
@@ -22,29 +22,6 @@ type FieldErrors = {
   password?: string;
   confirmPassword?: string;
 };
-
-function StrengthRow({ ok, label }: { ok: boolean; label: string }) {
-  return (
-    <li
-      className={[
-        'flex items-center gap-2 text-[12px]',
-        ok ? 'text-[var(--color-sr-navy)]' : 'text-[var(--color-sr-muted)]',
-      ].join(' ')}
-    >
-      <span
-        className={[
-          'flex h-4 w-4 items-center justify-center border',
-          ok
-            ? 'border-[var(--color-sr-navy)] bg-[var(--color-sr-navy)] text-white'
-            : 'border-[var(--color-sr-border)] bg-white',
-        ].join(' ')}
-      >
-        {ok ? <Check className="h-2.5 w-2.5" strokeWidth={3} /> : null}
-      </span>
-      {label}
-    </li>
-  );
-}
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -214,24 +191,10 @@ export default function Register() {
           <div className="w-full max-w-[440px]">
             <Link to="/" className="mb-8 inline-flex items-center gap-2.5 lg:hidden">
               <img src="/sr/logo.png" alt="AfriRoar" className="h-9 object-contain" />
-              <span
-                className="text-[1.15rem] font-bold text-[var(--color-sr-navy-deeper)]"
-                style={{ fontFamily: 'var(--font-hero)' }}
-              >
-                AfriRoar
-              </span>
             </Link>
 
-            <p className="mb-1 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-sr-muted)]">
-              New student
-            </p>
-            <h1
-              className="text-[1.75rem] font-bold leading-tight text-[var(--color-sr-navy-deeper)] sm:text-[1.95rem]"
-              style={{ fontFamily: 'var(--font-hero)' }}
-            >
-              Create your AfriRoar account
-            </h1>
-            <p className="mt-2 text-[15px] leading-relaxed text-[var(--color-sr-muted)]">
+            <h1 className="sr-only">Create your AfriRoar account</h1>
+            <p className="text-[15px] leading-relaxed text-[var(--color-sr-muted)]">
               Verify your email, then apply for scholarships with a tracked draft.
             </p>
 
@@ -345,12 +308,6 @@ export default function Register() {
                 {capsLock ? (
                   <p className="mt-1.5 text-[12px] font-medium text-amber-800">Caps Lock is on</p>
                 ) : null}
-                <ul className="mt-2.5 grid gap-1.5 sm:grid-cols-2">
-                  <StrengthRow ok={passwordChecks.length} label="8+ characters" />
-                  <StrengthRow ok={passwordChecks.upper} label="One uppercase letter" />
-                  <StrengthRow ok={passwordChecks.number} label="One number" />
-                  <StrengthRow ok={passwordChecks.match} label="Passwords match" />
-                </ul>
               </div>
 
               <div>

@@ -172,24 +172,10 @@ export default function Login() {
           <div className="w-full max-w-[420px]">
             <Link to="/" className="mb-8 inline-flex items-center gap-2.5 lg:hidden">
               <img src="/sr/logo.png" alt="AfriRoar" className="h-9 object-contain" />
-              <span
-                className="text-[1.15rem] font-bold text-[var(--color-sr-navy-deeper)]"
-                style={{ fontFamily: 'var(--font-hero)' }}
-              >
-                AfriRoar
-              </span>
             </Link>
 
-            <p className="mb-1 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-sr-muted)]">
-              Account access
-            </p>
-            <h1
-              className="text-[1.75rem] font-bold leading-tight text-[var(--color-sr-navy-deeper)] sm:text-[1.95rem]"
-              style={{ fontFamily: 'var(--font-hero)' }}
-            >
-              Log in to AfriRoar
-            </h1>
-            <p className="mt-2 text-[15px] leading-relaxed text-[var(--color-sr-muted)]">
+            <h1 className="sr-only">Log in to AfriRoar</h1>
+            <p className="text-[15px] leading-relaxed text-[var(--color-sr-muted)]">
               Sign in to continue your scholarship applications.
             </p>
 
