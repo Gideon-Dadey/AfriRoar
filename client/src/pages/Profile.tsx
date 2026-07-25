@@ -390,7 +390,7 @@ export default function Profile() {
                 <Field
                   id="profile-bio"
                   label="Bio"
-                  hint="A short paragraph committees can skim — goals, focus, and why funding matters."
+                  hint="A short paragraph committees can skim, goals, focus, and why funding matters."
                   className="sm:col-span-2"
                 >
                   <textarea
@@ -476,7 +476,7 @@ export default function Profile() {
               <header className="mb-6 border-b border-[var(--color-sr-border)] pb-4">
                 <h2 className="text-[18px] font-bold text-[var(--color-sr-navy-deeper)]">Preferences</h2>
                 <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">
-                  Helps AfriRoar surface relevant opportunities — not shown publicly.
+                  Helps AfriRoar surface relevant opportunities, not shown publicly.
                 </p>
               </header>
 

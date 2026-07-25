@@ -15,13 +15,37 @@ declare module 'axios' {
   }
 }
 
+/** Endpoints that return 401 for bad credentials, not for expired sessions. */
+const PUBLIC_AUTH_URLS = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/google',
+  '/auth/verify-email',
+  '/auth/resend-verification',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/refresh',
+];
+
+function requestUrl(config?: { url?: string; baseURL?: string }) {
+  return `${config?.url || ''}`;
+}
+
+function isPublicAuthRequest(config?: { url?: string }) {
+  const url = requestUrl(config);
+  return PUBLIC_AUTH_URLS.some((path) => url.includes(path));
+}
+
 function redirectToLogin() {
   useAuthStore.getState().logout();
+
   const path = `${window.location.pathname}${window.location.search}`;
-  const redirect =
-    path.startsWith('/login') || path.startsWith('/register')
-      ? '/dashboard'
-      : path || '/dashboard';
+  // Already on an auth screen, don't hard-reload into an "expired" loop
+  if (path.startsWith('/login') || path.startsWith('/register') || path.startsWith('/verify-email')) {
+    return;
+  }
+
+  const redirect = path || '/dashboard';
   window.location.href = `/login?redirect=${encodeURIComponent(redirect)}&reason=expired`;
 }
 
@@ -53,12 +77,19 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// Response interceptor - refresh once, then send user to login
+// Response interceptor - refresh once for protected calls, then send user to login
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (!originalRequest || originalRequest._retry || !isAuthFailure(error)) {
+
+    // Never treat login/register/google credential failures as "session expired"
+    if (!originalRequest || isPublicAuthRequest(originalRequest) || !isAuthFailure(error)) {
+      return Promise.reject(error);
+    }
+
+    if (originalRequest._retry) {
+      redirectToLogin();
       return Promise.reject(error);
     }
 

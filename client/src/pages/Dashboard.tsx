@@ -161,7 +161,7 @@ export default function Dashboard() {
     if (needsProfile) {
       actions.push({
         title: 'Finish your profile',
-        detail: `At ${profileScore}% complete — country and education unlock better matches.`,
+        detail: `At ${profileScore}% complete. Country and education unlock better matches.`,
         to: '/dashboard/profile',
         cta: 'Edit profile',
       });
@@ -311,19 +311,19 @@ export default function Dashboard() {
             <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               <Metric
                 label="Applications"
-                value={appsLoading ? '—' : totalApplications}
+                value={appsLoading ? '-' : totalApplications}
                 hint="View all"
                 to="/dashboard/applications"
               />
               <Metric
                 label="Drafts"
-                value={appsLoading ? '—' : drafts.length}
+                value={appsLoading ? '-' : drafts.length}
                 hint="Finish later"
                 to="/dashboard/applications?status=draft"
               />
               <Metric
                 label="Accepted"
-                value={appsLoading ? '—' : accepted}
+                value={appsLoading ? '-' : accepted}
                 hint="In recent list"
                 to="/dashboard/applications?status=accepted"
               />

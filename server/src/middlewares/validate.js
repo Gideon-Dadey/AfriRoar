@@ -65,6 +65,24 @@ const resendVerificationSchema = z.object({
   }),
 });
 
+const forgotPasswordSchema = z.object({
+  body: z.object({
+    email: z.string().email('Invalid email address'),
+  }),
+});
+
+const resetPasswordSchema = z.object({
+  body: z.object({
+    email: z.string().email('Invalid email address'),
+    code: z.string().min(4, 'Reset code is required').max(8),
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+      .regex(/[0-9]/, 'Password must contain at least one number'),
+  }),
+});
+
 // Scholarship validation schemas
 const createScholarshipSchema = z.object({
   body: z.object({
@@ -151,6 +169,8 @@ module.exports = {
   googleAuthSchema,
   verifyEmailSchema,
   resendVerificationSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   createScholarshipSchema,
   updateScholarshipSchema,
   createApplicationSchema,

@@ -97,7 +97,7 @@ export function GuidesPage() {
   return (
     <ListingPage
       title="Scholarship Guides"
-      description="Application tips, motivation letter examples, deadline calendars, and step-by-step guides."
+      description="Practical, step-by-step advice for African applicants: motivation letters, CSC acceptance letters, document checklists, deadlines, and common mistakes to avoid. Always verify final rules on official programme sites."
       category="guide"
     />
   );
@@ -107,7 +107,7 @@ export function ListsPage() {
   return (
     <ListingPage
       title="Scholarship Lists"
-      description="Curated country and theme lists of fully funded scholarships for international students."
+      description="Curated country and theme lists to help you shortlist programmes faster. Open any list for eligibility notes, typical funding, and where to confirm official deadlines."
       category="list"
     />
   );

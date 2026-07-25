@@ -86,9 +86,32 @@ const refreshToken = catchAsync(async (req, res) => {
 });
 
 const logout = catchAsync(async (req, res) => {
-  await authService.logout(req.user._id, req);
+  // Optional auth: clear DB refresh token when we can identify the user
+  const bearer = req.headers.authorization?.startsWith('Bearer ')
+    ? req.headers.authorization.slice(7)
+    : null;
+  const cookieToken = req.cookies?.refreshToken;
 
-  res.clearCookie('refreshToken');
+  if (bearer || cookieToken) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const raw = bearer || cookieToken;
+      const secret = bearer ? config.jwt.secret : config.jwt.refreshSecret;
+      const decoded = jwt.verify(raw, secret);
+      if (decoded?.id) {
+        await authService.logout(decoded.id, req);
+      }
+    } catch {
+      // Token may already be expired — still clear the cookie below
+    }
+  }
+
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: config.env === 'production',
+    sameSite: config.env === 'production' ? 'none' : 'lax',
+    path: '/',
+  });
 
   res.status(200).json({
     status: 'success',
@@ -148,6 +171,30 @@ const saveScholarship = catchAsync(async (req, res) => {
   });
 });
 
+const forgotPassword = catchAsync(async (req, res) => {
+  const result = await authService.forgotPassword(req.body);
+  res.status(200).json({
+    status: 'success',
+    data: result,
+  });
+});
+
+const resetPassword = catchAsync(async (req, res) => {
+  const result = await authService.resetPassword(req.body, req);
+
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: config.env === 'production',
+    sameSite: config.env === 'production' ? 'none' : 'lax',
+    path: '/',
+  });
+
+  res.status(200).json({
+    status: 'success',
+    data: result,
+  });
+});
+
 module.exports = {
   register,
   verifyEmail,
@@ -159,4 +206,6 @@ module.exports = {
   getMe,
   updateProfile,
   saveScholarship,
+  forgotPassword,
+  resetPassword,
 };

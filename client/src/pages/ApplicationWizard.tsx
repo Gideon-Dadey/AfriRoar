@@ -703,7 +703,7 @@ export default function ApplicationWizard() {
                     Choose a scholarship
                   </h1>
                   <p className="mt-2 text-[15px] leading-relaxed text-[var(--color-sr-muted)]">
-                    Open a draft for one programme. Save as you go — you can return any time before you submit.
+                    Open a draft for one programme. Save as you go. You can return any time before you submit.
                   </p>
                 </div>
                 <Link
@@ -1438,7 +1438,7 @@ export default function ApplicationWizard() {
             {step === 4 && (
               <div>
                 <p className="mb-4 text-[14px] text-[var(--color-sr-muted)]">
-                  Upload clear scans or PDFs. Accepted: PDF, DOC, DOCX, JPG, PNG — max 5 MB each.
+                  Upload clear scans or PDFs. Accepted: PDF, DOC, DOCX, JPG, PNG (max 5 MB each).
                 </p>
                 <ul className="mb-5 grid gap-2 sm:grid-cols-2">
                   {DOC_HINTS.map((hint) => (
@@ -1558,20 +1558,20 @@ export default function ApplicationWizard() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <ReviewBlock title="Personal" locked={locked} onEdit={() => setStep(1)}>
                     <p className="font-semibold text-[var(--color-sr-navy-deeper)]">
-                      {personal.fullName || '—'}
+                      {personal.fullName || '-'}
                     </p>
                     <dl className="mt-3 space-y-1.5 text-[14px]">
                       <div className="flex justify-between gap-3">
                         <dt className="text-[var(--color-sr-muted)]">Nationality</dt>
-                        <dd className="text-right text-[var(--color-sr-text)]">{personal.nationality || '—'}</dd>
+                        <dd className="text-right text-[var(--color-sr-text)]">{personal.nationality || '-'}</dd>
                       </div>
                       <div className="flex justify-between gap-3">
                         <dt className="text-[var(--color-sr-muted)]">Residence</dt>
-                        <dd className="text-right text-[var(--color-sr-text)]">{personal.country || '—'}</dd>
+                        <dd className="text-right text-[var(--color-sr-text)]">{personal.country || '-'}</dd>
                       </div>
                       <div className="flex justify-between gap-3">
                         <dt className="text-[var(--color-sr-muted)]">Phone</dt>
-                        <dd className="text-right text-[var(--color-sr-text)]">{personal.phone || '—'}</dd>
+                        <dd className="text-right text-[var(--color-sr-text)]">{personal.phone || '-'}</dd>
                       </div>
                       {personal.dateOfBirth ? (
                         <div className="flex justify-between gap-3">
@@ -1590,19 +1590,19 @@ export default function ApplicationWizard() {
 
                   <ReviewBlock title="Academic" locked={locked} onEdit={() => setStep(2)}>
                     <p className="font-semibold text-[var(--color-sr-navy-deeper)]">
-                      {academic.fieldOfStudy || '—'}
+                      {academic.fieldOfStudy || '-'}
                     </p>
                     <dl className="mt-3 space-y-1.5 text-[14px]">
                       <div className="flex justify-between gap-3">
                         <dt className="text-[var(--color-sr-muted)]">Level</dt>
                         <dd className="text-right text-[var(--color-sr-text)]">
-                          {getLevelLabel(academic.educationLevel) || '—'}
+                          {getLevelLabel(academic.educationLevel) || '-'}
                         </dd>
                       </div>
                       <div className="flex justify-between gap-3">
                         <dt className="text-[var(--color-sr-muted)]">Institution</dt>
                         <dd className="max-w-[60%] text-right text-[var(--color-sr-text)]">
-                          {academic.institution || '—'}
+                          {academic.institution || '-'}
                         </dd>
                       </div>
                       {academic.gpa ? (
@@ -1629,13 +1629,13 @@ export default function ApplicationWizard() {
 
                 <ReviewBlock title="Personal statement" locked={locked} onEdit={() => setStep(3)}>
                   <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-[var(--color-sr-text)]">
-                    {personalStatement.trim() || '—'}
+                    {personalStatement.trim() || '-'}
                   </p>
                 </ReviewBlock>
 
                 <ReviewBlock title="Motivation" locked={locked} onEdit={() => setStep(3)}>
                   <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-[var(--color-sr-text)]">
-                    {motivation.trim() || '—'}
+                    {motivation.trim() || '-'}
                   </p>
                 </ReviewBlock>
 

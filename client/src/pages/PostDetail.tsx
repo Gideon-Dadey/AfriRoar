@@ -4,8 +4,10 @@ import { useQuery } from '@tanstack/react-query';
 import {
   ArrowLeft,
   ArrowRight,
+  BookOpen,
   Calendar,
   CheckCircle2,
+  Clock3,
   ExternalLink,
   Globe2,
   GraduationCap,
@@ -14,7 +16,8 @@ import {
 } from 'lucide-react';
 import api from '@/lib/api';
 import { formatDeadline, getFundingTypeLabel, getLevelLabel } from '@/lib/utils';
-import { getLatestScholarships, getPostBySlug } from '@/data/srContent';
+import { getGuideArticle } from '@/data/guideArticles';
+import { getLatestScholarships, getPostBySlug, getPostsByCategory } from '@/data/srContent';
 import { useAuthStore } from '@/stores/authStore';
 import PostCard from '@/components/sr/PostCard';
 import type { Scholarship } from '@/types';
@@ -27,10 +30,24 @@ function splitParagraphs(text?: string) {
     .filter(Boolean);
 }
 
+function categoryHome(category?: string) {
+  if (category === 'guide') return '/guides';
+  if (category === 'list') return '/lists';
+  if (category === 'internship') return '/internships';
+  return '/scholarships';
+}
+
 export default function PostDetail() {
   const { slug = '' } = useParams();
   const post = getPostBySlug(slug);
+  const article = getGuideArticle(slug);
   const { isAuthenticated } = useAuthStore();
+
+  const isGuideLike =
+    Boolean(article) ||
+    post?.category === 'guide' ||
+    post?.category === 'list' ||
+    post?.category === 'internship';
 
   const {
     data: scholarship,
@@ -42,12 +59,11 @@ export default function PostDetail() {
       const { data } = await api.get(`/scholarships/slug/${slug}`);
       return data.data.scholarship as Scholarship;
     },
-    enabled: Boolean(slug) && (post?.category === 'scholarship' || !post),
+    enabled: Boolean(slug) && !isGuideLike && (post?.category === 'scholarship' || !post),
     retry: 1,
     staleTime: 60_000,
   });
 
-  // API-only programme (e.g. Mastercard / DAAD) with no static marketing post
   if (!post && loadingScholarship) {
     return (
       <div className="sr-container flex items-center justify-center gap-2 py-20 text-[14px] text-[var(--color-sr-muted)]">
@@ -60,23 +76,27 @@ export default function PostDetail() {
   if (!post && !scholarship) {
     return (
       <div className="sr-container py-16 text-center">
-        <h1 className="mb-3 text-2xl font-bold">Scholarship not found</h1>
-        <Link to="/scholarships" className="sr-load-more">
-          Browse scholarships
+        <h1 className="mb-3 text-2xl font-bold">Page not found</h1>
+        <Link to="/guides" className="sr-load-more">
+          Browse guides
         </Link>
       </div>
     );
   }
 
-  const title = scholarship?.title || post?.title || 'Scholarship';
+  const title = scholarship?.title || post?.title || 'AfriRoar';
   const image = scholarship?.coverImage || post?.image || '/sr/posts/chevening.png';
   const country = scholarship?.country || post?.country;
   const levelLabel = scholarship?.level
     ? getLevelLabel(scholarship.level)
-    : post?.level || 'Multiple levels';
+    : post?.level || undefined;
   const excerpt = scholarship?.shortDescription || post?.excerpt || '';
-  const isScholarship = post?.category === 'scholarship' || Boolean(scholarship);
-  const related = getLatestScholarships()
+  const isScholarship = !isGuideLike && (post?.category === 'scholarship' || Boolean(scholarship));
+
+  const relatedGuides = getPostsByCategory(post?.category === 'list' ? 'list' : 'guide')
+    .filter((p) => p.slug !== slug)
+    .slice(0, 3);
+  const relatedScholarships = getLatestScholarships()
     .filter((p) => p.slug !== slug)
     .slice(0, 3);
 
@@ -90,7 +110,226 @@ export default function PostDetail() {
 
   const overviewParagraphs = splitParagraphs(scholarship?.description);
   const eligibilityParagraphs = splitParagraphs(scholarship?.eligibility);
+  const backTo = categoryHome(post?.category);
 
+  // ── Guide / list / internship article layout ─────────────────────────────
+  if (isGuideLike && post) {
+    return (
+      <>
+        <Helmet>
+          <title>{title} | AfriRoar</title>
+          <meta name="description" content={excerpt} />
+        </Helmet>
+
+        <article>
+          <header className="border-b border-[var(--color-sr-border)] bg-white">
+            <div className="sr-container py-8 md:py-10">
+              <Link
+                to={backTo}
+                className="mb-4 inline-flex items-center gap-2 text-[13px] font-semibold text-[var(--color-sr-navy)] hover:underline"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to {post.category === 'list' ? 'lists' : post.category === 'internship' ? 'internships' : 'guides'}
+              </Link>
+              <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-sr-muted)]">
+                {post.category}
+              </p>
+              <h1
+                className="max-w-3xl text-[1.85rem] font-bold leading-tight text-[var(--color-sr-navy-deeper)] md:text-[2.35rem]"
+                style={{ fontFamily: 'var(--font-hero)' }}
+              >
+                {title}
+              </h1>
+              <div className="mt-4 flex flex-wrap gap-4 text-[13px] text-[var(--color-sr-muted)]">
+                <span className="inline-flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5" />
+                  {post.date}
+                </span>
+                {article?.readingTime ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Clock3 className="h-3.5 w-3.5" />
+                    {article.readingTime}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5">
+                    <BookOpen className="h-3.5 w-3.5" />
+                    AfriRoar Guide
+                  </span>
+                )}
+                {country ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Globe2 className="h-3.5 w-3.5" />
+                    {country}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          </header>
+
+          <div className="sr-container grid gap-10 py-8 md:grid-cols-[minmax(0,1fr)_240px] md:py-12 lg:gap-14">
+            <div>
+              <img
+                src={image}
+                alt=""
+                className="mb-8 aspect-[2/1] w-full border border-[var(--color-sr-border)] object-cover"
+                width={1280}
+                height={640}
+              />
+
+              <div className="border border-[var(--color-sr-border)] bg-white px-5 py-2 sm:px-8">
+                <p className="border-b border-[var(--color-sr-border)] py-6 text-[17px] leading-relaxed text-[var(--color-sr-text)]">
+                  {article?.intro || excerpt}
+                </p>
+
+                {article ? (
+                  article.sections.map((section) => (
+                    <section
+                      key={section.id}
+                      id={section.id}
+                      className="scroll-mt-28 border-b border-[var(--color-sr-border)] py-8 last:border-b-0"
+                    >
+                      <h2 className="text-[1.2rem] font-bold text-[var(--color-sr-navy-deeper)]">
+                        {section.heading}
+                      </h2>
+                      {section.paragraphs?.map((para) => (
+                        <p
+                          key={para.slice(0, 48)}
+                          className="mt-3 text-[15px] leading-relaxed text-[var(--color-sr-muted)]"
+                        >
+                          {para}
+                        </p>
+                      ))}
+                      {section.bullets?.length ? (
+                        <ul className="mt-4 list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-[var(--color-sr-muted)]">
+                          {section.bullets.map((item) => (
+                            <li key={item.slice(0, 48)}>{item}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      {section.note ? (
+                        <p className="mt-4 border border-[var(--color-sr-border)] bg-[var(--color-sr-bg)] px-4 py-3 text-[13px] leading-relaxed text-[var(--color-sr-text)]">
+                          {section.note}
+                        </p>
+                      ) : null}
+                    </section>
+                  ))
+                ) : (
+                  <div className="py-8">
+                    <p className="text-[15px] leading-relaxed text-[var(--color-sr-muted)]">{excerpt}</p>
+                    <p className="mt-4 text-[15px] leading-relaxed text-[var(--color-sr-muted)]">
+                      Full article content is being prepared. Meanwhile, browse scholarships or start an
+                      application draft on AfriRoar.
+                    </p>
+                  </div>
+                )}
+
+                {article?.checklist?.length ? (
+                  <section className="border-t border-[var(--color-sr-border)] py-8">
+                    <h2 className="text-[1.2rem] font-bold text-[var(--color-sr-navy-deeper)]">
+                      Checklist before you submit
+                    </h2>
+                    <ul className="mt-4 space-y-2">
+                      {article.checklist.map((item) => (
+                        <li key={item} className="flex gap-2 text-[15px] text-[var(--color-sr-text)]">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-sr-navy)]" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                ) : null}
+
+                <div className="border-t border-[var(--color-sr-border)] py-8">
+                  <p className="text-[13px] leading-relaxed text-[var(--color-sr-muted)]">
+                    Always verify requirements on official programme pages. See our{' '}
+                    <Link to="/disclaimer" className="font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline">
+                      Disclaimer
+                    </Link>
+                    .
+                  </p>
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <Link
+                      to="/scholarships"
+                      className="inline-flex items-center gap-2 bg-[var(--color-sr-yellow)] px-5 py-2.5 text-[14px] font-bold text-[var(--color-sr-navy-deeper)] transition hover:bg-[var(--color-sr-yellow-hover)]"
+                    >
+                      Browse scholarships
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      to={isAuthenticated ? '/dashboard/applications/new' : '/login?redirect=/dashboard/applications/new'}
+                      className="inline-flex items-center gap-2 border border-[var(--color-sr-border)] px-5 py-2.5 text-[14px] font-semibold text-[var(--color-sr-navy)] transition hover:border-[var(--color-sr-navy)]"
+                    >
+                      Start an application
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <aside className="md:sticky md:top-24 md:self-start">
+              {article?.sections?.length ? (
+                <nav aria-label="On this page" className="mb-8">
+                  <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-sr-muted)]">
+                    On this page
+                  </p>
+                  <div className="flex flex-col gap-0.5">
+                    {article.sections.map((section) => (
+                      <a
+                        key={section.id}
+                        href={`#${section.id}`}
+                        className="border-l-2 border-transparent px-3 py-1.5 text-[13px] font-medium text-[var(--color-sr-muted)] transition hover:border-[var(--color-sr-navy)] hover:text-[var(--color-sr-navy-deeper)]"
+                      >
+                        {section.heading}
+                      </a>
+                    ))}
+                  </div>
+                </nav>
+              ) : null}
+
+              {article?.relatedLinks?.length ? (
+                <div className="mb-8 border border-[var(--color-sr-border)] bg-white p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-sr-muted)]">
+                    Related
+                  </p>
+                  <ul className="mt-3 space-y-2">
+                    {article.relatedLinks.map((link) => (
+                      <li key={link.to}>
+                        <Link
+                          to={link.to}
+                          className="text-[13px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              <div>
+                <h2 className="mb-4 text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--color-sr-muted)]">
+                  More {post.category === 'internship' ? 'internships' : 'guides'}
+                </h2>
+                <div className="space-y-4">
+                  {(post.category === 'internship'
+                    ? getPostsByCategory('internship')
+                    : relatedGuides
+                  )
+                    .filter((p) => p.slug !== slug)
+                    .slice(0, 3)
+                    .map((item) => (
+                      <PostCard key={item.id} post={item} compact />
+                    ))}
+                </div>
+              </div>
+            </aside>
+          </div>
+        </article>
+      </>
+    );
+  }
+
+  // ── Scholarship layout ───────────────────────────────────────────────────
   return (
     <>
       <Helmet>
@@ -102,7 +341,7 @@ export default function PostDetail() {
         <div className="bg-[var(--color-sr-navy)] text-white">
           <div className="sr-container py-8 md:py-10">
             <Link
-              to={post?.category === 'internship' ? '/internships' : '/scholarships'}
+              to={backTo}
               className="mb-4 inline-flex items-center gap-2 text-sm text-white/80 hover:text-[var(--color-sr-yellow)]"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -168,7 +407,8 @@ export default function PostDetail() {
 
               {scholarshipError && isScholarship && !scholarship ? (
                 <p className="mb-4 text-[14px] text-amber-800">
-                  Live application data is temporarily unavailable. You can still read this guide and try Apply again shortly.
+                  Live application data is temporarily unavailable. You can still read this page and try
+                  Apply again shortly.
                 </p>
               ) : null}
 
@@ -194,7 +434,7 @@ export default function PostDetail() {
                 </li>
                 <li className="flex gap-2">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-sr-navy)]" />
-                  <span>Study level: {levelLabel}</span>
+                  <span>Study level: {levelLabel || 'Multiple levels'}</span>
                 </li>
                 <li className="flex gap-2">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-sr-navy)]" />
@@ -276,7 +516,8 @@ export default function PostDetail() {
                   Apply with AfriRoar
                 </p>
                 <p className="mt-2 text-[14px] leading-relaxed text-[var(--color-sr-text)]">
-                  Open a tracked draft, upload documents, and submit when ready. Your progress saves automatically.
+                  Open a tracked draft, upload documents, and submit when ready. Your progress saves
+                  automatically.
                 </p>
                 <Link
                   to={applyHref}
@@ -285,16 +526,13 @@ export default function PostDetail() {
                   {scholarship?._id ? 'Continue to application' : 'Choose a scholarship'}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-                {!scholarship?._id && loadingScholarship ? (
-                  <p className="mt-2 text-[12px] text-[var(--color-sr-muted)]">Linking programme record…</p>
-                ) : null}
               </div>
             ) : null}
 
             <div>
               <h2 className="sr-section-bar mb-4">Related Scholarships</h2>
               <div className="space-y-4">
-                {related.map((item) => (
+                {relatedScholarships.map((item) => (
                   <PostCard key={item.id} post={item} compact />
                 ))}
               </div>

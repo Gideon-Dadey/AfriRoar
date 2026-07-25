@@ -10,6 +10,7 @@ const auditLogSchema = new mongoose.Schema(
         'user.login',
         'user.logout',
         'user.update',
+        'user.password_reset',
         'user.suspend',
         'user.unsuspend',
         'user.delete',

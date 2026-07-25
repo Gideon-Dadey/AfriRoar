@@ -327,6 +327,85 @@ const logout = async (userId, req) => {
   });
 };
 
+/**
+ * Always returns a generic success payload (do not reveal whether the email exists).
+ */
+const forgotPassword = async ({ email }) => {
+  const normalized = String(email || '').toLowerCase().trim();
+  const generic = {
+    message: 'If an account exists for that email, we sent a password reset code.',
+  };
+
+  const user = await User.findOne({ email: normalized }).select(
+    '+passwordResetCode +passwordResetExpires',
+  );
+  if (!user || user.isSuspended) {
+    return generic;
+  }
+
+  const code = createVerificationCode();
+  user.passwordResetCode = code;
+  user.passwordResetExpires = new Date(Date.now() + CODE_TTL_MS);
+  await user.save({ validateBeforeSave: false });
+
+  const emailTemplate = templates.passwordReset(user.name, code);
+  await sendEmail({ to: user.email, ...emailTemplate });
+
+  logger.info(
+    `Password reset code generated for ${user.email}${config.env === 'development' ? `: ${code}` : ''}`,
+  );
+
+  return {
+    ...generic,
+    email: user.email,
+    // Dev-only convenience so local testing works without opening Gmail every time
+    devCode: config.env === 'development' ? code : undefined,
+  };
+};
+
+const resetPassword = async ({ email, code, password }, req) => {
+  const normalized = String(email || '').toLowerCase().trim();
+  const user = await User.findOne({ email: normalized }).select(
+    '+password +passwordResetCode +passwordResetExpires +refreshToken',
+  );
+
+  if (!user) {
+    throw new BadRequestError('Invalid email or reset code.');
+  }
+
+  if (
+    !user.passwordResetCode ||
+    !user.passwordResetExpires ||
+    user.passwordResetExpires.getTime() < Date.now() ||
+    user.passwordResetCode !== String(code).trim()
+  ) {
+    throw new BadRequestError('Invalid or expired reset code. Request a new one.');
+  }
+
+  user.password = password;
+  user.passwordResetCode = undefined;
+  user.passwordResetExpires = undefined;
+  user.refreshToken = null;
+  // Ensure email/password login works even if they previously used Google
+  if (user.authProvider === 'google') {
+    user.authProvider = 'local';
+  }
+  await user.save();
+
+  await createAuditLog({
+    action: 'user.password_reset',
+    userId: user._id,
+    targetId: user._id,
+    targetModel: 'User',
+    req,
+  });
+
+  return {
+    email: user.email,
+    message: 'Password updated. You can log in with your new password.',
+  };
+};
+
 module.exports = {
   register,
   login,
@@ -335,5 +414,7 @@ module.exports = {
   resendVerificationCode,
   refreshAccessToken,
   logout,
+  forgotPassword,
+  resetPassword,
   generateTokens,
 };

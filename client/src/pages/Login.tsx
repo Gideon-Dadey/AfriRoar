@@ -31,7 +31,7 @@ export default function Login() {
   const { login, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
 
   const fromState = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
   const redirect = useMemo(() => {
@@ -42,6 +42,13 @@ export default function Login() {
   }, [params, fromState?.pathname, fromState?.search]);
 
   const sessionNotice = params.get('reason') === 'expired';
+
+  const clearSessionNotice = () => {
+    if (params.get('reason') !== 'expired') return;
+    const next = new URLSearchParams(params);
+    next.delete('reason');
+    setParams(next, { replace: true });
+  };
 
   useEffect(() => {
     const q = params.get('email');
@@ -66,6 +73,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
+    clearSessionNotice();
     if (!validate()) return;
 
     setLoading(true);
@@ -108,13 +116,20 @@ export default function Login() {
       </Helmet>
 
       <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-sr-bg)] lg:grid lg:grid-cols-2">
-        {/* Brand panel — full-bleed visual */}
+        {/* Brand panel, full-bleed visual */}
         <aside className="relative hidden overflow-hidden bg-[var(--color-sr-navy-deeper)] lg:block">
-          <img
-            src="/sr/hero/panel-1.jpg"
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-          />
+          <picture>
+            <source srcSet="/sr/hero/panel-1.webp" type="image/webp" />
+            <img
+              src="/sr/hero/panel-1.jpg"
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+              width={1600}
+              height={1066}
+              decoding="async"
+              fetchPriority="high"
+            />
+          </picture>
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-sr-navy-deeper)] via-[var(--color-sr-navy-deeper)]/75 to-[var(--color-sr-navy)]/40" />
           <div className="relative flex h-full min-h-[70vh] flex-col justify-between p-10 xl:p-14">
             <Link to="/" className="inline-flex items-center gap-3 text-white">
@@ -193,12 +208,15 @@ export default function Login() {
             <div className="mt-8">
               <GoogleSignInButton
                 label="signin"
-                onSuccessNavigate={() => navigate(redirect, { replace: true })}
+                onSuccessNavigate={() => {
+                  clearSessionNotice();
+                  navigate(redirect, { replace: true });
+                }}
               />
               <AuthDivider />
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+            <form onSubmit={handleSubmit} className="space-y-5" noValidate onFocus={clearSessionNotice}>
               {formError ? (
                 <div
                   role="alert"
@@ -251,6 +269,12 @@ export default function Login() {
                   >
                     Password
                   </label>
+                  <Link
+                    to={`/forgot-password${email.trim() ? `?email=${encodeURIComponent(email.trim())}` : ''}`}
+                    className="text-[12px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
                 </div>
                 <div className="relative">
                   <input

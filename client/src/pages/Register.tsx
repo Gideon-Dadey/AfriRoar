@@ -161,11 +161,18 @@ export default function Register() {
 
       <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-sr-bg)] lg:grid lg:grid-cols-2">
         <aside className="relative hidden overflow-hidden bg-[var(--color-sr-navy-deeper)] lg:block">
-          <img
-            src="/sr/hero/panel-2.jpg"
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-          />
+          <picture>
+            <source srcSet="/sr/hero/panel-2.webp" type="image/webp" />
+            <img
+              src="/sr/hero/panel-2.jpg"
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+              width={1600}
+              height={1066}
+              decoding="async"
+              fetchPriority="high"
+            />
+          </picture>
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-sr-navy-deeper)] via-[var(--color-sr-navy-deeper)]/80 to-[var(--color-sr-navy)]/45" />
           <div className="relative flex h-full min-h-[70vh] flex-col justify-between p-10 xl:p-14">
             <Link to="/" className="inline-flex items-center gap-3 text-white">

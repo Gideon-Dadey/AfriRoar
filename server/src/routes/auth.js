@@ -9,6 +9,8 @@ const {
   googleAuthSchema,
   verifyEmailSchema,
   resendVerificationSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   updateProfileSchema,
 } = require('../middlewares/validate');
 const upload = require('../middlewares/upload');
@@ -21,11 +23,14 @@ router.post('/verify-email', validate(verifyEmailSchema), authController.verifyE
 router.post('/resend-verification', validate(resendVerificationSchema), authController.resendVerification);
 router.post('/login', validate(loginSchema), authController.login);
 router.post('/google', validate(googleAuthSchema), authController.googleAuth);
+router.post('/forgot-password', validate(forgotPasswordSchema), authController.forgotPassword);
+router.post('/reset-password', validate(resetPasswordSchema), authController.resetPassword);
 router.post('/refresh', authController.refreshToken);
+// Public so the refresh cookie is always cleared, even if the access token already expired
+router.post('/logout', authController.logout);
 
 // Protected routes
 router.use(protect);
-router.post('/logout', authController.logout);
 router.get('/me', authController.getMe);
 router.patch('/profile', validate(updateProfileSchema), authController.updateProfile);
 router.post('/save-scholarship/:scholarshipId', authController.saveScholarship);

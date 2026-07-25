@@ -5,6 +5,7 @@ import { HelmetProvider } from 'react-helmet-async';
 
 import Layout from '@/components/layout/Layout';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import ScrollToTop from '@/components/ScrollToTop';
 
 import Home from '@/pages/Home';
 import Login from '@/pages/Login';
@@ -27,6 +28,7 @@ import Dashboard from '@/pages/Dashboard';
 import Profile from '@/pages/Profile';
 import Applications from '@/pages/Applications';
 import VerifyEmail from '@/pages/VerifyEmail';
+import ForgotPassword from '@/pages/ForgotPassword';
 import ApplicationWizard from '@/pages/ApplicationWizard';
 
 const queryClient = new QueryClient({
@@ -44,6 +46,7 @@ function App() {
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
+          <ScrollToTop />
           <Toaster
             position="top-right"
             toastOptions={{
@@ -72,6 +75,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/about" element={<About />} />
               <Route path="/terms" element={<Terms />} />

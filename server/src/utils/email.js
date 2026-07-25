@@ -162,6 +162,40 @@ const templates = {
       </div>
     `,
   }),
+
+  passwordReset: (userName, code) => ({
+    subject: 'Reset your AfriRoar password',
+    text: `Hi ${userName},\n\nYour AfriRoar password reset code is ${code}. It expires in 15 minutes.\n\nIf you did not request this, ignore this email.`,
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;color:#1e1e1e;border:1px solid #e5e7eb;">
+        ${brandHeader}
+        <div style="padding:36px 32px;">
+          <h1 style="margin:0 0 12px;font-size:22px;color:#2f4468;">Reset your password</h1>
+          <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#334155;">
+            Hi ${userName},
+          </p>
+          <p style="margin:0 0 20px;font-size:16px;line-height:1.6;color:#334155;">
+            We received a request to reset your AfriRoar password. Enter the code below to choose a new one.
+          </p>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:24px;text-align:center;margin:24px 0;">
+            <div style="font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#64748b;margin-bottom:10px;">Reset Code</div>
+            <div style="font-size:36px;font-weight:700;letter-spacing:0.28em;color:#2f4468;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;">
+              ${code}
+            </div>
+          </div>
+          <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#64748b;">
+            This code expires in <strong>15 minutes</strong>. Do not share it with anyone.
+          </p>
+          <div style="margin-top:28px;text-align:center;">
+            <a href="${config.clientUrl}/forgot-password" style="background:#2f4468;color:#ffffff;padding:12px 28px;border-radius:4px;text-decoration:none;display:inline-block;font-weight:600;">
+              Reset password
+            </a>
+          </div>
+        </div>
+        ${brandFooter}
+      </div>
+    `,
+  }),
 };
 
 module.exports = { sendEmail, templates };
