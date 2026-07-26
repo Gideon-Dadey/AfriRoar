@@ -158,12 +158,12 @@ export function ConfirmModal({
           </div>
         </div>
 
-        <div className="flex flex-col-reverse gap-2 border-t border-[var(--color-sr-border)] bg-[var(--color-sr-bg)] px-5 py-3 sm:flex-row sm:justify-end sm:px-6">
+        <div className="flex flex-col-reverse gap-2 border-t border-[var(--color-sr-border)] bg-[var(--color-sr-bg)] px-5 py-3 sm:flex-row sm:justify-end sm:gap-2.5 sm:px-6">
           <button
             type="button"
             disabled={busy}
             onClick={onCancel}
-            className="inline-flex items-center justify-center border border-[var(--color-sr-border)] bg-white px-4 py-2.5 text-[14px] font-semibold text-[var(--color-sr-navy)] transition hover:border-[var(--color-sr-navy)] disabled:opacity-50"
+            className="inline-flex h-9 min-w-[5.5rem] items-center justify-center border border-[var(--color-sr-border)] bg-white px-4 text-[13px] font-semibold text-[var(--color-sr-navy)] transition hover:border-[var(--color-sr-navy)] disabled:opacity-50"
           >
             {cancelLabel}
           </button>
@@ -172,7 +172,7 @@ export function ConfirmModal({
             type="button"
             disabled={busy}
             onClick={onConfirm}
-            className={`inline-flex items-center justify-center px-4 py-2.5 text-[14px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 disabled:opacity-50 ${styles.confirm} ${styles.ring}`}
+            className={`inline-flex h-9 min-w-[5.5rem] items-center justify-center px-4 text-[13px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 disabled:opacity-50 ${styles.confirm} ${styles.ring}`}
           >
             {busy ? 'Working…' : confirmLabel}
           </button>
