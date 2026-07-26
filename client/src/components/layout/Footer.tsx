@@ -29,8 +29,6 @@ const legal = [
   { label: 'Disclaimer', to: '/disclaimer' },
 ];
 
-const SUPPORT_EMAIL = 'afriroar.support@gmail.com';
-
 export default function Footer() {
   return (
     <footer className="mt-10 border-t border-[var(--color-sr-border)] bg-[var(--color-sr-bg)]">
@@ -58,15 +56,6 @@ export default function Footer() {
               </li>
             ))}
           </ul>
-          <p className="mt-5 text-[14px] leading-relaxed text-[var(--color-sr-muted)]">
-            Need help with an application?{' '}
-            <a
-              href={`mailto:${SUPPORT_EMAIL}`}
-              className="font-semibold text-[var(--color-sr-link)] hover:underline"
-            >
-              {SUPPORT_EMAIL}
-            </a>
-          </p>
         </div>
 
         <div>
