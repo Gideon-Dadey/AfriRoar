@@ -109,9 +109,11 @@ export default function About() {
                 Make funding findable for students who need it most.
               </h2>
               <p className="mt-4 text-[16px] leading-relaxed text-[var(--color-sr-muted)]">
-                Too many opportunities stay buried in scattered sites and outdated PDFs. AfriRoar
-                brings listings together, explains what matters, and helps you move from interest to
-                a submitted application.
+                AfriRoar is a trusted platform connecting African students and professionals to
+                verified international scholarships, internships, and career opportunities. We
+                curate and update opportunities across undergraduate, master's, and PhD levels,
+                helping ambitious individuals access the resources they need to pursue higher
+                education and drive national and global development.
               </p>
             </div>
             <div className="relative aspect-[4/3] overflow-hidden">
