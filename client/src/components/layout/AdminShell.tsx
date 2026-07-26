@@ -9,7 +9,7 @@ import {
   faHouse,
   faNewspaper,
   faRightFromBracket,
-  faShieldHalved,
+  faUserShield,
   faClockRotateLeft,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons';
@@ -75,7 +75,7 @@ export default function AdminShell() {
           />
         </Link>
         <span className="inline-flex items-center gap-1 border border-[var(--color-sr-yellow)]/40 bg-[var(--color-sr-yellow)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--color-sr-yellow)]">
-          <FontAwesomeIcon icon={faShieldHalved} className="text-[10px]" />
+          <FontAwesomeIcon icon={faUserShield} className="text-[10px]" />
           Admin
         </span>
       </div>

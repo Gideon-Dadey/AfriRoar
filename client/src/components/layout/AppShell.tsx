@@ -6,8 +6,8 @@ import {
   faGaugeHigh,
   faMagnifyingGlass,
   faRightFromBracket,
-  faShieldHalved,
   faUser,
+  faUserShield,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { Menu, X } from 'lucide-react';
@@ -47,7 +47,7 @@ export default function AppShell() {
           {
             to: '/dashboard/admin',
             label: 'Admin',
-            icon: faShieldHalved,
+            icon: faUserShield,
             end: false,
           },
         ]
