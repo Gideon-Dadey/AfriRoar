@@ -1,14 +1,4 @@
 import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faFacebookF,
-  faInstagram,
-  faLinkedinIn,
-  faWhatsapp,
-  faXTwitter,
-  faYoutube,
-} from '@fortawesome/free-brands-svg-icons';
-import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 
 const categories = [
   { label: 'Undergraduate Scholarships', to: '/scholarships?level=undergraduate' },
@@ -20,6 +10,16 @@ const categories = [
   { label: 'Scholarship Advisory Desk', to: '/guides' },
 ];
 
+const forStudents = [
+  { label: 'Browse scholarships', to: '/scholarships' },
+  { label: 'Browse internships', to: '/internships' },
+  { label: 'Scholarship guides', to: '/guides' },
+  { label: 'Curated scholarship lists', to: '/lists' },
+  { label: 'Create student account', to: '/register' },
+  { label: 'Student dashboard', to: '/dashboard' },
+  { label: 'Contact support', to: '/contact' },
+];
+
 const legal = [
   { label: 'About Us', to: '/about' },
   { label: 'Terms of Use', to: '/terms' },
@@ -29,14 +29,7 @@ const legal = [
   { label: 'Disclaimer', to: '/disclaimer' },
 ];
 
-const social: { label: string; icon: IconDefinition; href: string }[] = [
-  { label: 'Facebook', icon: faFacebookF, href: 'https://www.facebook.com/' },
-  { label: 'YouTube', icon: faYoutube, href: 'https://www.youtube.com/' },
-  { label: 'Instagram', icon: faInstagram, href: 'https://www.instagram.com/' },
-  { label: 'LinkedIn', icon: faLinkedinIn, href: 'https://www.linkedin.com/' },
-  { label: 'X', icon: faXTwitter, href: 'https://x.com/' },
-  { label: 'WhatsApp', icon: faWhatsapp, href: 'https://wa.me/' },
-];
+const SUPPORT_EMAIL = 'afriroar.support@gmail.com';
 
 export default function Footer() {
   return (
@@ -45,28 +38,35 @@ export default function Footer() {
         <div>
           <p className="sr-footer-label mb-3 text-[var(--color-sr-muted)]">ABOUT</p>
           <p className="sr-footer-text mb-5 text-[var(--color-sr-text)]">
-            AfriRoar.com is an updated listing of international scholarships and internships for
-            students who seek national and global development through higher education.
+            AfriRoar is a trusted platform connecting African students and professionals to verified
+            international scholarships, internships, and career opportunities.
           </p>
           <img src="/sr/logo.png" alt="AfriRoar" className="h-8 w-auto object-contain" />
         </div>
 
         <div>
-          <p className="sr-footer-label mb-3 text-[var(--color-sr-muted)]">FOLLOW US AND SUBSCRIBE</p>
-          <div className="flex flex-wrap gap-2.5">
-            {social.map(({ label, icon, href }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-sr-navy)] text-white transition-colors hover:bg-[var(--color-sr-yellow)] hover:text-[var(--color-sr-navy-deeper)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-sr-navy)]"
-              >
-                <FontAwesomeIcon icon={icon} className="text-[16px]" />
-              </a>
+          <p className="sr-footer-label mb-3 text-[var(--color-sr-muted)]">FOR STUDENTS</p>
+          <ul className="space-y-2">
+            {forStudents.map((item) => (
+              <li key={item.label}>
+                <Link
+                  to={item.to}
+                  className="text-[18px] font-normal leading-[30.6px] text-[var(--color-sr-link)] hover:underline"
+                >
+                  {item.label}
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
+          <p className="mt-5 text-[14px] leading-relaxed text-[var(--color-sr-muted)]">
+            Need help with an application?{' '}
+            <a
+              href={`mailto:${SUPPORT_EMAIL}`}
+              className="font-semibold text-[var(--color-sr-link)] hover:underline"
+            >
+              {SUPPORT_EMAIL}
+            </a>
+          </p>
         </div>
 
         <div>
