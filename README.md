@@ -59,16 +59,11 @@ cd server
 npm run seed
 ```
 
-Upserts demo accounts only — it does **not** delete real registrations, applications, or the scholarship catalogue.
+Ensures the admin account exists, removes mock demo students/providers, and restores known real student data. It does **not** wipe real registrations or the scholarship catalogue.
 
-This creates test accounts:
 | Role | Email | Password |
 |------|-------|----------|
 | Admin | admin@afriroar.com | admin@123 |
-| Student | student@scholarhive.com | Student@123456 |
-| Student | maria@scholarhive.com | Student@123456 |
-| Provider | provider@scholarhive.com | Provider@123456 |
-| Provider | techfuture@scholarhive.com | Provider@123456 |
 
 ### 4. Run Development Servers
 

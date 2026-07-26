@@ -14,7 +14,7 @@ const getUsers = async (queryString) => {
   const skip = (page - 1) * limit;
 
   const filter = { isDeleted: { $ne: true } };
-  if (queryString.role) filter.role = queryString.role;
+  if (queryString.role && queryString.role !== 'all') filter.role = queryString.role;
   if (queryString.suspended === 'true') filter.isSuspended = true;
   if (queryString.suspended === 'false') filter.isSuspended = { $ne: true };
   if (queryString.search) {
