@@ -84,7 +84,7 @@ function Field({
   );
 }
 
-function asJob(value: JobApplication['jobId']): Job | null {
+function asJob(value: JobApplication['jobId'] | undefined | null): Job | null {
   return value && typeof value === 'object' ? (value as Job) : null;
 }
 
