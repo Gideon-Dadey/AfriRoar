@@ -32,7 +32,7 @@ export default function AdminUsers() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const [role, setRole] = useState('');
+  const [role, setRole] = useState('student');
   const [suspended, setSuspended] = useState('');
 
   const { data, isLoading, isError, refetch } = useQuery({

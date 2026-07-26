@@ -59,6 +59,8 @@ cd server
 npm run seed
 ```
 
+Upserts demo accounts only — it does **not** delete real registrations, applications, or the scholarship catalogue.
+
 This creates test accounts:
 | Role | Email | Password |
 |------|-------|----------|

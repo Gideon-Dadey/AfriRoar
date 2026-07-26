@@ -246,32 +246,61 @@ const createScholarships = (providerIds) => [
   },
 ];
 
+const DEMO_EMAILS = new Set(users.map((u) => u.email.toLowerCase()));
+
+const upsertDemoUsers = async () => {
+  const results = [];
+  for (const userData of users) {
+    const email = userData.email.toLowerCase();
+    let user = await User.findOne({ email }).select('+password');
+    if (user) {
+      user.name = userData.name;
+      user.role = userData.role;
+      user.isEmailVerified = true;
+      user.isDeleted = false;
+      user.isSuspended = false;
+      user.password = userData.password;
+      if (userData.profile) {
+        user.profile = { ...user.profile?.toObject?.() ?? user.profile ?? {}, ...userData.profile };
+      }
+      await user.save();
+      results.push({ email, action: 'updated' });
+    } else {
+      user = await User.create(userData);
+      results.push({ email, action: 'created' });
+    }
+  }
+  return results;
+};
+
 const seed = async () => {
   try {
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB');
 
-    // Clear existing data
-    await Promise.all([
-      User.deleteMany({}),
-      Scholarship.deleteMany({}),
-      Application.deleteMany({}),
-    ]);
-    console.log('Cleared existing data');
+    // Never wipe real registrations — only upsert known demo accounts.
+    const userResults = await upsertDemoUsers();
+    console.log(
+      `Demo users: ${userResults.map((r) => `${r.email} (${r.action})`).join(', ')}`
+    );
 
-    // Create users
-    const createdUsers = await User.create(users);
-    console.log(`Created ${createdUsers.length} users`);
+    const providers = await User.find({ role: 'provider', email: { $in: [...DEMO_EMAILS] } });
+    const providerIds = providers.map((u) => u._id);
 
-    // Get provider IDs
-    const providerIds = createdUsers
-      .filter((u) => u.role === 'provider')
-      .map((u) => u._id);
+    // Add demo scholarships only when none exist yet (do not delete catalogue/applications).
+    const existingCount = await Scholarship.countDocuments({ isDeleted: { $ne: true } });
+    let createdScholarshipCount = 0;
+    if (existingCount === 0 && providerIds.length > 0) {
+      const scholarships = createScholarships(providerIds);
+      const createdScholarships = await Scholarship.create(scholarships);
+      createdScholarshipCount = createdScholarships.length;
+    }
 
-    // Create scholarships
-    const scholarships = createScholarships(providerIds);
-    const createdScholarships = await Scholarship.create(scholarships);
-    console.log(`Created ${createdScholarships.length} scholarships`);
+    const studentCount = await User.countDocuments({ role: 'student', isDeleted: { $ne: true } });
+    const totalUsers = await User.countDocuments({ isDeleted: { $ne: true } });
+
+    console.log(`Scholarships seeded: ${createdScholarshipCount} (catalogue already had ${existingCount})`);
+    console.log(`Users in DB: ${totalUsers} total, ${studentCount} students`);
 
     console.log('\n--- Test Accounts ---');
     console.log('Admin:    admin@afriroar.com / admin@123');
