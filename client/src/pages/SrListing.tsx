@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 import PostCard from '@/components/sr/PostCard';
 import api from '@/lib/api';
 import { formatDate, getLevelLabel } from '@/lib/utils';
-import { getPostsByCategory, popularCountries, posts, type SrPost } from '@/data/srContent';
+import { getPostsByCategory, popularCountries, type SrPost } from '@/data/srContent';
 import type { ContentItem, Scholarship } from '@/types';
 
 type ListingProps = {
@@ -94,23 +94,21 @@ function ListingPage({ title, description, category, filterFn }: ListingProps) {
     staleTime: 60_000,
   });
 
-  let items = category ? getPostsByCategory(category) : [...posts];
+  let items: SrPost[] = [];
 
-  if (loadScholarships) {
+  if (category === 'scholarship') {
+    items = apiScholarships.map(scholarshipToPost);
+  } else if (contentCategory) {
+    const mapped = apiContent.map(contentToPost);
+    // Editorial static guides/lists/internships remain until moved into CMS.
+    items = mergeUnique(mapped, getPostsByCategory(contentCategory));
+  } else if (!category) {
     items = mergeUnique(
       apiScholarships.map(scholarshipToPost),
-      category === 'scholarship' ? getPostsByCategory('scholarship') : items,
+      [...getPostsByCategory('guide'), ...getPostsByCategory('list'), ...getPostsByCategory('internship')],
     );
-  }
-
-  if (contentCategory) {
-    const mapped = apiContent.map(contentToPost);
-    if (contentCategory === 'list') {
-      // Jobs from CMS surface under lists for MVP
-      items = mergeUnique(mapped, getPostsByCategory('list'));
-    } else {
-      items = mergeUnique(mapped, getPostsByCategory(contentCategory));
-    }
+  } else {
+    items = getPostsByCategory(category);
   }
 
   if (filterFn) items = items.filter(filterFn);
@@ -265,8 +263,7 @@ export function CountryDetailPage() {
       filterFn={(p) => {
         if (p.category !== 'scholarship') return false;
         const hay = `${p.country || ''} ${p.title}`.toLowerCase();
-        const matched = keys.some((k) => hay.includes(k));
-        return matched || p.featured === true;
+        return keys.some((k) => hay.includes(k));
       }}
     />
   );

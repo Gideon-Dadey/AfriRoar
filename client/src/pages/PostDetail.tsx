@@ -17,7 +17,7 @@ import {
 import api from '@/lib/api';
 import { formatDate, formatDeadline, getFundingTypeLabel, getLevelLabel } from '@/lib/utils';
 import { getGuideArticle } from '@/data/guideArticles';
-import { getLatestScholarships, getPostBySlug, getPostsByCategory } from '@/data/srContent';
+import { getPostBySlug, getPostsByCategory } from '@/data/srContent';
 import { useAuthStore } from '@/stores/authStore';
 import PostCard from '@/components/sr/PostCard';
 import type { ContentItem, Scholarship } from '@/types';
@@ -37,9 +37,39 @@ function categoryHome(category?: string) {
   return '/scholarships';
 }
 
+const PLACEHOLDER_IMAGE = '/sr/posts/chevening.png';
+
+function scholarshipToPost(s: Scholarship): {
+  id: string;
+  slug: string;
+  title: string;
+  date: string;
+  category: 'scholarship';
+  level?: string;
+  country?: string;
+  image: string;
+  excerpt: string;
+  featured?: boolean;
+} {
+  return {
+    id: s._id,
+    slug: s.slug,
+    title: s.title,
+    date: formatDate(s.createdAt || s.deadline),
+    category: 'scholarship',
+    level: getLevelLabel(s.level),
+    country: s.country,
+    image: s.coverImage || PLACEHOLDER_IMAGE,
+    excerpt: s.shortDescription || s.description?.slice(0, 180) || '',
+    featured: Boolean(s.isFeatured),
+  };
+}
+
 export default function PostDetail() {
   const { slug = '' } = useParams();
-  const staticPost = getPostBySlug(slug);
+  const staticRaw = getPostBySlug(slug);
+  // Scholarships are API-only; keep static posts for guides/lists/internships.
+  const staticPost = staticRaw?.category === 'scholarship' ? undefined : staticRaw;
   const article = getGuideArticle(slug);
   const { isAuthenticated } = useAuthStore();
 
@@ -94,6 +124,18 @@ export default function PostDetail() {
     staleTime: 60_000,
   });
 
+  const { data: relatedApiScholarships = [] } = useQuery({
+    queryKey: ['related-scholarships', slug],
+    queryFn: async () => {
+      const { data } = await api.get('/scholarships', {
+        params: { limit: 6, sort: '-createdAt' },
+      });
+      return (data.data.scholarships || []) as Scholarship[];
+    },
+    enabled: Boolean(slug) && !isGuideLike,
+    staleTime: 60_000,
+  });
+
   if (!post && (loadingScholarship || loadingCms)) {
     return (
       <div className="sr-container flex items-center justify-center gap-2 py-20 text-[14px] text-[var(--color-sr-muted)]">
@@ -126,9 +168,10 @@ export default function PostDetail() {
   const relatedGuides = getPostsByCategory(post?.category === 'list' ? 'list' : 'guide')
     .filter((p) => p.slug !== slug)
     .slice(0, 3);
-  const relatedScholarships = getLatestScholarships()
-    .filter((p) => p.slug !== slug)
-    .slice(0, 3);
+  const relatedScholarships = relatedApiScholarships
+    .filter((s) => s.slug !== slug)
+    .slice(0, 3)
+    .map(scholarshipToPost);
 
   const applyHref = scholarship?._id
     ? isAuthenticated

@@ -7,13 +7,14 @@ const Notification = require('../models/Notification');
 const Content = require('../models/Content');
 const { NotFoundError } = require('../utils/errors');
 const { createAuditLog } = require('../utils/auditLog');
+const { systemUserFilter } = require('../constants/systemUsers');
 
 const getUsers = async (queryString) => {
   const page = parseInt(queryString.page, 10) || 1;
   const limit = parseInt(queryString.limit, 10) || 20;
   const skip = (page - 1) * limit;
 
-  const filter = { isDeleted: { $ne: true } };
+  const filter = { isDeleted: { $ne: true }, ...systemUserFilter };
   if (queryString.role && queryString.role !== 'all') filter.role = queryString.role;
   if (queryString.suspended === 'true') filter.isSuspended = true;
   if (queryString.suspended === 'false') filter.isSuspended = { $ne: true };
@@ -510,14 +511,19 @@ const getAnalytics = async () => {
     applicationsByStatus,
     revenueData,
   ] = await Promise.all([
-    User.countDocuments({ isDeleted: { $ne: true } }),
-    User.countDocuments({ role: 'student', isDeleted: { $ne: true } }),
-    User.countDocuments({ role: 'provider', isDeleted: { $ne: true } }),
-    User.countDocuments({ role: 'admin', isDeleted: { $ne: true } }),
-    User.countDocuments({ isSuspended: true }),
-    User.countDocuments({ role: 'student', isEmailVerified: true, isDeleted: { $ne: true } }),
-    User.countDocuments({ createdAt: { $gte: since7 }, isDeleted: { $ne: true } }),
-    User.countDocuments({ createdAt: { $gte: since30 }, isDeleted: { $ne: true } }),
+    User.countDocuments({ isDeleted: { $ne: true }, ...systemUserFilter }),
+    User.countDocuments({ role: 'student', isDeleted: { $ne: true }, ...systemUserFilter }),
+    User.countDocuments({ role: 'provider', isDeleted: { $ne: true }, ...systemUserFilter }),
+    User.countDocuments({ role: 'admin', isDeleted: { $ne: true }, ...systemUserFilter }),
+    User.countDocuments({ isSuspended: true, ...systemUserFilter }),
+    User.countDocuments({
+      role: 'student',
+      isEmailVerified: true,
+      isDeleted: { $ne: true },
+      ...systemUserFilter,
+    }),
+    User.countDocuments({ createdAt: { $gte: since7 }, isDeleted: { $ne: true }, ...systemUserFilter }),
+    User.countDocuments({ createdAt: { $gte: since30 }, isDeleted: { $ne: true }, ...systemUserFilter }),
     Scholarship.countDocuments({ isDeleted: { $ne: true } }),
     Scholarship.countDocuments({ status: 'approved', isDeleted: { $ne: true } }),
     Scholarship.countDocuments({ status: 'pending', isDeleted: { $ne: true } }),
@@ -526,11 +532,15 @@ const getAnalytics = async () => {
     Application.countDocuments(),
     Application.countDocuments({ createdAt: { $gte: since7 } }),
     Application.countDocuments({ createdAt: { $gte: since30 } }),
-    User.countDocuments({ subscriptionPlan: { $ne: 'free' }, subscriptionStatus: 'active' }),
+    User.countDocuments({
+      subscriptionPlan: { $ne: 'free' },
+      subscriptionStatus: 'active',
+      ...systemUserFilter,
+    }),
     Content.countDocuments({ isDeleted: { $ne: true } }),
     Content.countDocuments({ status: 'published', isDeleted: { $ne: true } }),
     Content.countDocuments({ status: 'draft', isDeleted: { $ne: true } }),
-    User.find({ isDeleted: { $ne: true } })
+    User.find({ isDeleted: { $ne: true }, ...systemUserFilter })
       .sort('-createdAt')
       .limit(8)
       .select('name email role createdAt isSuspended isEmailVerified'),
