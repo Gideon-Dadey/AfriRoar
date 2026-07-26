@@ -15,16 +15,16 @@ export default function Layout() {
 
   if (isAdminArea) {
     return (
-      <div className="min-h-screen max-w-[100vw] overflow-x-hidden bg-[var(--color-sr-bg)]">
+      <div className="min-h-screen overflow-x-clip bg-[var(--color-sr-bg)]">
         <AdminShell />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen max-w-[100vw] flex-col overflow-x-hidden bg-[var(--color-sr-bg)]">
+    <div className="flex min-h-screen flex-col overflow-x-clip bg-[var(--color-sr-bg)]">
       {isDashboard ? <AppShell /> : <Navbar />}
-      <main className={`min-w-0 flex-1 ${isDashboard ? 'overflow-x-hidden' : ''}`}>
+      <main className="min-w-0 flex-1">
         <Outlet />
       </main>
       {!hideFooter ? <Footer /> : null}

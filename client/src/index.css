@@ -21,6 +21,33 @@
   --font-hero: "Open Sans", sans-serif;
 }
 
+/*
+ * Shared page shell: nav, hero, sections, and footer all use these tokens
+ * so left/right edges stay locked to one industry-standard rhythm.
+ */
+:root {
+  --sr-container-max: 72.5rem; /* 1160px content shell */
+  --sr-gutter: 1.25rem; /* 20px mobile */
+}
+
+@media (min-width: 640px) {
+  :root {
+    --sr-gutter: 1.5rem; /* 24px */
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --sr-gutter: 2rem; /* 32px */
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --sr-gutter: 2.5rem; /* 40px */
+  }
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -31,6 +58,8 @@
     scroll-behavior: auto;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* Keeps fixed nav and page columns aligned when a scrollbar appears */
+    scrollbar-gutter: stable;
     /* Top overscroll matches navy header; bottom matches page canvas */
     background: linear-gradient(
       to bottom,
@@ -128,26 +157,13 @@
   }
 
   .sr-container {
+    box-sizing: border-box;
     width: 100%;
-    max-width: 1180px;
+    max-width: var(--sr-container-max);
     margin-left: auto;
     margin-right: auto;
-    padding-left: max(1rem, env(safe-area-inset-left));
-    padding-right: max(1rem, env(safe-area-inset-right));
-  }
-
-  @media (min-width: 640px) {
-    .sr-container {
-      padding-left: 1.25rem;
-      padding-right: 1.25rem;
-    }
-  }
-
-  @media (min-width: 640px) {
-    .sr-container {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
+    padding-left: max(var(--sr-gutter), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--sr-gutter), env(safe-area-inset-right, 0px));
   }
 
   .sr-hero-title {
