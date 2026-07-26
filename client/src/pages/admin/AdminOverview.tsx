@@ -38,6 +38,9 @@ export default function AdminOverview() {
         description="Platform health, pending work, and recent activity."
         actions={
           <>
+            <Link to="/dashboard/admin/analytics" className={btnSecondary}>
+              Analytics
+            </Link>
             <Link to="/dashboard/admin/scholarships/new" className={btnPrimary}>
               <Plus className="h-3.5 w-3.5" />
               Add scholarship

@@ -11,6 +11,7 @@ import {
   faRightFromBracket,
   faUserShield,
   faClockRotateLeft,
+  faChartLine,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
@@ -22,6 +23,7 @@ import { cn } from '@/lib/utils';
 
 const navItems: { to: string; label: string; icon: IconDefinition; end?: boolean }[] = [
   { to: '/dashboard/admin', label: 'Overview', icon: faGaugeHigh, end: true },
+  { to: '/dashboard/admin/analytics', label: 'Analytics', icon: faChartLine },
   { to: '/dashboard/admin/users', label: 'Students & users', icon: faUsers },
   { to: '/dashboard/admin/scholarships', label: 'Scholarships', icon: faGraduationCap },
   { to: '/dashboard/admin/applications', label: 'Applications', icon: faFileLines },

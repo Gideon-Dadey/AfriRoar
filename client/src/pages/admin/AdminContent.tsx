@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -40,9 +40,10 @@ const CATEGORIES = [
 
 export default function AdminContent() {
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(1);
   const [category, setCategory] = useState('');
-  const [status, setStatus] = useState('');
+  const status = searchParams.get('status') || '';
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
 
@@ -61,6 +62,14 @@ export default function AdminContent() {
       return res.data!;
     },
   });
+
+  const setStatus = (value: string) => {
+    setPage(1);
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set('status', value);
+    else next.delete('status');
+    setSearchParams(next, { replace: true });
+  };
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/admin/content/${id}`),

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
@@ -29,11 +30,13 @@ type UsersPayload = {
 
 export default function AdminUsers() {
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const [role, setRole] = useState('student');
-  const [suspended, setSuspended] = useState('');
+  const roleRaw = searchParams.get('role');
+  const role = roleRaw === null ? 'student' : roleRaw === 'all' ? '' : roleRaw;
+  const suspended = searchParams.get('suspended') || '';
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['admin', 'users', page, search, role, suspended],
@@ -50,6 +53,19 @@ export default function AdminUsers() {
       return res.data!;
     },
   });
+
+  const updateFilter = (key: 'role' | 'suspended', value: string) => {
+    setPage(1);
+    const next = new URLSearchParams(searchParams);
+    if (key === 'role') {
+      next.set('role', value || 'all');
+    } else if (value) {
+      next.set(key, value);
+    } else {
+      next.delete(key);
+    }
+    setSearchParams(next, { replace: true });
+  };
 
   const suspendMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
@@ -122,10 +138,7 @@ export default function AdminUsers() {
         </form>
         <select
           value={role}
-          onChange={(e) => {
-            setPage(1);
-            setRole(e.target.value);
-          }}
+          onChange={(e) => updateFilter('role', e.target.value)}
           className={`${selectClass} sm:w-40`}
           aria-label="Role filter"
         >
@@ -136,10 +149,7 @@ export default function AdminUsers() {
         </select>
         <select
           value={suspended}
-          onChange={(e) => {
-            setPage(1);
-            setSuspended(e.target.value);
-          }}
+          onChange={(e) => updateFilter('suspended', e.target.value)}
           className={`${selectClass} sm:w-44`}
           aria-label="Suspended filter"
         >

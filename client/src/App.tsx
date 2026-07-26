@@ -32,6 +32,7 @@ import VerifyEmail from '@/pages/VerifyEmail';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ApplicationWizard from '@/pages/ApplicationWizard';
 import AdminOverview from '@/pages/admin/AdminOverview';
+import AdminAnalytics from '@/pages/admin/AdminAnalytics';
 import AdminUsers from '@/pages/admin/AdminUsers';
 import AdminScholarships from '@/pages/admin/AdminScholarships';
 import AdminScholarshipForm from '@/pages/admin/AdminScholarshipForm';
@@ -103,6 +104,7 @@ function App() {
 
               <Route element={<ProtectedRoute roles={['admin']} />}>
                 <Route path="/dashboard/admin" element={<AdminOverview />} />
+                <Route path="/dashboard/admin/analytics" element={<AdminAnalytics />} />
                 <Route path="/dashboard/admin/users" element={<AdminUsers />} />
                 <Route path="/dashboard/admin/scholarships" element={<AdminScholarships />} />
                 <Route path="/dashboard/admin/scholarships/new" element={<AdminScholarshipForm />} />

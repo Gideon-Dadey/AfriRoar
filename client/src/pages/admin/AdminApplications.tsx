@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { formatDate } from '@/lib/utils';
@@ -46,8 +46,9 @@ function scholarshipLabel(app: Application) {
 }
 
 export default function AdminApplications() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(1);
-  const [status, setStatus] = useState('');
+  const status = searchParams.get('status') || '';
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
 
@@ -70,6 +71,14 @@ export default function AdminApplications() {
     e.preventDefault();
     setPage(1);
     setSearch(searchInput.trim());
+  };
+
+  const setStatus = (value: string) => {
+    setPage(1);
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set('status', value);
+    else next.delete('status');
+    setSearchParams(next, { replace: true });
   };
 
   return (
@@ -98,10 +107,7 @@ export default function AdminApplications() {
         </form>
         <select
           value={status}
-          onChange={(e) => {
-            setPage(1);
-            setStatus(e.target.value);
-          }}
+          onChange={(e) => setStatus(e.target.value)}
           className={`${selectClass} sm:w-48`}
           aria-label="Status filter"
         >

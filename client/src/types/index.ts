@@ -164,20 +164,37 @@ export interface Analytics {
     providers: number;
     admins?: number;
     suspended?: number;
+    verifiedStudents?: number;
+    last7Days?: number;
+    last30Days?: number;
   };
   scholarships: {
     total: number;
     approved: number;
     pending: number;
     rejected?: number;
+    featured?: number;
   };
-  applications: { total: number; byStatus: Record<string, number> };
-  content?: { total: number; published: number };
+  applications: {
+    total: number;
+    byStatus: Record<string, number>;
+    last7Days?: number;
+    last30Days?: number;
+  };
+  content?: { total: number; published: number; draft?: number };
   revenue: {
     totalPremium: number;
     byPlan: Array<{ _id: string; count: number; totalRevenue: number }>;
   };
-  recent: { users: Partial<User>[]; scholarships: Partial<Scholarship>[] };
+  recent: {
+    users: Partial<User>[];
+    scholarships: Partial<Scholarship>[];
+    applications?: Partial<Application>[];
+  };
+  topScholarships?: Array<
+    Partial<Scholarship> & { applicationCount?: number; title?: string; country?: string }
+  >;
+  generatedAt?: string;
 }
 
 export interface AuditLog {

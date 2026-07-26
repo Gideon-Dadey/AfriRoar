@@ -473,22 +473,40 @@ const setContentCover = async (id, coverImage, adminId, req) => {
 };
 
 const getAnalytics = async () => {
+  const now = new Date();
+  const daysAgo = (n) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() - n);
+    return d;
+  };
+  const since7 = daysAgo(7);
+  const since30 = daysAgo(30);
+
   const [
     totalUsers,
     totalStudents,
     totalProviders,
     totalAdmins,
     suspendedUsers,
+    verifiedStudents,
+    usersLast7Days,
+    usersLast30Days,
     totalScholarships,
     approvedScholarships,
     pendingScholarships,
     rejectedScholarships,
+    featuredScholarships,
     totalApplications,
+    applicationsLast7Days,
+    applicationsLast30Days,
     totalPremium,
     totalContent,
     publishedContent,
+    draftContent,
     recentUsers,
     recentScholarships,
+    recentApplications,
+    topScholarships,
     applicationsByStatus,
     revenueData,
   ] = await Promise.all([
@@ -497,28 +515,50 @@ const getAnalytics = async () => {
     User.countDocuments({ role: 'provider', isDeleted: { $ne: true } }),
     User.countDocuments({ role: 'admin', isDeleted: { $ne: true } }),
     User.countDocuments({ isSuspended: true }),
+    User.countDocuments({ role: 'student', isEmailVerified: true, isDeleted: { $ne: true } }),
+    User.countDocuments({ createdAt: { $gte: since7 }, isDeleted: { $ne: true } }),
+    User.countDocuments({ createdAt: { $gte: since30 }, isDeleted: { $ne: true } }),
     Scholarship.countDocuments({ isDeleted: { $ne: true } }),
     Scholarship.countDocuments({ status: 'approved', isDeleted: { $ne: true } }),
     Scholarship.countDocuments({ status: 'pending', isDeleted: { $ne: true } }),
     Scholarship.countDocuments({ status: 'rejected', isDeleted: { $ne: true } }),
+    Scholarship.countDocuments({ isFeatured: true, isDeleted: { $ne: true } }),
     Application.countDocuments(),
+    Application.countDocuments({ createdAt: { $gte: since7 } }),
+    Application.countDocuments({ createdAt: { $gte: since30 } }),
     User.countDocuments({ subscriptionPlan: { $ne: 'free' }, subscriptionStatus: 'active' }),
     Content.countDocuments({ isDeleted: { $ne: true } }),
     Content.countDocuments({ status: 'published', isDeleted: { $ne: true } }),
+    Content.countDocuments({ status: 'draft', isDeleted: { $ne: true } }),
     User.find({ isDeleted: { $ne: true } })
       .sort('-createdAt')
       .limit(8)
-      .select('name email role createdAt isSuspended'),
+      .select('name email role createdAt isSuspended isEmailVerified'),
     Scholarship.find({ isDeleted: { $ne: true } })
       .sort('-createdAt')
       .limit(8)
-      .select('title status country createdAt'),
+      .select('title status country createdAt applicationCount isFeatured'),
+    Application.find()
+      .sort('-updatedAt')
+      .limit(8)
+      .populate('userId', 'name email')
+      .populate('scholarshipId', 'title country')
+      .select('status submittedAt createdAt updatedAt userId scholarshipId'),
+    Scholarship.find({ isDeleted: { $ne: true }, applicationCount: { $gt: 0 } })
+      .sort('-applicationCount')
+      .limit(5)
+      .select('title country applicationCount status'),
     Application.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
     Payment.aggregate([
       { $match: { status: 'active' } },
       { $group: { _id: '$plan', count: { $sum: 1 }, totalRevenue: { $sum: '$amount' } } },
     ]),
   ]);
+
+  const byStatus = applicationsByStatus.reduce((acc, item) => {
+    acc[item._id] = item.count;
+    return acc;
+  }, {});
 
   return {
     users: {
@@ -527,21 +567,28 @@ const getAnalytics = async () => {
       providers: totalProviders,
       admins: totalAdmins,
       suspended: suspendedUsers,
+      verifiedStudents,
+      last7Days: usersLast7Days,
+      last30Days: usersLast30Days,
     },
     scholarships: {
       total: totalScholarships,
       approved: approvedScholarships,
       pending: pendingScholarships,
       rejected: rejectedScholarships,
+      featured: featuredScholarships,
     },
     applications: {
       total: totalApplications,
-      byStatus: applicationsByStatus.reduce((acc, item) => {
-        acc[item._id] = item.count;
-        return acc;
-      }, {}),
+      last7Days: applicationsLast7Days,
+      last30Days: applicationsLast30Days,
+      byStatus,
     },
-    content: { total: totalContent, published: publishedContent },
+    content: {
+      total: totalContent,
+      published: publishedContent,
+      draft: draftContent,
+    },
     revenue: {
       totalPremium,
       byPlan: revenueData,
@@ -549,7 +596,10 @@ const getAnalytics = async () => {
     recent: {
       users: recentUsers,
       scholarships: recentScholarships,
+      applications: recentApplications,
     },
+    topScholarships,
+    generatedAt: now.toISOString(),
   };
 };
 
