@@ -302,10 +302,21 @@ const getAdminApplications = async (queryString) => {
 
   const filter = {};
   if (queryString.status) filter.status = queryString.status;
+  if (queryString.userId) filter.userId = queryString.userId;
+
+  if (queryString.search) {
+    const users = await User.find({
+      $or: [
+        { name: { $regex: queryString.search, $options: 'i' } },
+        { email: { $regex: queryString.search, $options: 'i' } },
+      ],
+    }).select('_id');
+    filter.userId = { $in: users.map((u) => u._id) };
+  }
 
   const [applications, total] = await Promise.all([
     Application.find(filter)
-      .populate('userId', 'name email profile.country')
+      .populate('userId', 'name email profile')
       .populate('scholarshipId', 'title slug country deadline')
       .sort('-updatedAt')
       .skip(skip)
@@ -317,6 +328,29 @@ const getAdminApplications = async (queryString) => {
     applications,
     pagination: { page, limit, total, pages: Math.ceil(total / limit) || 1 },
   };
+};
+
+const getAdminApplicationById = async (id) => {
+  const application = await Application.findById(id)
+    .populate('userId', 'name email profile role createdAt')
+    .populate('scholarshipId')
+    .populate('reviewedBy', 'name email');
+
+  if (!application) {
+    throw new NotFoundError('Application not found.');
+  }
+
+  // Other applications from the same student (previous records)
+  const studentId = application.userId?._id || application.userId;
+  const previousApplications = await Application.find({
+    userId: studentId,
+    _id: { $ne: application._id },
+  })
+    .populate('scholarshipId', 'title slug country')
+    .sort('-updatedAt')
+    .select('status submittedAt createdAt updatedAt scholarshipId');
+
+  return { application, previousApplications };
 };
 
 const getContents = async (queryString) => {
@@ -557,6 +591,7 @@ module.exports = {
   featureScholarship,
   getPendingScholarships,
   getAdminApplications,
+  getAdminApplicationById,
   getContents,
   getContentById,
   createContent,

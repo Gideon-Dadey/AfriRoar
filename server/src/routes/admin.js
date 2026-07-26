@@ -35,6 +35,7 @@ router.patch('/scholarships/:id/feature', adminController.featureScholarship);
 
 // Applications
 router.get('/applications', adminController.getApplications);
+router.get('/applications/:id', adminController.getApplication);
 
 // Content CMS (guides, internships, lists, jobs)
 router.get('/content', adminController.getContents);

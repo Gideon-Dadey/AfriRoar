@@ -92,18 +92,26 @@ const getApplications = async (userId, queryString) => {
   };
 };
 
-const getApplicationById = async (id, userId) => {
+const getApplicationById = async (id, userId, options = {}) => {
   const application = await Application.findById(id)
     .populate('scholarshipId')
-    .populate('userId', 'name email profile');
+    .populate('userId', 'name email profile role');
 
   if (!application) {
     throw new NotFoundError('Application not found.');
   }
 
-  // Ensure user owns the application or is the scholarship provider/admin
-  if (application.userId._id.toString() !== userId.toString()) {
-    const scholarship = await Scholarship.findById(application.scholarshipId);
+  if (options.role === 'admin') {
+    return application;
+  }
+
+  // Ensure user owns the application or is the scholarship provider
+  const ownerId = application.userId?._id?.toString?.() || application.userId?.toString?.();
+  if (ownerId !== userId.toString()) {
+    const scholarship =
+      application.scholarshipId?.providerId != null
+        ? application.scholarshipId
+        : await Scholarship.findById(application.scholarshipId);
     if (!scholarship || scholarship.providerId.toString() !== userId.toString()) {
       throw new ForbiddenError('You do not have access to this application.');
     }
@@ -155,6 +163,40 @@ const submitApplication = async (id, userId, req) => {
     throw new BadRequestError('Application has already been submitted.');
   }
 
+  // Freeze a profile snapshot on the application so admin can always see what was submitted.
+  const user = await User.findById(userId);
+  const profile = user?.profile || {};
+  const personalStep = application.steps?.find((s) => s.stepNumber === 1);
+  if (personalStep) {
+    const existing = personalStep.data || {};
+    personalStep.data = {
+      fullName: existing.fullName || user?.name || '',
+      phone: existing.phone || profile.phone || '',
+      country: existing.country || profile.country || '',
+      dateOfBirth: existing.dateOfBirth || profile.dateOfBirth || '',
+      address: existing.address || '',
+      nationality: existing.nationality || profile.country || '',
+    };
+    personalStep.completed = true;
+    personalStep.completedAt = personalStep.completedAt || new Date();
+  }
+  const academicStep = application.steps?.find((s) => s.stepNumber === 2);
+  if (academicStep) {
+    const existing = academicStep.data || {};
+    academicStep.data = {
+      educationLevel: existing.educationLevel || profile.educationLevel || '',
+      institution: existing.institution || profile.institution || '',
+      fieldOfStudy: existing.fieldOfStudy || profile.fieldOfStudy || '',
+      gpa: existing.gpa || profile.gpa || '',
+      graduationYear: existing.graduationYear || '',
+      languages:
+        existing.languages ||
+        (Array.isArray(profile.languages) ? profile.languages.join(', ') : profile.languages || ''),
+    };
+    academicStep.completed = true;
+    academicStep.completedAt = academicStep.completedAt || new Date();
+  }
+
   application.status = 'submitted';
   application.submittedAt = new Date();
   await application.save();
@@ -165,7 +207,6 @@ const submitApplication = async (id, userId, req) => {
   });
 
   // Send email notification
-  const user = await User.findById(userId);
   const emailTemplate = templates.applicationSubmitted(user.name, application.scholarshipId.title);
   sendEmail({ to: user.email, ...emailTemplate });
 

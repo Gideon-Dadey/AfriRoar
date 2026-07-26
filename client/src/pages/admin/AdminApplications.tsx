@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { formatDate } from '@/lib/utils';
@@ -13,6 +14,8 @@ import {
   PageHeader,
   PaginationControls,
   StatusBadge,
+  btnGhost,
+  inputClass,
   selectClass,
   tdClass,
   thClass,
@@ -45,20 +48,29 @@ function scholarshipLabel(app: Application) {
 export default function AdminApplications() {
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState('');
+  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
 
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['admin', 'applications', page, status],
+    queryKey: ['admin', 'applications', page, status, search],
     queryFn: async () => {
       const { data: res } = await api.get<ApiResponse<ApplicationsPayload>>('/admin/applications', {
         params: {
           page,
           limit: 20,
           status: status || undefined,
+          search: search || undefined,
         },
       });
       return res.data!;
     },
   });
+
+  const applySearch = (e: FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    setSearch(searchInput.trim());
+  };
 
   return (
     <>
@@ -68,10 +80,22 @@ export default function AdminApplications() {
 
       <PageHeader
         title="Applications"
-        description="Monitor student applications across the platform."
+        description="Monitor student applications and open full submission records."
       />
 
       <FilterBar>
+        <form onSubmit={applySearch} className="flex min-w-0 flex-1 gap-2">
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search student name or email"
+            className={`${inputClass} max-w-sm`}
+          />
+          <button type="submit" className={btnGhost}>
+            Search
+          </button>
+        </form>
         <select
           value={status}
           onChange={(e) => {
@@ -109,6 +133,7 @@ export default function AdminApplications() {
                   <th className={thClass()}>Status</th>
                   <th className={thClass()}>Submitted</th>
                   <th className={thClass()}>Updated</th>
+                  <th className={thClass()}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -132,6 +157,14 @@ export default function AdminApplications() {
                         {app.submittedAt ? formatDate(app.submittedAt) : '-'}
                       </td>
                       <td className={tdClass()}>{formatDate(app.updatedAt)}</td>
+                      <td className={tdClass()}>
+                        <Link
+                          to={`/dashboard/admin/applications/${app._id}`}
+                          className="text-[13px] font-semibold text-[var(--color-sr-link)] hover:underline"
+                        >
+                          View application
+                        </Link>
+                      </td>
                     </tr>
                   );
                 })}

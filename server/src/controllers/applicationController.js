@@ -19,7 +19,9 @@ const getAll = catchAsync(async (req, res) => {
 });
 
 const getById = catchAsync(async (req, res) => {
-  const application = await applicationService.getApplicationById(req.params.id, req.user._id);
+  const application = await applicationService.getApplicationById(req.params.id, req.user._id, {
+    role: req.user.role,
+  });
   res.status(200).json({
     status: 'success',
     data: { application },

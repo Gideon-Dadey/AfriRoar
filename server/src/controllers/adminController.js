@@ -100,6 +100,11 @@ const getApplications = catchAsync(async (req, res) => {
   res.status(200).json({ status: 'success', data: result });
 });
 
+const getApplication = catchAsync(async (req, res) => {
+  const result = await adminService.getAdminApplicationById(req.params.id);
+  res.status(200).json({ status: 'success', data: result });
+});
+
 const getContents = catchAsync(async (req, res) => {
   const result = await adminService.getContents(req.query);
   res.status(200).json({ status: 'success', data: result });
@@ -202,6 +207,7 @@ module.exports = {
   featureScholarship,
   getPendingScholarships,
   getApplications,
+  getApplication,
   getContents,
   getContent,
   createContent,

@@ -36,6 +36,7 @@ import AdminUsers from '@/pages/admin/AdminUsers';
 import AdminScholarships from '@/pages/admin/AdminScholarships';
 import AdminScholarshipForm from '@/pages/admin/AdminScholarshipForm';
 import AdminApplications from '@/pages/admin/AdminApplications';
+import AdminApplicationDetail from '@/pages/admin/AdminApplicationDetail';
 import AdminContent from '@/pages/admin/AdminContent';
 import AdminContentForm from '@/pages/admin/AdminContentForm';
 import AdminActivity from '@/pages/admin/AdminActivity';
@@ -110,6 +111,10 @@ function App() {
                   element={<AdminScholarshipForm />}
                 />
                 <Route path="/dashboard/admin/applications" element={<AdminApplications />} />
+                <Route
+                  path="/dashboard/admin/applications/:id"
+                  element={<AdminApplicationDetail />}
+                />
                 <Route path="/dashboard/admin/content" element={<AdminContent />} />
                 <Route path="/dashboard/admin/content/new" element={<AdminContentForm />} />
                 <Route path="/dashboard/admin/content/:id/edit" element={<AdminContentForm />} />
