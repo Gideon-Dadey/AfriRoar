@@ -84,8 +84,8 @@ export default function AdminContent() {
 
   const handleDelete = async (item: ContentItem) => {
     const ok = await confirm({
-      title: 'Confirm Deletion',
-      description: `Are you sure you want to permanently remove “${item.title}”? This page will be taken off the site.`,
+      title: `Delete “${item.title}”?`,
+      description: 'This cannot be undone. The page will be removed from the site.',
       confirmLabel: 'Delete content',
       variant: 'danger',
     });

@@ -82,8 +82,8 @@ export default function AdminJobs() {
 
   const handleDelete = async (job: Job) => {
     const ok = await confirm({
-      title: 'Confirm Deletion',
-      description: `Are you sure you want to permanently remove “${job.title}”? Related applications may break.`,
+      title: `Delete “${job.title}”?`,
+      description: 'This cannot be undone. Related applications may break.',
       confirmLabel: 'Delete job',
       variant: 'danger',
     });

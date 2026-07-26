@@ -51,7 +51,7 @@ export function ConfirmModal({
   title,
   description,
   confirmLabel = 'Confirm',
-  cancelLabel = 'Nevermind',
+  cancelLabel = 'Cancel',
   variant = 'danger',
   input,
   inputValue,
@@ -121,13 +121,13 @@ export function ConfirmModal({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
-        className={`relative flex w-full max-w-[22rem] flex-col rounded-2xl bg-white p-7 shadow-[0_24px_64px_rgba(15,23,42,0.22)] sm:p-8 ${
+        className={`relative flex w-full max-w-[22rem] flex-col bg-white p-7 shadow-[0_24px_64px_rgba(15,23,42,0.22)] sm:p-8 ${
           input ? '' : 'aspect-square justify-center'
         }`}
       >
         <div className="flex flex-1 flex-col items-center text-center">
           <div
-            className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl ${styles.iconWrap}`}
+            className={`mb-5 flex h-12 w-12 items-center justify-center ${styles.iconWrap}`}
             aria-hidden
           >
             <Icon className="h-6 w-6" strokeWidth={2} />
@@ -165,7 +165,7 @@ export function ConfirmModal({
                 onChange={(e) => onInputChange?.(e.target.value)}
                 placeholder={input.placeholder}
                 disabled={busy}
-                className="w-full rounded-xl border border-[var(--color-sr-border)] px-3 py-2.5 text-[15px] text-[var(--color-sr-text)] outline-none focus:border-[var(--color-sr-navy)] disabled:opacity-60"
+                className="w-full border border-[var(--color-sr-border)] px-3 py-2.5 text-[15px] text-[var(--color-sr-text)] outline-none focus:border-[var(--color-sr-navy)] disabled:opacity-60"
               />
               {inputError ? (
                 <p className="mt-1.5 text-[12px] font-medium text-red-700">{inputError}</p>
@@ -179,7 +179,7 @@ export function ConfirmModal({
               type="button"
               disabled={busy}
               onClick={onConfirm}
-              className={`inline-flex h-11 w-full items-center justify-center rounded-xl px-4 text-[14px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 disabled:opacity-50 ${styles.confirm} ${styles.ring}`}
+              className={`inline-flex h-11 w-full items-center justify-center px-4 text-[14px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 disabled:opacity-50 ${styles.confirm} ${styles.ring}`}
             >
               {busy ? 'Working…' : confirmLabel}
             </button>
@@ -187,7 +187,7 @@ export function ConfirmModal({
               type="button"
               disabled={busy}
               onClick={onCancel}
-              className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-slate-100 px-4 text-[14px] font-semibold text-slate-700 transition hover:bg-slate-200 disabled:opacity-50"
+              className="inline-flex h-11 w-full items-center justify-center bg-slate-100 px-4 text-[14px] font-semibold text-slate-700 transition hover:bg-slate-200 disabled:opacity-50"
             >
               {cancelLabel}
             </button>
