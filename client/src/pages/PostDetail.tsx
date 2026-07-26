@@ -1,18 +1,23 @@
 import { Link, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
   ArrowRight,
+  Bookmark,
+  BookmarkCheck,
   BookOpen,
   Calendar,
   CheckCircle2,
   Clock3,
+  ExternalLink,
   Globe2,
   GraduationCap,
   Loader2,
+  ShieldCheck,
   Wallet,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { formatDate, formatDeadline, getFundingTypeLabel, getLevelLabel } from '@/lib/utils';
 import { getGuideArticle } from '@/data/guideArticles';
@@ -70,7 +75,8 @@ export default function PostDetail() {
   // Scholarships are API-only; keep static posts for guides/lists/internships.
   const staticPost = staticRaw?.category === 'scholarship' ? undefined : staticRaw;
   const article = getGuideArticle(slug);
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user, updateUser } = useAuthStore();
+  const queryClient = useQueryClient();
 
   const { data: cmsItem, isLoading: loadingCms } = useQuery({
     queryKey: ['content-by-slug', slug],
@@ -135,6 +141,25 @@ export default function PostDetail() {
     staleTime: 60_000,
   });
 
+  const toggleSave = useMutation({
+    mutationFn: async (scholarshipId: string) => {
+      const { data } = await api.post(`/auth/save-scholarship/${scholarshipId}`);
+      return data.data as { saved: boolean; savedScholarships: string[] };
+    },
+    onSuccess: (result) => {
+      updateUser({ savedScholarships: result.savedScholarships });
+      queryClient.invalidateQueries({ queryKey: ['me', 'saved'] });
+      toast.success(result.saved ? 'Saved to your shortlist' : 'Removed from saved');
+    },
+    onError: () => {
+      if (!isAuthenticated) {
+        toast.error('Sign in to save scholarships');
+        return;
+      }
+      toast.error('Could not update saved list');
+    },
+  });
+
   if (!post && (loadingScholarship || loadingCms)) {
     return (
       <div className="sr-container flex items-center justify-center gap-2 py-20 text-[14px] text-[var(--color-sr-muted)]">
@@ -179,6 +204,11 @@ export default function PostDetail() {
     : isAuthenticated
       ? '/dashboard/applications/new'
       : '/login?redirect=/dashboard/applications/new';
+
+  const savedIds = (user?.savedScholarships || []).map((id) =>
+    typeof id === 'string' ? id : String((id as { _id?: string })?._id || id)
+  );
+  const isSaved = Boolean(scholarship?._id && savedIds.includes(String(scholarship._id)));
 
   const overviewParagraphs = splitParagraphs(scholarship?.description);
   const eligibilityParagraphs = splitParagraphs(scholarship?.eligibility);
@@ -414,11 +444,35 @@ export default function PostDetail() {
   }
 
   // ── Scholarship layout ───────────────────────────────────────────────────
+  const verifiedAt = scholarship?.approvedAt || scholarship?.updatedAt;
+  const jsonLd = scholarship
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Scholarship',
+        name: scholarship.title,
+        description: scholarship.shortDescription || scholarship.description?.slice(0, 300),
+        url: typeof window !== 'undefined' ? window.location.href : undefined,
+        provider: {
+          '@type': 'Organization',
+          name: 'AfriRoar',
+        },
+        educationalLevel: getLevelLabel(scholarship.level),
+        applicationDeadline: scholarship.deadline,
+      }
+    : null;
+
   return (
     <>
       <Helmet>
         <title>{title} | AfriRoar</title>
-        <meta name="description" content={excerpt} />
+        <meta name="description" content={excerpt || `${title} scholarship on AfriRoar`} />
+        <meta property="og:title" content={`${title} | AfriRoar`} />
+        <meta property="og:description" content={excerpt || title} />
+        <meta property="og:image" content={image} />
+        <meta property="og:type" content="article" />
+        {jsonLd ? (
+          <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        ) : null}
       </Helmet>
 
       <article>
@@ -431,9 +485,17 @@ export default function PostDetail() {
               <ArrowLeft className="h-4 w-4" />
               Back
             </Link>
-            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[var(--color-sr-yellow)]">
-              {post?.category || 'scholarship'}
-            </p>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-sr-yellow)]">
+                {post?.category || 'scholarship'}
+              </p>
+              {scholarship?.status === 'approved' || scholarship ? (
+                <span className="inline-flex items-center gap-1 border border-white/25 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white/90">
+                  <ShieldCheck className="h-3 w-3 text-[var(--color-sr-yellow)]" />
+                  Verified listing
+                </span>
+              ) : null}
+            </div>
             <h1 className="max-w-4xl text-2xl font-bold leading-tight md:text-4xl">{title}</h1>
             <div className="mt-4 flex flex-wrap gap-4 text-sm text-white/85">
               {post?.date ? (
@@ -463,6 +525,12 @@ export default function PostDetail() {
                 <span className="inline-flex items-center gap-1.5">
                   <Wallet className="h-4 w-4" />
                   {getFundingTypeLabel(scholarship.fundingType)}
+                </span>
+              ) : null}
+              {verifiedAt ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock3 className="h-4 w-4" />
+                  Last verified {formatDate(verifiedAt)}
                 </span>
               ) : null}
             </div>
@@ -577,6 +645,38 @@ export default function PostDetail() {
                     {scholarship?._id ? 'Apply on AfriRoar' : 'Start application'}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
+                  {scholarship?._id ? (
+                    <button
+                      type="button"
+                      disabled={toggleSave.isPending}
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          toast.error('Sign in to save scholarships');
+                          return;
+                        }
+                        toggleSave.mutate(scholarship._id);
+                      }}
+                      className="inline-flex items-center gap-2 border border-[var(--color-sr-border)] px-5 py-2.5 text-[14px] font-semibold text-[var(--color-sr-navy)] transition hover:border-[var(--color-sr-navy)]"
+                    >
+                      {isSaved ? (
+                        <BookmarkCheck className="h-4 w-4" />
+                      ) : (
+                        <Bookmark className="h-4 w-4" />
+                      )}
+                      {isSaved ? 'Saved' : 'Save'}
+                    </button>
+                  ) : null}
+                  {scholarship?.applicationUrl ? (
+                    <a
+                      href={scholarship.applicationUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-[14px] font-semibold text-[var(--color-sr-link)] hover:underline"
+                    >
+                      Official programme site
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  ) : null}
                 </div>
               ) : null}
             </div>
@@ -599,6 +699,21 @@ export default function PostDetail() {
                   {scholarship?._id ? 'Continue to application' : 'Choose a scholarship'}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
+                {scholarship?.applicationUrl ? (
+                  <a
+                    href={scholarship.applicationUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex w-full items-center justify-center gap-2 border border-[var(--color-sr-border)] px-4 py-2.5 text-[14px] font-semibold text-[var(--color-sr-navy)] hover:border-[var(--color-sr-navy)]"
+                  >
+                    Official source
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                ) : null}
+                <p className="mt-3 text-[12px] leading-relaxed text-[var(--color-sr-muted)]">
+                  Always confirm eligibility and deadlines on the official programme page before you
+                  submit.
+                </p>
               </div>
             ) : null}
 

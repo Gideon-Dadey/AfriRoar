@@ -325,7 +325,7 @@ export default function Dashboard() {
                 hint="In recent list"
                 to="/dashboard/applications?status=accepted"
               />
-              <Metric label="Saved" value={savedCount} hint="From your account" to="/scholarships" />
+              <Metric label="Saved" value={savedCount} hint="Your shortlist" to="/dashboard/saved" />
             </section>
           ) : null}
 
@@ -481,26 +481,19 @@ export default function Dashboard() {
               </h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {user.role === 'provider' ? (
-                  <>
+                  <div className="border border-[var(--color-sr-border)] bg-white p-4 sm:col-span-2 sm:p-5 lg:col-span-3">
+                    <p className="font-bold text-[var(--color-sr-navy-deeper)]">Provider workspace</p>
+                    <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">
+                      Programme listing tools for providers are rolling out next. For now, email support
+                      to publish or update a scholarship.
+                    </p>
                     <Link
-                      to="/dashboard/provider/listings"
-                      className="border border-[var(--color-sr-border)] bg-white p-4 transition hover:border-[var(--color-sr-navy)] sm:p-5"
+                      to="/contact"
+                      className="mt-3 inline-flex text-[14px] font-semibold text-[var(--color-sr-link)] hover:underline"
                     >
-                      <p className="font-bold text-[var(--color-sr-navy-deeper)]">My listings</p>
-                      <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">
-                        Create and update scholarship posts.
-                      </p>
+                      Contact AfriRoar
                     </Link>
-                    <Link
-                      to="/dashboard/provider/applicants"
-                      className="border border-[var(--color-sr-border)] bg-white p-4 transition hover:border-[var(--color-sr-navy)] sm:p-5"
-                    >
-                      <p className="font-bold text-[var(--color-sr-navy-deeper)]">Applicants</p>
-                      <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">
-                        Review submissions for your programmes.
-                      </p>
-                    </Link>
-                  </>
+                  </div>
                 ) : null}
                 {user.role === 'admin' ? (
                   <>

@@ -39,12 +39,13 @@ export const popularCountries = [
 
 export const lookingFor = [
   { label: 'Undergraduate Scholarships', to: '/scholarships?level=undergraduate' },
-  { label: 'Masters Scholarships', to: '/scholarships?level=masters' },
-  { label: 'PhD Scholarships', to: '/scholarships?level=phd' },
-  { label: 'Postdoctoral Scholarships', to: '/scholarships?level=postdoctoral' },
+  { label: "Master's Scholarships", to: '/scholarships?level=masters' },
+  { label: 'PhD & Doctoral Scholarships', to: '/scholarships?level=phd' },
+  { label: 'Postdoctoral Fellowships', to: '/scholarships?level=postdoctoral' },
   { label: 'Training Scholarships', to: '/scholarships?level=training' },
+  { label: 'Closing soon', to: '/scholarships?deadline=soon' },
   { label: 'Scholarships by Countries', to: '/countries' },
-  { label: 'Scholarships Lists', to: '/lists' },
+  { label: 'Scholarship Lists', to: '/lists' },
   { label: 'Internships', to: '/internships' },
   { label: 'Scholarship Guides', to: '/guides' },
 ];

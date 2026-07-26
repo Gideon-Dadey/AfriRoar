@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { formatDate, getLevelLabel } from '@/lib/utils';
 import type { ApiResponse, Application, Scholarship, User } from '@/types';
@@ -12,6 +14,7 @@ import {
   PageHeader,
   StatusBadge,
   btnGhost,
+  btnPrimary,
   tdClass,
   thClass,
   AdminTable,
@@ -73,6 +76,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 export default function AdminApplicationDetail() {
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
+  const [feedback, setFeedback] = useState('');
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['admin', 'applications', id],
@@ -81,6 +86,23 @@ export default function AdminApplicationDetail() {
       const { data: res } = await api.get<ApiResponse<DetailPayload>>(`/admin/applications/${id}`);
       return res.data!;
     },
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: async (status: Application['status']) => {
+      const { data: res } = await api.patch(`/applications/${id}/status`, {
+        status,
+        feedback: feedback.trim() || undefined,
+      });
+      return res.data.application as Application;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'applications', id] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'applications'] });
+      toast.success('Application status updated');
+      setFeedback('');
+    },
+    onError: () => toast.error('Could not update status'),
   });
 
   const application = data?.application;
@@ -157,11 +179,51 @@ export default function AdminApplicationDetail() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={application.status} />
-                <span className="text-[12px] text-[var(--color-sr-muted)]">
-                  Submitted {application.submittedAt ? formatDate(application.submittedAt) : '—'}
-                </span>
+                {scholarship?._id ? (
+                  <Link
+                    to={`/scholarships/${scholarship.slug}`}
+                    className="text-[13px] font-semibold text-[var(--color-sr-link)] hover:underline"
+                  >
+                    View listing
+                  </Link>
+                ) : null}
               </div>
             </div>
+
+            {['submitted', 'under_review', 'accepted', 'rejected'].includes(application.status) ||
+            application.status === 'draft' ? (
+              <div className="mt-4 border-t border-[var(--color-sr-border)] pt-4">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--color-sr-muted)]">
+                  Update status
+                </p>
+                <textarea
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Optional feedback to the student…"
+                  rows={2}
+                  className="mt-2 w-full border border-[var(--color-sr-border)] px-3 py-2 text-[16px] outline-none focus:border-[var(--color-sr-navy)]"
+                />
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {(
+                    [
+                      ['under_review', 'Mark under review'],
+                      ['accepted', 'Accept'],
+                      ['rejected', 'Reject'],
+                    ] as const
+                  ).map(([status, label]) => (
+                    <button
+                      key={status}
+                      type="button"
+                      disabled={statusMutation.isPending || application.status === status}
+                      onClick={() => statusMutation.mutate(status)}
+                      className={status === 'accepted' ? btnPrimary : btnGhost}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </section>
 
           <div className="grid gap-4 lg:grid-cols-2">

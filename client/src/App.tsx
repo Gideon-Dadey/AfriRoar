@@ -31,6 +31,8 @@ import Applications from '@/pages/Applications';
 import VerifyEmail from '@/pages/VerifyEmail';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ApplicationWizard from '@/pages/ApplicationWizard';
+import SavedScholarships from '@/pages/SavedScholarships';
+import Notifications from '@/pages/Notifications';
 import AdminOverview from '@/pages/admin/AdminOverview';
 import AdminAnalytics from '@/pages/admin/AdminAnalytics';
 import AdminUsers from '@/pages/admin/AdminUsers';
@@ -100,6 +102,8 @@ function App() {
                 <Route path="/dashboard/applications" element={<Applications />} />
                 <Route path="/dashboard/applications/new" element={<ApplicationWizard />} />
                 <Route path="/dashboard/applications/:id" element={<ApplicationWizard />} />
+                <Route path="/dashboard/saved" element={<SavedScholarships />} />
+                <Route path="/dashboard/notifications" element={<Notifications />} />
               </Route>
 
               <Route element={<ProtectedRoute roles={['admin']} />}>

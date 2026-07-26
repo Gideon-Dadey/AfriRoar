@@ -58,6 +58,7 @@ export interface Scholarship {
   saveCount: number;
   coverImage?: string;
   matchScore?: number;
+  approvedAt?: string;
   createdAt: string;
   updatedAt: string;
 }

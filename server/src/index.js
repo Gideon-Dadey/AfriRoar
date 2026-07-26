@@ -157,6 +157,10 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/content', contentRoutes);
 
+const { robotsTxt, sitemapXml } = require('./controllers/seoController');
+app.get('/robots.txt', robotsTxt);
+app.get('/sitemap.xml', sitemapXml);
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.status(200).json({
@@ -224,6 +228,9 @@ const start = async () => {
     await bootstrapDemoData();
     const { migrateBinAvatars } = require('./utils/migrateBinAvatars');
     await migrateBinAvatars();
+
+    const { startDeadlineReminderJob } = require('./jobs/deadlineReminders');
+    startDeadlineReminderJob();
 
     app.listen(config.port, () => {
       logger.info(`🚀 AfriRoar API running on port ${config.port} in ${config.env} mode`);

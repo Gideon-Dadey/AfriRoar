@@ -7,8 +7,22 @@ class APIFeatures {
 
   filter() {
     const queryObj = { ...this.queryString };
-    const excludedFields = ['page', 'sort', 'limit', 'fields', 'search', 'keyword'];
+    const excludedFields = [
+      'page',
+      'sort',
+      'limit',
+      'fields',
+      'search',
+      'keyword',
+      'closing',
+      'open',
+    ];
     excludedFields.forEach((field) => delete queryObj[field]);
+
+    // Ignore raw string deadline aliases that were not normalized
+    if (typeof queryObj.deadline === 'string') {
+      delete queryObj.deadline;
+    }
 
     // Handle advanced filtering (gte, gt, lte, lt)
     let queryStr = JSON.stringify(queryObj);

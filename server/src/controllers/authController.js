@@ -149,7 +149,8 @@ const saveScholarship = catchAsync(async (req, res) => {
   const { scholarshipId } = req.params;
   const user = await User.findById(req.user._id);
 
-  const index = user.savedScholarships.indexOf(scholarshipId);
+  const ids = (user.savedScholarships || []).map((id) => String(id));
+  const index = ids.indexOf(String(scholarshipId));
   if (index > -1) {
     user.savedScholarships.splice(index, 1);
   } else {

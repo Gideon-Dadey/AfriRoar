@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  faBookmark,
+  faBell,
   faFileLines,
   faGaugeHigh,
   faMagnifyingGlass,
@@ -14,6 +16,7 @@ import { Menu, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
+import NotificationBell from '@/components/NotificationBell';
 
 const baseLinks: {
   to: string;
@@ -23,6 +26,8 @@ const baseLinks: {
 }[] = [
   { to: '/dashboard', label: 'Overview', icon: faGaugeHigh, end: true },
   { to: '/dashboard/applications', label: 'Applications', icon: faFileLines, end: false },
+  { to: '/dashboard/saved', label: 'Saved', icon: faBookmark, end: false },
+  { to: '/dashboard/notifications', label: 'Alerts', icon: faBell, end: false },
   { to: '/dashboard/profile', label: 'Profile', icon: faUser, end: false },
 ];
 
@@ -98,6 +103,7 @@ export default function AppShell() {
         </div>
 
         <div className="hidden items-center gap-2 md:flex">
+          <NotificationBell />
           <Link
             to="/scholarships"
             className="inline-flex items-center gap-1.5 px-3 py-2 text-[13px] font-semibold text-white/80 transition hover:text-[var(--color-sr-yellow)]"
@@ -119,14 +125,17 @@ export default function AppShell() {
           </button>
         </div>
 
-        <button
-          type="button"
-          className="inline-flex shrink-0 p-2 md:hidden"
-          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-          onClick={() => setMenuOpen((v) => !v)}
-        >
-          {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex items-center gap-1 md:hidden">
+          <NotificationBell />
+          <button
+            type="button"
+            className="inline-flex shrink-0 p-2"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
       {menuOpen ? (

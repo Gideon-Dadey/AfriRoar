@@ -2,6 +2,7 @@ const Scholarship = require('../models/Scholarship');
 const APIFeatures = require('../utils/apiFeatures');
 const { NotFoundError, ForbiddenError } = require('../utils/errors');
 const { createAuditLog } = require('../utils/auditLog');
+const { normalizeScholarshipQuery } = require('../utils/scholarshipQuery');
 
 const createScholarship = async (data, userId, req) => {
   const scholarship = await Scholarship.create({
@@ -22,6 +23,8 @@ const createScholarship = async (data, userId, req) => {
 };
 
 const getScholarships = async (queryString, user = null) => {
+  const normalized = normalizeScholarshipQuery(queryString);
+
   // Base filter: only approved scholarships for non-admin users
   const baseFilter = {};
   if (!user || user.role !== 'admin') {
@@ -33,7 +36,18 @@ const getScholarships = async (queryString, user = null) => {
     baseFilter.isEarlyAccess = { $ne: true };
   }
 
-  const features = new APIFeatures(Scholarship.find(baseFilter), queryString)
+  // Strip custom keys that are not schema fields (already converted to gte/lte)
+  const featuresQuery = { ...normalized };
+  delete featuresQuery.closing;
+  delete featuresQuery.open;
+
+  // Country: case-insensitive contains (UK matches United Kingdom)
+  if (featuresQuery.country) {
+    baseFilter.country = { $regex: String(featuresQuery.country).trim(), $options: 'i' };
+    delete featuresQuery.country;
+  }
+
+  const features = new APIFeatures(Scholarship.find(baseFilter), featuresQuery)
     .filter()
     .search(['title', 'description', 'field', 'country', 'tags'])
     .sort()

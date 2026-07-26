@@ -6,7 +6,7 @@ const { protect } = require('../middlewares/auth');
 router.use(protect);
 
 router.get('/', adminController.getNotifications);
-router.patch('/:id/read', adminController.markNotificationRead);
 router.patch('/read-all', adminController.markAllRead);
+router.patch('/:id/read', adminController.markNotificationRead);
 
 module.exports = router;

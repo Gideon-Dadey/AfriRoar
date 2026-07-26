@@ -241,6 +241,14 @@ const contactSchema = z.object({
   }),
 });
 
+const newsletterSchema = z.object({
+  body: z.object({
+    email: z.string().trim().email('Invalid email address').max(254),
+    source: z.string().trim().max(40).optional(),
+    company: z.string().max(200).optional().or(z.literal('')), // honeypot
+  }),
+});
+
 module.exports = {
   validate,
   registerSchema,
@@ -255,6 +263,7 @@ module.exports = {
   createApplicationSchema,
   updateProfileSchema,
   contactSchema,
+  newsletterSchema,
   adminScholarshipSchema,
   contentSchema,
   updateContentSchema,

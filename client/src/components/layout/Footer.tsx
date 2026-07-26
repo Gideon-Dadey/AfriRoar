@@ -1,4 +1,7 @@
+import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import api from '@/lib/api';
 
 const categories = [
   { label: 'Undergraduate Scholarships', to: '/scholarships?level=undergraduate' },
@@ -30,6 +33,29 @@ const legal = [
 ];
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [honeypot, setHoneypot] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const subscribe = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setSubmitting(true);
+    try {
+      await api.post('/contact/newsletter', {
+        email: email.trim(),
+        source: 'footer',
+        company: honeypot,
+      });
+      toast.success('Subscribed — watch your inbox for new listings.');
+      setEmail('');
+    } catch {
+      toast.error('Could not subscribe. Try again shortly.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <footer className="mt-10 border-t border-[var(--color-sr-border)] bg-[var(--color-sr-bg)]">
       <div className="sr-container grid grid-cols-1 gap-10 py-10 md:grid-cols-3">
@@ -40,6 +66,39 @@ export default function Footer() {
             international scholarships, internships, and career opportunities.
           </p>
           <img src="/sr/logo.png" alt="AfriRoar" className="h-8 w-auto object-contain" />
+
+          <form onSubmit={subscribe} className="mt-6">
+            <p className="sr-footer-label mb-2 text-[var(--color-sr-muted)]">NEWSLETTER</p>
+            <p className="mb-3 text-[14px] text-[var(--color-sr-muted)]">
+              New scholarships and closing deadlines — one email when we publish.
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@email.com"
+                className="min-w-0 flex-1 border border-[var(--color-sr-border)] bg-white px-3 py-2.5 text-[16px] outline-none focus:border-[var(--color-sr-navy)]"
+              />
+              <input
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                className="absolute -left-[9999px] h-0 w-0 opacity-0"
+                aria-hidden
+              />
+              <button
+                type="submit"
+                disabled={submitting}
+                className="bg-[var(--color-sr-navy)] px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-[var(--color-sr-navy-dark)] disabled:opacity-60"
+              >
+                {submitting ? '…' : 'Subscribe'}
+              </button>
+            </div>
+          </form>
         </div>
 
         <div>
