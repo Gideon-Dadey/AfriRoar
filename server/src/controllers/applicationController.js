@@ -109,6 +109,7 @@ const uploadDocuments = catchAsync(async (req, res) => {
     const result = await uploadToCloudinary(file.buffer, {
       folder: `afriror/applications/${req.params.id}`,
       filename: file.originalname,
+      mimetype: file.mimetype,
       resource_type: 'raw',
     });
     return {

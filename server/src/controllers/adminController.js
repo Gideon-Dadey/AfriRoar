@@ -54,6 +54,7 @@ const uploadScholarshipCover = catchAsync(async (req, res) => {
   const result = await uploadToCloudinary(req.file.buffer, {
     folder: 'afriror/scholarships',
     filename: req.file.originalname,
+    mimetype: req.file.mimetype,
     transformation: [{ width: 1280, height: 720, crop: 'fill' }],
   });
   const scholarship = await adminService.setScholarshipCover(
@@ -135,6 +136,7 @@ const uploadContentCover = catchAsync(async (req, res) => {
   const result = await uploadToCloudinary(req.file.buffer, {
     folder: 'afriror/content',
     filename: req.file.originalname,
+    mimetype: req.file.mimetype,
     transformation: [{ width: 1280, height: 720, crop: 'fill' }],
   });
   const item = await adminService.setContentCover(

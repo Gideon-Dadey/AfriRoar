@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const cloudinary = require('cloudinary').v2;
 const config = require('../config');
 const logger = require('./logger');
+const { resolveUploadExt } = require('./fileTypes');
 
 const hasCloudinary =
   Boolean(config.cloudinary.cloudName) &&
@@ -31,9 +32,20 @@ const uploadLocally = async (buffer, options = {}) => {
   const destDir = path.join(uploadsRoot, folder);
   ensureDir(destDir);
 
-  const ext = options.filename?.includes('.')
-    ? path.extname(options.filename)
-    : '.bin';
+  const ext = resolveUploadExt({
+    filename: options.filename,
+    mimetype: options.mimetype,
+    buffer,
+  });
+
+  if (ext === '.heic') {
+    const err = new Error(
+      'HEIC photos from iPhone are not supported. Please choose a JPG or PNG, or set Camera to Most Compatible.'
+    );
+    err.statusCode = 400;
+    throw err;
+  }
+
   const publicId = `${folder}/${crypto.randomBytes(12).toString('hex')}`;
   const filename = `${path.basename(publicId)}${ext}`;
   const fullPath = path.join(destDir, filename);
@@ -45,6 +57,7 @@ const uploadLocally = async (buffer, options = {}) => {
     secure_url: relativeUrl,
     public_id: publicId,
     bytes: buffer.length,
+    format: ext.replace(/^\./, ''),
   };
 };
 
@@ -60,6 +73,9 @@ const uploadToCloudinary = (buffer, options = {}) => {
       folder: options.folder || 'afriror',
       ...options,
     };
+    // Cloudinary stream API does not use local mimetype/filename the same way
+    delete uploadOptions.mimetype;
+    delete uploadOptions.filename;
 
     const uploadStream = cloudinary.uploader.upload_stream(
       uploadOptions,

@@ -6,6 +6,7 @@ const ALLOWED_FILE_TYPES = {
   'application/msword': 'doc',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
   'image/jpeg': 'jpg',
+  'image/jpg': 'jpg',
   'image/png': 'png',
   'image/webp': 'webp',
 };

@@ -40,8 +40,14 @@ router.post('/avatar', upload.single('avatar'), catchAsync(async (req, res) => {
     return res.status(400).json({ status: 'fail', message: 'No file uploaded.' });
   }
 
+  if (!req.file.mimetype?.startsWith('image/')) {
+    return res.status(400).json({ status: 'fail', message: 'Please upload an image (JPG, PNG, or WEBP).' });
+  }
+
   const result = await uploadToCloudinary(req.file.buffer, {
     folder: 'afriror/avatars',
+    mimetype: req.file.mimetype,
+    filename: req.file.originalname,
     transformation: [{ width: 200, height: 200, crop: 'fill' }],
   });
 

@@ -111,6 +111,7 @@ export default function Profile() {
   const [baseline, setBaseline] = useState<ProfileForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [avatarBroken, setAvatarBroken] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -201,6 +202,10 @@ export default function Profile() {
     }
   };
 
+  useEffect(() => {
+    setAvatarBroken(false);
+  }, [user?.profile?.avatar]);
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -208,6 +213,10 @@ export default function Profile() {
 
     if (!file.type.startsWith('image/')) {
       toast.error('Please choose an image file.');
+      return;
+    }
+    if (file.type === 'image/heic' || file.type === 'image/heif') {
+      toast.error('HEIC photos are not supported. Use JPG or PNG (iPhone: Settings → Camera → Most Compatible).');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
@@ -222,6 +231,7 @@ export default function Profile() {
       const { data } = await api.post('/auth/avatar', body, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+      setAvatarBroken(false);
       updateUser({ profile: { ...user.profile, avatar: data.data.avatar } });
       toast.success('Photo updated.');
     } catch {
@@ -263,11 +273,13 @@ export default function Profile() {
               <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-start">
                 <div className="relative shrink-0">
                   <div className="flex h-[88px] w-[88px] items-center justify-center overflow-hidden bg-[var(--color-sr-navy)] text-white md:h-24 md:w-24">
-                    {user.profile?.avatar ? (
+                    {user.profile?.avatar && !avatarBroken ? (
                       <img
                         src={user.profile.avatar}
                         alt=""
                         className="h-full w-full object-cover"
+                        decoding="async"
+                        onError={() => setAvatarBroken(true)}
                       />
                     ) : (
                       <span className="text-2xl font-bold tracking-wide">{initials || '?'}</span>
@@ -285,7 +297,7 @@ export default function Profile() {
                   <input
                     ref={fileRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
                     className="hidden"
                     onChange={handleAvatarUpload}
                   />

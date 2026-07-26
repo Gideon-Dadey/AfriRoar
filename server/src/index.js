@@ -108,7 +108,38 @@ app.use(hpp());
 
 // Local uploads (MVP fallback when Cloudinary is not configured)
 const path = require('path');
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+const fs = require('fs');
+const { sniffExtFromBuffer, mimeFromExt } = require('./utils/fileTypes');
+
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, '../uploads'), {
+    setHeaders(res, filePath) {
+      const ext = path.extname(filePath).toLowerCase();
+      // Legacy avatar uploads were saved as .bin — sniff bytes so mobile Safari can render them
+      if (ext === '.bin') {
+        try {
+          const fd = fs.openSync(filePath, 'r');
+          const buf = Buffer.alloc(16);
+          fs.readSync(fd, buf, 0, 16, 0);
+          fs.closeSync(fd);
+          const sniffed = sniffExtFromBuffer(buf);
+          const mime = mimeFromExt(sniffed);
+          if (mime) {
+            res.setHeader('Content-Type', mime);
+          }
+        } catch {
+          /* keep default */
+        }
+      } else {
+        const mime = mimeFromExt(ext);
+        if (mime) res.setHeader('Content-Type', mime);
+      }
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+    },
+  })
+);
 
 // HTTP request logging
 app.use((req, res, next) => {
@@ -192,6 +223,8 @@ const start = async () => {
     await connectDB();
     const { bootstrapDemoData } = require('./utils/bootstrapDemoData');
     await bootstrapDemoData();
+    const { migrateBinAvatars } = require('./utils/migrateBinAvatars');
+    await migrateBinAvatars();
 
     app.listen(config.port, () => {
       logger.info(`🚀 AfriRoar API running on port ${config.port} in ${config.env} mode`);
