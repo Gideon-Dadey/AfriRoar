@@ -34,6 +34,8 @@ app.use(
       useDefaults: true,
       directives: {
         'img-src': ["'self'", 'data:', 'blob:', 'https:'],
+        'worker-src': ["'self'", 'blob:'],
+        'manifest-src': ["'self'"],
         'upgrade-insecure-requests': null,
       },
     },
