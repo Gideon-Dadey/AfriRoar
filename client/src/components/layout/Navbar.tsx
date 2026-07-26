@@ -142,16 +142,6 @@ export default function Navbar() {
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
-            <NavLink
-              to="/"
-              end
-              className={({ isActive }) =>
-                `sr-nav-link px-3 py-2 transition-colors hover:text-[var(--color-sr-yellow)] ${isActive ? 'text-[var(--color-sr-yellow)]' : ''}`
-              }
-            >
-              Home
-            </NavLink>
-
             {/* Scholarships nested flyout */}
             <div
               className="relative"
@@ -382,10 +372,6 @@ export default function Navbar() {
                 </button>
               </div>
               <nav className="sr-nav-link px-2 py-3">
-                <Link to="/" className="block px-3 py-3 hover:bg-white/10" onClick={closeAll}>
-                  Home
-                </Link>
-
                 <button
                   type="button"
                   className="flex w-full items-center justify-between px-3 py-3 hover:bg-white/10"
