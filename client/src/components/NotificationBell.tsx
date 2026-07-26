@@ -25,10 +25,10 @@ export default function NotificationBell() {
   return (
     <Link
       to="/dashboard/notifications"
-      className="relative inline-flex items-center justify-center p-2 text-white/85 transition hover:text-[var(--color-sr-yellow)]"
+      className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center text-white/85 transition hover:text-[var(--color-sr-yellow)]"
       aria-label={unread ? `${unread} unread notifications` : 'Notifications'}
     >
-      <Bell className="h-5 w-5" />
+      <Bell className="h-[18px] w-[18px]" />
       {unread > 0 ? (
         <span className="absolute right-1 top-1 inline-flex h-4 min-w-4 items-center justify-center bg-[var(--color-sr-yellow)] px-1 text-[10px] font-bold text-[var(--color-sr-navy-deeper)]">
           {unread > 9 ? '9+' : unread}

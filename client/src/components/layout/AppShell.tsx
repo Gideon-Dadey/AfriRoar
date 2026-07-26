@@ -33,14 +33,17 @@ const baseLinks: {
   { to: '/dashboard/profile', label: 'Profile', icon: faUser, end: false },
 ];
 
-function linkClass({ isActive }: { isActive: boolean }) {
+function navLinkClass({ isActive }: { isActive: boolean }) {
   return [
-    'inline-flex items-center gap-2 px-3 py-2 text-[14px] font-semibold transition-colors',
+    'inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 text-[13px] font-semibold leading-none transition-colors',
     isActive
       ? 'text-[var(--color-sr-yellow)]'
       : 'text-white/85 hover:text-[var(--color-sr-yellow)]',
   ].join(' ');
 }
+
+const utilityLinkClass =
+  'inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 text-[13px] font-semibold leading-none text-white/80 transition-colors hover:text-[var(--color-sr-yellow)]';
 
 export default function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -83,124 +86,146 @@ export default function AppShell() {
 
   return (
     <>
-    <header className="sr-safe-top fixed inset-x-0 top-0 z-50 w-full border-b border-white/10 bg-[var(--color-sr-navy)] text-white">
-      <div className="sr-container flex h-14 min-w-0 items-center justify-between gap-3 md:h-16">
-        <div className="flex min-w-0 items-center gap-3 md:gap-6">
-          <Link to="/dashboard" className="min-w-0 shrink" onClick={closeMenu}>
+      <header className="sr-safe-top fixed inset-x-0 top-0 z-50 w-full border-b border-white/10 bg-[var(--color-sr-navy)] text-white">
+        <div className="sr-container flex h-14 min-w-0 items-center gap-3 md:h-16 md:gap-4">
+          <Link
+            to="/dashboard"
+            className="flex h-9 shrink-0 items-center"
+            onClick={closeMenu}
+          >
             <img
               src="/sr/logo.png"
               alt="AfriRoar"
-              className="h-7 w-auto max-w-[148px] object-contain object-left md:h-8 md:max-w-none"
+              className="block h-7 w-auto max-w-[132px] object-contain object-left md:h-8 md:max-w-[148px]"
             />
           </Link>
 
-          <nav className="hidden items-center gap-0.5 md:flex" aria-label="Workspace">
+          <nav
+            className="hidden min-w-0 flex-1 items-center gap-0.5 lg:flex"
+            aria-label="Workspace"
+          >
             {links.map(({ to, label, icon, end }) => (
-              <NavLink key={to} to={to} end={end} className={linkClass}>
-                <FontAwesomeIcon icon={icon} className="text-[14px] opacity-90" />
-                {label}
+              <NavLink key={to} to={to} end={end} className={navLinkClass}>
+                <FontAwesomeIcon
+                  icon={icon}
+                  className="fa-fw text-[12px] leading-none opacity-90"
+                  aria-hidden
+                />
+                <span className="leading-none">{label}</span>
               </NavLink>
             ))}
           </nav>
+
+          <div className="ml-auto hidden shrink-0 items-center gap-0.5 lg:flex">
+            <NotificationBell />
+            <Link to="/jobs" className={utilityLinkClass}>
+              <FontAwesomeIcon
+                icon={faBriefcase}
+                className="fa-fw text-[12px] leading-none opacity-90"
+                aria-hidden
+              />
+              <span className="leading-none">Browse jobs</span>
+            </Link>
+            <Link to="/scholarships" className={utilityLinkClass}>
+              <FontAwesomeIcon
+                icon={faMagnifyingGlass}
+                className="fa-fw text-[12px] leading-none opacity-90"
+                aria-hidden
+              />
+              <span className="leading-none">Scholarships</span>
+            </Link>
+            <span className="mx-1.5 h-4 w-px shrink-0 bg-white/20" aria-hidden />
+            <span
+              className="max-w-[7rem] truncate text-[13px] leading-none text-white/70"
+              title={user?.name || firstName}
+            >
+              {firstName}
+            </span>
+            <button type="button" onClick={handleLogout} className={utilityLinkClass}>
+              <FontAwesomeIcon
+                icon={faRightFromBracket}
+                className="fa-fw text-[12px] leading-none opacity-90"
+                aria-hidden
+              />
+              <span className="leading-none">Log out</span>
+            </button>
+          </div>
+
+          <div className="ml-auto flex shrink-0 items-center gap-0.5 lg:hidden">
+            <NotificationBell />
+            <button
+              type="button"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
 
-        <div className="hidden items-center gap-2 md:flex">
-          <NotificationBell />
-          <Link
-            to="/jobs"
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-[13px] font-semibold text-white/80 transition hover:text-[var(--color-sr-yellow)]"
-          >
-            <FontAwesomeIcon icon={faBriefcase} className="text-[13px]" />
-            Browse jobs
-          </Link>
-          <Link
-            to="/scholarships"
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-[13px] font-semibold text-white/80 transition hover:text-[var(--color-sr-yellow)]"
-          >
-            <FontAwesomeIcon icon={faMagnifyingGlass} className="text-[13px]" />
-            Scholarships
-          </Link>
-          <span className="mx-1 hidden h-5 w-px bg-white/20 lg:block" aria-hidden />
-          <span className="hidden max-w-[140px] truncate text-[13px] text-white/70 lg:inline">
-            {firstName}
-          </span>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-[13px] font-semibold text-white/85 transition hover:text-[var(--color-sr-yellow)]"
-          >
-            <FontAwesomeIcon icon={faRightFromBracket} className="text-[13px]" />
-            Log out
-          </button>
-        </div>
-
-        <div className="flex items-center gap-1 md:hidden">
-          <NotificationBell />
-          <button
-            type="button"
-            className="inline-flex shrink-0 p-2"
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
-      </div>
-
-      {menuOpen ? (
-        <div className="border-t border-white/10 bg-[var(--color-sr-navy)] md:hidden">
-          <nav className="sr-container flex flex-col py-2" aria-label="Workspace mobile">
-            {links.map(({ to, label, icon, end }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={end}
+        {menuOpen ? (
+          <div className="border-t border-white/10 bg-[var(--color-sr-navy)] lg:hidden">
+            <nav className="sr-container flex flex-col py-2" aria-label="Workspace mobile">
+              {links.map(({ to, label, icon, end }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  onClick={closeMenu}
+                  className={({ isActive }) =>
+                    [
+                      'flex h-11 items-center gap-2.5 whitespace-nowrap px-1 text-[15px] font-semibold leading-none',
+                      isActive ? 'text-[var(--color-sr-yellow)]' : 'text-white',
+                    ].join(' ')
+                  }
+                >
+                  <FontAwesomeIcon icon={icon} className="fa-fw w-4 text-[14px] opacity-90" />
+                  {label}
+                </NavLink>
+              ))}
+              <Link
+                to="/jobs"
                 onClick={closeMenu}
-                className={({ isActive }) =>
-                  [
-                    'flex items-center gap-2.5 px-1 py-3 text-[15px] font-semibold',
-                    isActive ? 'text-[var(--color-sr-yellow)]' : 'text-white',
-                  ].join(' ')
-                }
+                className="flex h-11 items-center gap-2.5 whitespace-nowrap px-1 text-[15px] font-semibold leading-none text-white/90"
               >
-                <FontAwesomeIcon icon={icon} className="w-4 text-[14px] opacity-90" />
-                {label}
-              </NavLink>
-            ))}
-            <Link
-              to="/jobs"
-              onClick={closeMenu}
-              className="flex items-center gap-2.5 px-1 py-3 text-[15px] font-semibold text-white/90"
-            >
-              <FontAwesomeIcon icon={faBriefcase} className="w-4 text-[14px] opacity-90" />
-              Browse jobs
-            </Link>
-            <Link
-              to="/scholarships"
-              onClick={closeMenu}
-              className="flex items-center gap-2.5 px-1 py-3 text-[15px] font-semibold text-white/90"
-            >
-              <FontAwesomeIcon icon={faMagnifyingGlass} className="w-4 text-[14px] opacity-90" />
-              Browse scholarships
-            </Link>
-            <div className="mt-1 border-t border-white/15 pt-2">
-              <p className="px-1 py-2 text-[13px] text-white/60">{user?.email || firstName}</p>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="flex w-full items-center gap-2.5 px-1 py-3 text-left text-[15px] font-semibold text-white"
+                <FontAwesomeIcon icon={faBriefcase} className="fa-fw w-4 text-[14px] opacity-90" />
+                Browse jobs
+              </Link>
+              <Link
+                to="/scholarships"
+                onClick={closeMenu}
+                className="flex h-11 items-center gap-2.5 whitespace-nowrap px-1 text-[15px] font-semibold leading-none text-white/90"
               >
-                <FontAwesomeIcon icon={faRightFromBracket} className="w-4 text-[14px] opacity-90" />
-                Log out
-              </button>
-            </div>
-          </nav>
-        </div>
-      ) : null}
-    </header>
-    <div className="sr-fixed-nav-spacer" aria-hidden="true">
-      <div className="sr-fixed-nav-spacer-bar" />
-    </div>
+                <FontAwesomeIcon
+                  icon={faMagnifyingGlass}
+                  className="fa-fw w-4 text-[14px] opacity-90"
+                />
+                Scholarships
+              </Link>
+              <div className="mt-1 border-t border-white/15 pt-2">
+                <p className="truncate px-1 py-2 text-[13px] leading-none text-white/60">
+                  {user?.email || firstName}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex h-11 w-full items-center gap-2.5 whitespace-nowrap px-1 text-left text-[15px] font-semibold leading-none text-white"
+                >
+                  <FontAwesomeIcon
+                    icon={faRightFromBracket}
+                    className="fa-fw w-4 text-[14px] opacity-90"
+                  />
+                  Log out
+                </button>
+              </div>
+            </nav>
+          </div>
+        ) : null}
+      </header>
+      <div className="sr-fixed-nav-spacer" aria-hidden="true">
+        <div className="sr-fixed-nav-spacer-bar" />
+      </div>
     </>
   );
 }
