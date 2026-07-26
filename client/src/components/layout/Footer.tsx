@@ -12,12 +12,12 @@ import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 
 const categories = [
   { label: 'Undergraduate Scholarships', to: '/scholarships?level=undergraduate' },
-  { label: 'Masters Scholarships', to: '/scholarships?level=masters' },
-  { label: 'PhD Scholarships', to: '/scholarships?level=phd' },
+  { label: "Master's Scholarships", to: '/scholarships?level=masters' },
+  { label: 'PhD & Doctoral Scholarships', to: '/scholarships?level=phd' },
   { label: 'Postdoctoral Fellowships', to: '/scholarships?level=postdoctoral' },
-  { label: 'Internships', to: '/internships' },
-  { label: 'Application Documents', to: '/guides' },
-  { label: 'Scholarship Help Desk', to: '/guides' },
+  { label: 'Internships & Work-Study Programs', to: '/internships' },
+  { label: 'Application Guides & Documents', to: '/guides' },
+  { label: 'Scholarship Advisory Desk', to: '/guides' },
 ];
 
 const legal = [
