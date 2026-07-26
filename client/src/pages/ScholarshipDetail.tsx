@@ -6,7 +6,7 @@ import type { Scholarship } from '@/types';
 import { formatDate, formatDeadline, getFundingTypeLabel, getLevelLabel, formatCurrency } from '@/lib/utils';
 import {
   MapPin, Clock, GraduationCap, DollarSign, Bookmark, Share2,
-  ExternalLink, ArrowLeft, Eye, Users, Tag, Building, CalendarCheck
+  ArrowLeft, Eye, Users, Tag, Building, CalendarCheck
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import toast from 'react-hot-toast';
@@ -111,11 +111,6 @@ export default function ScholarshipDetail() {
             <button onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Link copied!'); }} className="btn-ghost">
               <Share2 className="w-4 h-4" /> Share
             </button>
-            {scholarship.applicationUrl && (
-              <a href={scholarship.applicationUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost">
-                <ExternalLink className="w-4 h-4" /> External Link
-              </a>
-            )}
           </div>
 
           {/* Description */}

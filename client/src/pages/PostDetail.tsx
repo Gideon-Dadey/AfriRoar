@@ -8,7 +8,6 @@ import {
   Calendar,
   CheckCircle2,
   Clock3,
-  ExternalLink,
   Globe2,
   GraduationCap,
   Loader2,
@@ -578,17 +577,6 @@ export default function PostDetail() {
                     {scholarship?._id ? 'Apply on AfriRoar' : 'Start application'}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
-                  {scholarship?.applicationUrl ? (
-                    <a
-                      href={scholarship.applicationUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 border border-[var(--color-sr-border)] px-4 py-2.5 text-[14px] font-semibold text-[var(--color-sr-navy)] transition hover:border-[var(--color-sr-navy)]"
-                    >
-                      Official programme site
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </a>
-                  ) : null}
                 </div>
               ) : null}
             </div>
