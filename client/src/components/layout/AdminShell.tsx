@@ -67,13 +67,13 @@ export default function AdminShell() {
   };
 
   const sidebar = (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center gap-3 border-b border-white/10 px-4 py-4">
-        <Link to="/dashboard/admin" onClick={closeDrawer} className="min-w-0 shrink-0">
+      <div className="flex h-full flex-col">
+      <div className="flex flex-wrap items-center gap-2 border-b border-white/10 px-4 py-4">
+        <Link to="/dashboard/admin" onClick={closeDrawer} className="min-w-0 shrink">
           <img
             src="/sr/logo.png"
             alt="AfriRoar"
-            className="h-7 w-auto object-contain object-left"
+            className="h-7 w-auto max-w-[150px] object-contain object-left"
           />
         </Link>
         <span className="inline-flex items-center gap-1 border border-[var(--color-sr-yellow)]/40 bg-[var(--color-sr-yellow)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--color-sr-yellow)]">
@@ -122,24 +122,24 @@ export default function AdminShell() {
   );
 
   return (
-    <div className="flex min-h-screen bg-[var(--color-sr-bg)]">
+    <div className="flex min-h-screen max-w-[100vw] overflow-x-hidden bg-[var(--color-sr-bg)]">
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 overflow-y-auto bg-[var(--color-sr-navy)] text-white lg:block">
         {sidebar}
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--color-sr-border)] bg-[var(--color-sr-navy)] px-4 text-white lg:hidden">
-          <div className="flex items-center gap-2">
-            <Link to="/dashboard/admin">
-              <img src="/sr/logo.png" alt="AfriRoar" className="h-6 w-auto" />
+      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
+        <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-3 border-b border-[var(--color-sr-border)] bg-[var(--color-sr-navy)] px-3 text-white sm:px-4 lg:hidden">
+          <div className="flex min-w-0 items-center gap-2">
+            <Link to="/dashboard/admin" className="min-w-0 shrink">
+              <img src="/sr/logo.png" alt="AfriRoar" className="h-6 w-auto max-w-[140px] object-contain object-left" />
             </Link>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-sr-yellow)]">
+            <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-[var(--color-sr-yellow)]">
               Admin
             </span>
           </div>
           <button
             type="button"
-            className="inline-flex p-2"
+            className="inline-flex shrink-0 p-2"
             aria-label={drawerOpen ? 'Close menu' : 'Open menu'}
             onClick={() => setDrawerOpen((v) => !v)}
           >
@@ -155,14 +155,16 @@ export default function AdminShell() {
               aria-label="Close drawer"
               onClick={closeDrawer}
             />
-            <aside className="absolute inset-y-0 left-0 w-[min(280px,85vw)] bg-[var(--color-sr-navy)] text-white shadow-xl">
+            <aside className="absolute inset-y-0 left-0 flex w-[min(300px,88vw)] flex-col bg-[var(--color-sr-navy)] text-white shadow-xl">
               {sidebar}
             </aside>
           </div>
         ) : null}
 
-        <main className="flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-          <Outlet />
+        <main className="min-w-0 flex-1 overflow-x-hidden px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
+          <div className="mx-auto w-full max-w-6xl min-w-0">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

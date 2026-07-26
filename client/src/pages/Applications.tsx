@@ -196,7 +196,7 @@ export default function Applications() {
         <title>Applications | AfriRoar</title>
       </Helmet>
 
-      <div className="min-h-[70vh] bg-[var(--color-sr-bg)] pb-16">
+      <div className="min-h-[70vh] w-full max-w-[100vw] overflow-x-hidden bg-[var(--color-sr-bg)] pb-10 sm:pb-16">
         <div className="border-b border-[var(--color-sr-border)] bg-white">
           <div className="sr-container py-7 md:py-9">
             <Link
@@ -290,9 +290,9 @@ export default function Applications() {
             </div>
           ) : null}
 
-          <div className="flex flex-col gap-3 border border-[var(--color-sr-border)] bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 flex-col gap-3 border border-[var(--color-sr-border)] bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
             <div
-              className="flex gap-1 overflow-x-auto"
+              className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5 [-webkit-overflow-scrolling:touch]"
               role="tablist"
               aria-label="Filter by status"
             >
@@ -452,13 +452,13 @@ export default function Applications() {
                           ) : null}
                         </div>
 
-                        <h2 className="mt-2 truncate text-[1.05rem] font-bold text-[var(--color-sr-navy-deeper)] group-hover:text-[var(--color-sr-navy)]">
+                        <h2 className="mt-2 break-words text-[1.05rem] font-bold text-[var(--color-sr-navy-deeper)] group-hover:text-[var(--color-sr-navy)] sm:truncate">
                           {titleOf(app)}
                         </h2>
 
                         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-[var(--color-sr-muted)]">
                           {programme.level || programme.field ? (
-                            <span className="font-medium text-[var(--color-sr-navy)]">
+                            <span className="max-w-full break-words font-medium text-[var(--color-sr-navy)]">
                               Applying:{' '}
                               {[programme.level ? getLevelLabel(programme.level) : null, programme.field]
                                 .filter(Boolean)

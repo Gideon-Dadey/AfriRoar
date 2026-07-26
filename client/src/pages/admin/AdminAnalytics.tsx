@@ -91,11 +91,11 @@ function Panel({
 }) {
   return (
     <section className="border border-[var(--color-sr-border)] bg-white">
-      <div className="flex items-center justify-between gap-3 border-b border-[var(--color-sr-border)] px-4 py-3">
-        <h2 className="text-[14px] font-bold text-[var(--color-sr-navy-deeper)]">{title}</h2>
-        {action}
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--color-sr-border)] px-3 py-3 sm:px-4">
+        <h2 className="min-w-0 text-[14px] font-bold text-[var(--color-sr-navy-deeper)]">{title}</h2>
+        {action ? <div className="shrink-0">{action}</div> : null}
       </div>
-      <div className="p-4">{children}</div>
+      <div className="min-w-0 p-3 sm:p-4">{children}</div>
     </section>
   );
 }

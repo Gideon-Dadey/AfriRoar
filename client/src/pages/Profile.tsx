@@ -248,7 +248,7 @@ export default function Profile() {
         <title>Profile | AfriRoar</title>
       </Helmet>
 
-      <div className="min-h-[70vh] bg-[var(--color-sr-bg)] pb-28">
+      <div className="min-h-[70vh] w-full max-w-[100vw] overflow-x-hidden bg-[var(--color-sr-bg)] pb-28">
         <div className="border-b border-[var(--color-sr-border)] bg-white">
           <div className="sr-container py-8 md:py-10">
             <Link
@@ -260,7 +260,7 @@ export default function Profile() {
             </Link>
 
             <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-              <div className="flex items-start gap-5">
+              <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-start">
                 <div className="relative shrink-0">
                   <div className="flex h-[88px] w-[88px] items-center justify-center overflow-hidden bg-[var(--color-sr-navy)] text-white md:h-24 md:w-24">
                     {user.profile?.avatar ? (
@@ -553,14 +553,14 @@ export default function Profile() {
 
       <div
         className={[
-          'fixed inset-x-0 bottom-0 z-40 border-t bg-white/95 backdrop-blur-sm transition-transform duration-300',
+          'fixed inset-x-0 bottom-0 z-40 border-t bg-white/95 backdrop-blur-sm transition-transform duration-300 pb-[env(safe-area-inset-bottom)]',
           dirty ? 'translate-y-0 border-[var(--color-sr-border)]' : 'translate-y-full border-transparent',
         ].join(' ')}
         aria-hidden={!dirty}
       >
-        <div className="sr-container flex flex-wrap items-center justify-between gap-3 py-3">
+        <div className="sr-container flex flex-col gap-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <p className="text-[14px] text-[var(--color-sr-muted)]">You have unsaved changes.</p>
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
             <button
               type="button"
               onClick={discard}
@@ -573,7 +573,7 @@ export default function Profile() {
               type="submit"
               form="profile-form"
               disabled={saving || !dirty}
-              className="inline-flex items-center gap-2 bg-[var(--color-sr-yellow)] px-5 py-2.5 text-[14px] font-bold text-[var(--color-sr-navy-deeper)] transition hover:bg-[#e0b400] disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 bg-[var(--color-sr-yellow)] px-5 py-2.5 text-[14px] font-bold text-[var(--color-sr-navy-deeper)] transition hover:bg-[#e0b400] disabled:opacity-50"
             >
               {saving ? (
                 <>

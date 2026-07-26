@@ -15,14 +15,18 @@ export function PageHeader({
   return (
     <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0">
-        <h1 className="text-[1.35rem] font-bold tracking-tight text-[var(--color-sr-navy-deeper)] sm:text-[1.5rem]">
+        <h1 className="break-words text-[1.35rem] font-bold tracking-tight text-[var(--color-sr-navy-deeper)] sm:text-[1.5rem]">
           {title}
         </h1>
         {description ? (
           <p className="mt-1 text-[14px] leading-relaxed text-[var(--color-sr-muted)]">{description}</p>
         ) : null}
       </div>
-      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
+      {actions ? (
+        <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:shrink-0 sm:flex-row sm:flex-wrap sm:items-center [&>a]:w-full [&>button]:w-full sm:[&>a]:w-auto sm:[&>button]:w-auto">
+          {actions}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -66,7 +70,7 @@ export function StatTile({
 
 export function FilterBar({ children }: { children: ReactNode }) {
   return (
-    <div className="mb-4 flex flex-col gap-2 border border-[var(--color-sr-border)] bg-white p-3 sm:flex-row sm:flex-wrap sm:items-center">
+    <div className="mb-4 flex min-w-0 flex-col gap-2 border border-[var(--color-sr-border)] bg-white p-3 sm:flex-row sm:flex-wrap sm:items-center [&>input]:w-full [&>select]:w-full sm:[&>input]:max-w-sm sm:[&>select]:w-auto">
       {children}
     </div>
   );
@@ -179,8 +183,10 @@ export function StatusBadge({ status }: { status: string }) {
 
 export function AdminTable({ children }: { children: ReactNode }) {
   return (
-    <div className="overflow-x-auto border border-[var(--color-sr-border)] bg-white">
-      <table className="w-full min-w-[720px] border-collapse text-left text-[13px]">{children}</table>
+    <div className="w-full max-w-full overflow-x-auto overscroll-x-contain border border-[var(--color-sr-border)] bg-white [-webkit-overflow-scrolling:touch]">
+      <table className="w-full min-w-[560px] border-collapse text-left text-[13px] sm:min-w-[680px]">
+        {children}
+      </table>
     </div>
   );
 }
@@ -199,10 +205,10 @@ export const inputClass =
 export const selectClass = inputClass;
 
 export const btnPrimary =
-  'inline-flex items-center justify-center gap-1.5 border border-[var(--color-sr-navy)] bg-[var(--color-sr-navy)] px-3.5 py-2 text-[13px] font-semibold text-white transition hover:bg-[var(--color-sr-navy-deeper)] disabled:opacity-50';
+  'inline-flex items-center justify-center gap-1.5 border border-[var(--color-sr-navy)] bg-[var(--color-sr-navy)] px-3.5 py-2.5 text-[13px] font-semibold text-white transition hover:bg-[var(--color-sr-navy-deeper)] disabled:opacity-50 sm:py-2';
 
 export const btnSecondary =
-  'inline-flex items-center justify-center gap-1.5 border border-[var(--color-sr-border)] bg-white px-3.5 py-2 text-[13px] font-semibold text-[var(--color-sr-navy)] transition hover:border-[var(--color-sr-navy)] disabled:opacity-50';
+  'inline-flex items-center justify-center gap-1.5 border border-[var(--color-sr-border)] bg-white px-3.5 py-2.5 text-[13px] font-semibold text-[var(--color-sr-navy)] transition hover:border-[var(--color-sr-navy)] disabled:opacity-50 sm:py-2';
 
 export const btnDanger =
   'inline-flex items-center justify-center gap-1.5 border border-red-300 bg-white px-3 py-1.5 text-[12px] font-semibold text-red-700 transition hover:bg-red-50 disabled:opacity-50';

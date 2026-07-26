@@ -76,13 +76,13 @@ export default function AppShell() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[var(--color-sr-navy)] text-white">
-      <div className="sr-container flex h-14 items-center justify-between gap-3 md:h-16">
-        <div className="flex min-w-0 items-center gap-6">
-          <Link to="/dashboard" className="shrink-0" onClick={closeMenu}>
+      <div className="sr-container flex h-14 min-w-0 items-center justify-between gap-3 md:h-16">
+        <div className="flex min-w-0 items-center gap-3 md:gap-6">
+          <Link to="/dashboard" className="min-w-0 shrink" onClick={closeMenu}>
             <img
               src="/sr/logo.png"
               alt="AfriRoar"
-              className="h-7 w-auto object-contain object-left md:h-8"
+              className="h-7 w-auto max-w-[148px] object-contain object-left md:h-8 md:max-w-none"
             />
           </Link>
 
@@ -120,7 +120,7 @@ export default function AppShell() {
 
         <button
           type="button"
-          className="inline-flex p-2 md:hidden"
+          className="inline-flex shrink-0 p-2 md:hidden"
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           onClick={() => setMenuOpen((v) => !v)}
         >

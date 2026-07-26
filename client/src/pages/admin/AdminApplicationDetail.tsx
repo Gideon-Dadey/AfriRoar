@@ -53,9 +53,9 @@ function formatBytes(bytes?: number) {
 
 function Field({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-3 border-b border-[var(--color-sr-border)] py-2 last:border-b-0">
-      <dt className="text-[13px] text-[var(--color-sr-muted)]">{label}</dt>
-      <dd className="max-w-[65%] text-right text-[13px] text-[var(--color-sr-text)]">{value}</dd>
+    <div className="flex flex-col gap-1 border-b border-[var(--color-sr-border)] py-2 last:border-b-0 sm:flex-row sm:justify-between sm:gap-3">
+      <dt className="shrink-0 text-[13px] text-[var(--color-sr-muted)]">{label}</dt>
+      <dd className="break-words text-[13px] text-[var(--color-sr-text)] sm:max-w-[65%] sm:text-right">{value}</dd>
     </div>
   );
 }

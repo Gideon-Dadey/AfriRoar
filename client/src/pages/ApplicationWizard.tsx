@@ -1190,7 +1190,7 @@ export default function ApplicationWizard() {
         </title>
       </Helmet>
 
-      <div className={['min-h-[70vh] bg-[var(--color-sr-bg)]', dirty && !locked ? 'pb-36' : 'pb-28'].join(' ')}>
+      <div className={['min-h-[70vh] w-full max-w-[100vw] overflow-x-hidden bg-[var(--color-sr-bg)]', dirty && !locked ? 'pb-36' : 'pb-28'].join(' ')}>
         <div className="border-b border-[var(--color-sr-border)] bg-white">
           <div className="sr-container py-7 md:py-9">
             <Link
@@ -1206,7 +1206,7 @@ export default function ApplicationWizard() {
                 <p className="mb-1 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-sr-muted)]">
                   {locked ? 'Submitted application' : 'Application wizard'}
                 </p>
-                <h1 className="text-[1.6rem] font-bold leading-tight text-[var(--color-sr-navy-deeper)] md:text-[1.9rem]">
+                <h1 className="break-words text-[1.45rem] font-bold leading-tight text-[var(--color-sr-navy-deeper)] sm:text-[1.6rem] md:text-[1.9rem]">
                   {scholarship?.title || 'Scholarship application'}
                 </h1>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -1268,9 +1268,9 @@ export default function ApplicationWizard() {
           </div>
         </div>
 
-        <div className="sr-container mt-8 grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-          <aside className="h-fit border border-[var(--color-sr-border)] bg-white p-4 lg:sticky lg:top-24">
-            <div className="mb-3 flex gap-1 overflow-x-auto pb-1 lg:hidden" role="tablist" aria-label="Application steps">
+        <div className="sr-container mt-6 grid min-w-0 gap-5 sm:mt-8 sm:gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+          <aside className="h-fit min-w-0 border border-[var(--color-sr-border)] bg-white p-3 sm:p-4 lg:sticky lg:top-24">
+            <div className="-mx-1 mb-3 flex gap-1 overflow-x-auto px-1 pb-1 [-webkit-overflow-scrolling:touch] lg:hidden" role="tablist" aria-label="Application steps">
               {STEPS.map((item, idx) => {
                 const n = idx + 1;
                 const active = step === n;
@@ -1379,9 +1379,9 @@ export default function ApplicationWizard() {
             ) : null}
           </aside>
 
-          <section className="border border-[var(--color-sr-border)] bg-white p-6 md:p-8">
+          <section className="min-w-0 border border-[var(--color-sr-border)] bg-white p-4 sm:p-6 md:p-8">
             <header className="mb-6 border-b border-[var(--color-sr-border)] pb-4">
-              <h2 className="text-[1.25rem] font-bold text-[var(--color-sr-navy-deeper)]">
+              <h2 className="text-[1.15rem] font-bold text-[var(--color-sr-navy-deeper)] sm:text-[1.25rem]">
                 {STEPS[step - 1].title}
               </h2>
               <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">{STEPS[step - 1].blurb}</p>
@@ -1988,23 +1988,23 @@ export default function ApplicationWizard() {
             )}
 
             {!locked ? (
-              <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color-sr-border)] pt-6">
+              <div className="mt-8 flex flex-col gap-3 border-t border-[var(--color-sr-border)] pt-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <button
                   type="button"
                   onClick={goBack}
                   disabled={step === 1 || saving || submitting}
-                  className="inline-flex items-center gap-2 border border-[var(--color-sr-border)] px-4 py-2.5 text-[14px] font-semibold text-[var(--color-sr-navy)] disabled:opacity-40"
+                  className="inline-flex w-full items-center justify-center gap-2 border border-[var(--color-sr-border)] px-4 py-2.5 text-[14px] font-semibold text-[var(--color-sr-navy)] disabled:opacity-40 sm:w-auto"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Back
                 </button>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
                   <button
                     type="button"
                     onClick={() => saveProgress(step, false)}
                     disabled={saving || submitting || !dirty}
-                    className="inline-flex items-center gap-2 border border-[var(--color-sr-navy)] px-4 py-2.5 text-[14px] font-semibold text-[var(--color-sr-navy)] disabled:opacity-40"
+                    className="inline-flex w-full items-center justify-center gap-2 border border-[var(--color-sr-navy)] px-4 py-2.5 text-[14px] font-semibold text-[var(--color-sr-navy)] disabled:opacity-40 sm:w-auto"
                   >
                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     Save draft
@@ -2015,7 +2015,7 @@ export default function ApplicationWizard() {
                       type="button"
                       onClick={goNext}
                       disabled={saving || submitting}
-                      className="inline-flex items-center gap-2 bg-[var(--color-sr-navy)] px-4 py-2.5 text-[14px] font-semibold text-white disabled:opacity-60"
+                      className="inline-flex w-full items-center justify-center gap-2 bg-[var(--color-sr-navy)] px-4 py-2.5 text-[14px] font-semibold text-white disabled:opacity-60 sm:w-auto"
                     >
                       Continue
                       <ArrowRight className="h-4 w-4" />
@@ -2025,7 +2025,7 @@ export default function ApplicationWizard() {
                       type="button"
                       onClick={submitApplication}
                       disabled={submitting || saving}
-                      className="inline-flex items-center gap-2 bg-[var(--color-sr-yellow)] px-5 py-2.5 text-[14px] font-bold text-[var(--color-sr-navy-deeper)] disabled:opacity-60"
+                      className="inline-flex w-full items-center justify-center gap-2 bg-[var(--color-sr-yellow)] px-5 py-2.5 text-[14px] font-bold text-[var(--color-sr-navy-deeper)] disabled:opacity-60 sm:w-auto"
                     >
                       {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                       Submit application
@@ -2051,14 +2051,14 @@ export default function ApplicationWizard() {
       {!locked ? (
         <div
           className={[
-            'fixed inset-x-0 bottom-0 z-40 border-t bg-white/95 backdrop-blur-sm transition-transform duration-300',
+            'fixed inset-x-0 bottom-0 z-40 border-t bg-white/95 backdrop-blur-sm transition-transform duration-300 pb-[env(safe-area-inset-bottom)]',
             dirty ? 'translate-y-0 border-[var(--color-sr-border)]' : 'translate-y-full border-transparent',
           ].join(' ')}
           aria-hidden={!dirty}
         >
-          <div className="sr-container flex flex-wrap items-center justify-between gap-3 py-3">
+          <div className="sr-container flex flex-col gap-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <p className="text-[14px] text-[var(--color-sr-muted)]">You have unsaved changes on this draft.</p>
-            <div className="flex items-center gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
               <button
                 type="button"
                 onClick={discardChanges}
@@ -2071,7 +2071,7 @@ export default function ApplicationWizard() {
                 type="button"
                 onClick={() => saveProgress(step, false)}
                 disabled={saving || submitting || !dirty}
-                className="inline-flex items-center gap-2 bg-[var(--color-sr-yellow)] px-5 py-2.5 text-[14px] font-bold text-[var(--color-sr-navy-deeper)] transition hover:bg-[var(--color-sr-yellow-hover)] disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 bg-[var(--color-sr-yellow)] px-5 py-2.5 text-[14px] font-bold text-[var(--color-sr-navy-deeper)] transition hover:bg-[var(--color-sr-yellow-hover)] disabled:opacity-50"
               >
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 Save draft
