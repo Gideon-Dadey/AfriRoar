@@ -11,7 +11,6 @@ import {
   faIdCard,
   faNewspaper,
   faRightFromBracket,
-  faUserShield,
   faClockRotateLeft,
   faChartLine,
   faUsers,
@@ -80,8 +79,7 @@ export default function AdminShell() {
             className="h-7 w-auto max-w-[150px] object-contain object-left"
           />
         </Link>
-        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--color-sr-yellow)]">
-          <FontAwesomeIcon icon={faUserShield} className="text-[10px]" />
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-sr-yellow)]">
           Admin
         </span>
       </div>
