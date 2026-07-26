@@ -92,16 +92,16 @@ function Metric({
   return (
     <Link
       to={to}
-      className="group border border-[var(--color-sr-border)] bg-white p-4 transition hover:border-[var(--color-sr-navy)]"
+      className="group flex min-h-[104px] flex-col border border-[var(--color-sr-border)] bg-white p-3.5 transition hover:border-[var(--color-sr-navy)] sm:p-4"
     >
-      <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--color-sr-muted)]">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-sr-muted)] sm:text-[12px] sm:tracking-[0.14em]">
         {label}
       </p>
-      <p className="mt-2 text-[1.75rem] font-bold tabular-nums leading-none text-[var(--color-sr-navy-deeper)]">
+      <p className="mt-2 text-[1.5rem] font-bold tabular-nums leading-none text-[var(--color-sr-navy-deeper)] sm:text-[1.75rem]">
         {value}
       </p>
       {hint ? (
-        <p className="mt-2 text-[13px] text-[var(--color-sr-muted)] group-hover:text-[var(--color-sr-navy)]">
+        <p className="mt-auto pt-2 text-[12px] text-[var(--color-sr-muted)] group-hover:text-[var(--color-sr-navy)] sm:text-[13px]">
           {hint}
         </p>
       ) : null}
@@ -126,10 +126,7 @@ export default function Dashboard() {
     enabled: isStudent,
   });
 
-  const {
-    data: recommendations,
-    isLoading: recsLoading,
-  } = useQuery({
+  const { data: recommendations, isLoading: recsLoading } = useQuery({
     queryKey: ['recommendations'],
     queryFn: async () => {
       const { data } = await api.get('/scholarships/user/recommendations');
@@ -199,18 +196,19 @@ export default function Dashboard() {
         <title>Dashboard | AfriRoar</title>
       </Helmet>
 
-      <div className="min-h-[70vh] bg-[var(--color-sr-bg)] pb-16">
+      <div className="min-h-[70vh] w-full overflow-x-hidden bg-[var(--color-sr-bg)] pb-10 sm:pb-16">
+        {/* Workspace header */}
         <div className="border-b border-[var(--color-sr-border)] bg-white">
-          <div className="sr-container py-8 md:py-10">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-2xl">
-                <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-sr-muted)]">
+          <div className="sr-container py-6 sm:py-8 md:py-10">
+            <div className="flex flex-col gap-5 md:gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="min-w-0 max-w-2xl">
+                <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-sr-muted)] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
                   {greetingForHour()}
                 </p>
-                <h1 className="text-[1.85rem] font-bold leading-tight text-[var(--color-sr-navy-deeper)] md:text-[2.15rem]">
+                <h1 className="text-[1.55rem] font-bold leading-[1.2] text-[var(--color-sr-navy-deeper)] sm:text-[1.85rem] md:text-[2.15rem]">
                   {firstName}, here is your workspace
                 </h1>
-                <p className="mt-2 text-[16px] leading-relaxed text-[var(--color-sr-muted)]">
+                <p className="mt-2 max-w-xl text-[14px] leading-relaxed text-[var(--color-sr-muted)] sm:text-[16px]">
                   {user.role === 'student' &&
                     'Track applications, strengthen your profile, and move on scholarships that fit.'}
                   {user.role === 'provider' &&
@@ -220,46 +218,44 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                {isStudent ? (
-                  <>
-                    <Link
-                      to="/dashboard/profile"
-                      className="inline-flex items-center gap-2 border border-[var(--color-sr-border)] bg-white px-4 py-2.5 text-[14px] font-semibold text-[var(--color-sr-navy)] transition hover:border-[var(--color-sr-navy)]"
-                    >
-                      <UserRound className="h-4 w-4" />
-                      Profile
-                    </Link>
-                    <Link
-                      to="/dashboard/applications/new"
-                      className="inline-flex items-center gap-2 bg-[var(--color-sr-yellow)] px-4 py-2.5 text-[14px] font-bold text-[var(--color-sr-navy-deeper)] transition hover:bg-[#e0b400]"
-                    >
-                      Start application
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </>
-                ) : null}
-              </div>
+              {isStudent ? (
+                <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
+                  <Link
+                    to="/dashboard/profile"
+                    className="inline-flex w-full items-center justify-center gap-2 border border-[var(--color-sr-border)] bg-white px-4 py-3 text-[14px] font-semibold text-[var(--color-sr-navy)] transition hover:border-[var(--color-sr-navy)] sm:w-auto sm:py-2.5"
+                  >
+                    <UserRound className="h-4 w-4" />
+                    Profile
+                  </Link>
+                  <Link
+                    to="/dashboard/applications/new"
+                    className="inline-flex w-full items-center justify-center gap-2 bg-[var(--color-sr-yellow)] px-4 py-3 text-[14px] font-bold text-[var(--color-sr-navy-deeper)] transition hover:bg-[#e0b400] sm:w-auto sm:py-2.5"
+                  >
+                    Start application
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              ) : null}
             </div>
 
             {isStudent ? (
-              <div className="mt-8 border-t border-[var(--color-sr-border)] pt-6">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--color-sr-muted)]">
+              <div className="mt-6 border-t border-[var(--color-sr-border)] pt-5 sm:mt-8 sm:pt-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-sr-muted)] sm:text-[12px]">
                       Match readiness
                     </p>
-                    <p className="mt-1 text-[15px] text-[var(--color-sr-text)]">
+                    <p className="mt-1 text-[13px] leading-snug text-[var(--color-sr-text)] sm:text-[15px]">
                       {profileScore >= 80
                         ? 'Profile is strong enough for solid matching.'
                         : 'A few more details will improve scholarship recommendations.'}
                     </p>
                   </div>
-                  <p className="text-[1.5rem] font-bold tabular-nums text-[var(--color-sr-navy)]">
+                  <p className="shrink-0 text-[1.35rem] font-bold tabular-nums leading-none text-[var(--color-sr-navy)] sm:text-[1.5rem]">
                     {profileScore}%
                   </p>
                 </div>
-                <div className="mt-3 h-1.5 overflow-hidden bg-[var(--color-sr-border)]">
+                <div className="mt-3 h-1.5 w-full overflow-hidden bg-[var(--color-sr-border)]">
                   <div
                     className="h-full bg-[var(--color-sr-yellow)] transition-all duration-500"
                     style={{ width: `${Math.min(100, Math.max(0, profileScore))}%` }}
@@ -278,25 +274,27 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="sr-container mt-8 space-y-8">
+        <div className="sr-container mt-6 space-y-6 sm:mt-8 sm:space-y-8">
           {isStudent && nextActions.length > 0 ? (
             <section>
-              <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-sr-muted)]">
+              <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-sr-muted)] sm:text-[13px]">
                 Next up
               </h2>
               <div className="grid gap-3 md:grid-cols-2">
                 {nextActions.map((action) => (
                   <div
                     key={action.title}
-                    className="flex flex-col justify-between gap-4 border border-[var(--color-sr-border)] bg-white p-5 sm:flex-row sm:items-center"
+                    className="flex flex-col gap-4 border border-[var(--color-sr-border)] bg-white p-4 sm:p-5 md:flex-row md:items-center md:justify-between"
                   >
                     <div className="min-w-0">
                       <p className="font-bold text-[var(--color-sr-navy-deeper)]">{action.title}</p>
-                      <p className="mt-1 truncate text-[14px] text-[var(--color-sr-muted)]">{action.detail}</p>
+                      <p className="mt-1 text-[13px] leading-snug text-[var(--color-sr-muted)] sm:truncate sm:text-[14px]">
+                        {action.detail}
+                      </p>
                     </div>
                     <Link
                       to={action.to}
-                      className="inline-flex shrink-0 items-center gap-1.5 bg-[var(--color-sr-navy)] px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-[var(--color-sr-navy-dark)]"
+                      className="inline-flex w-full shrink-0 items-center justify-center gap-1.5 bg-[var(--color-sr-navy)] px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-[var(--color-sr-navy-dark)] md:w-auto"
                     >
                       {action.cta}
                       <ArrowRight className="h-3.5 w-3.5" />
@@ -308,7 +306,7 @@ export default function Dashboard() {
           ) : null}
 
           {isStudent ? (
-            <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <section className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
               <Metric
                 label="Applications"
                 value={appsLoading ? '-' : totalApplications}
@@ -327,41 +325,36 @@ export default function Dashboard() {
                 hint="In recent list"
                 to="/dashboard/applications?status=accepted"
               />
-              <Metric
-                label="Saved"
-                value={savedCount}
-                hint="From your account"
-                to="/scholarships"
-              />
+              <Metric label="Saved" value={savedCount} hint="From your account" to="/scholarships" />
             </section>
           ) : null}
 
           {isStudent ? (
-            <div className="grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-              <section className="border border-[var(--color-sr-border)] bg-white">
-                <div className="flex items-center justify-between border-b border-[var(--color-sr-border)] px-5 py-4">
-                  <h2 className="text-[17px] font-bold text-[var(--color-sr-navy-deeper)]">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:gap-8">
+              <section className="overflow-hidden border border-[var(--color-sr-border)] bg-white">
+                <div className="flex items-center justify-between gap-3 border-b border-[var(--color-sr-border)] px-4 py-3.5 sm:px-5 sm:py-4">
+                  <h2 className="text-[16px] font-bold text-[var(--color-sr-navy-deeper)] sm:text-[17px]">
                     Recent applications
                   </h2>
                   <Link
                     to="/dashboard/applications"
-                    className="text-[13px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
+                    className="shrink-0 text-[13px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
                   >
                     View all
                   </Link>
                 </div>
 
                 {appsLoading ? (
-                  <div className="flex items-center justify-center gap-2 px-5 py-14 text-[14px] text-[var(--color-sr-muted)]">
+                  <div className="flex items-center justify-center gap-2 px-4 py-14 text-[14px] text-[var(--color-sr-muted)] sm:px-5">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Loading applications…
                   </div>
                 ) : appsError ? (
-                  <div className="px-5 py-10 text-center text-[14px] text-[var(--color-sr-muted)]">
+                  <div className="px-4 py-10 text-center text-[14px] text-[var(--color-sr-muted)] sm:px-5">
                     Could not load applications. Refresh and try again.
                   </div>
                 ) : applications.length === 0 ? (
-                  <div className="px-5 py-12 text-center">
+                  <div className="px-4 py-12 text-center sm:px-5">
                     <FileText className="mx-auto mb-3 h-8 w-8 text-[var(--color-sr-muted)]" />
                     <p className="font-semibold text-[var(--color-sr-navy)]">No applications yet</p>
                     <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">
@@ -369,7 +362,7 @@ export default function Dashboard() {
                     </p>
                     <Link
                       to="/scholarships"
-                      className="mt-5 inline-flex items-center gap-2 bg-[var(--color-sr-navy)] px-4 py-2.5 text-[13px] font-semibold text-white"
+                      className="mt-5 inline-flex w-full items-center justify-center gap-2 bg-[var(--color-sr-navy)] px-4 py-2.5 text-[13px] font-semibold text-white sm:w-auto"
                     >
                       Browse scholarships
                       <ArrowRight className="h-3.5 w-3.5" />
@@ -384,23 +377,29 @@ export default function Dashboard() {
                         <li key={app._id}>
                           <Link
                             to={`/dashboard/applications/${app._id}`}
-                            className="flex items-center gap-4 px-5 py-4 transition hover:bg-[var(--color-sr-bg)]"
+                            className="flex items-start gap-3 px-4 py-3.5 transition hover:bg-[var(--color-sr-bg)] sm:items-center sm:gap-4 sm:px-5 sm:py-4"
                           >
                             <div className="min-w-0 flex-1">
-                              <p className="truncate font-semibold text-[var(--color-sr-navy-deeper)]">
+                              <p className="font-semibold leading-snug text-[var(--color-sr-navy-deeper)]">
                                 {scholarshipTitle(app)}
                               </p>
-                              <p className="mt-1 text-[13px] text-[var(--color-sr-muted)]">
+                              <p className="mt-1 text-[12px] text-[var(--color-sr-muted)] sm:text-[13px]">
                                 Updated {formatDate(app.updatedAt || app.lastSavedAt || app.createdAt)}
                               </p>
+                              <span
+                                className={`mt-2 inline-flex items-center gap-1.5 border px-2 py-0.5 text-[11px] font-semibold sm:hidden ${meta.className}`}
+                              >
+                                <StatusIcon className="h-3 w-3" />
+                                {meta.label}
+                              </span>
                             </div>
                             <span
-                              className={`inline-flex items-center gap-1.5 border px-2.5 py-1 text-[12px] font-semibold ${meta.className}`}
+                              className={`hidden shrink-0 items-center gap-1.5 border px-2.5 py-1 text-[12px] font-semibold sm:inline-flex ${meta.className}`}
                             >
                               <StatusIcon className="h-3.5 w-3.5" />
                               {meta.label}
                             </span>
-                            <ArrowRight className="hidden h-4 w-4 shrink-0 text-[var(--color-sr-muted)] sm:block" />
+                            <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[var(--color-sr-muted)] sm:mt-0" />
                           </Link>
                         </li>
                       );
@@ -409,9 +408,9 @@ export default function Dashboard() {
                 )}
               </section>
 
-              <section className="border border-[var(--color-sr-border)] bg-white">
-                <div className="border-b border-[var(--color-sr-border)] px-5 py-4">
-                  <h2 className="text-[17px] font-bold text-[var(--color-sr-navy-deeper)]">
+              <section className="overflow-hidden border border-[var(--color-sr-border)] bg-white">
+                <div className="border-b border-[var(--color-sr-border)] px-4 py-3.5 sm:px-5 sm:py-4">
+                  <h2 className="text-[16px] font-bold text-[var(--color-sr-navy-deeper)] sm:text-[17px]">
                     Suggested for you
                   </h2>
                   <p className="mt-1 text-[13px] text-[var(--color-sr-muted)]">
@@ -420,12 +419,12 @@ export default function Dashboard() {
                 </div>
 
                 {recsLoading ? (
-                  <div className="flex items-center justify-center gap-2 px-5 py-14 text-[14px] text-[var(--color-sr-muted)]">
+                  <div className="flex items-center justify-center gap-2 px-4 py-14 text-[14px] text-[var(--color-sr-muted)] sm:px-5">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Finding matches…
                   </div>
                 ) : !recommendations || recommendations.length === 0 ? (
-                  <div className="px-5 py-10 text-center">
+                  <div className="px-4 py-10 text-center sm:px-5">
                     <p className="font-semibold text-[var(--color-sr-navy)]">No matches yet</p>
                     <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">
                       Add country and education level on your profile to unlock suggestions.
@@ -443,7 +442,7 @@ export default function Dashboard() {
                       <li key={s._id}>
                         <Link
                           to={`/scholarships/${s.slug || s._id}`}
-                          className="block px-5 py-4 transition hover:bg-[var(--color-sr-bg)]"
+                          className="block px-4 py-3.5 transition hover:bg-[var(--color-sr-bg)] sm:px-5 sm:py-4"
                         >
                           <p className="font-semibold leading-snug text-[var(--color-sr-navy-deeper)]">
                             {s.title}
@@ -462,7 +461,7 @@ export default function Dashboard() {
                   </ul>
                 )}
 
-                <div className="border-t border-[var(--color-sr-border)] px-5 py-3">
+                <div className="border-t border-[var(--color-sr-border)] px-4 py-3 sm:px-5">
                   <Link
                     to="/scholarships"
                     className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
@@ -477,7 +476,7 @@ export default function Dashboard() {
 
           {(user.role === 'provider' || user.role === 'admin') && (
             <section>
-              <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-sr-muted)]">
+              <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-sr-muted)] sm:text-[13px]">
                 Tools
               </h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -485,7 +484,7 @@ export default function Dashboard() {
                   <>
                     <Link
                       to="/dashboard/provider/listings"
-                      className="border border-[var(--color-sr-border)] bg-white p-5 transition hover:border-[var(--color-sr-navy)]"
+                      className="border border-[var(--color-sr-border)] bg-white p-4 transition hover:border-[var(--color-sr-navy)] sm:p-5"
                     >
                       <p className="font-bold text-[var(--color-sr-navy-deeper)]">My listings</p>
                       <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">
@@ -494,7 +493,7 @@ export default function Dashboard() {
                     </Link>
                     <Link
                       to="/dashboard/provider/applicants"
-                      className="border border-[var(--color-sr-border)] bg-white p-5 transition hover:border-[var(--color-sr-navy)]"
+                      className="border border-[var(--color-sr-border)] bg-white p-4 transition hover:border-[var(--color-sr-navy)] sm:p-5"
                     >
                       <p className="font-bold text-[var(--color-sr-navy-deeper)]">Applicants</p>
                       <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">
@@ -507,7 +506,7 @@ export default function Dashboard() {
                   <>
                     <Link
                       to="/dashboard/admin/users"
-                      className="border border-[var(--color-sr-border)] bg-white p-5 transition hover:border-[var(--color-sr-navy)]"
+                      className="border border-[var(--color-sr-border)] bg-white p-4 transition hover:border-[var(--color-sr-navy)] sm:p-5"
                     >
                       <p className="font-bold text-[var(--color-sr-navy-deeper)]">Users</p>
                       <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">
@@ -516,7 +515,7 @@ export default function Dashboard() {
                     </Link>
                     <Link
                       to="/dashboard/admin/scholarships"
-                      className="border border-[var(--color-sr-border)] bg-white p-5 transition hover:border-[var(--color-sr-navy)]"
+                      className="border border-[var(--color-sr-border)] bg-white p-4 transition hover:border-[var(--color-sr-navy)] sm:p-5"
                     >
                       <p className="font-bold text-[var(--color-sr-navy-deeper)]">Scholarships</p>
                       <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">
@@ -525,7 +524,7 @@ export default function Dashboard() {
                     </Link>
                     <Link
                       to="/dashboard/admin/analytics"
-                      className="border border-[var(--color-sr-border)] bg-white p-5 transition hover:border-[var(--color-sr-navy)]"
+                      className="border border-[var(--color-sr-border)] bg-white p-4 transition hover:border-[var(--color-sr-navy)] sm:p-5"
                     >
                       <p className="font-bold text-[var(--color-sr-navy-deeper)]">Analytics</p>
                       <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">

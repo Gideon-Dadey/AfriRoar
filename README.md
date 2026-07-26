@@ -70,6 +70,18 @@ This creates test accounts:
 
 ### 4. Run Development Servers
 
+From the project root (starts API + frontend together):
+
+```bash
+npm install
+npm run dev
+```
+
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:5000
+
+Or run them separately:
+
 ```bash
 # Terminal 1: Backend
 cd server
@@ -79,9 +91,6 @@ npm run dev
 cd client
 npm run dev
 ```
-
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:5000
 
 ## Features
 

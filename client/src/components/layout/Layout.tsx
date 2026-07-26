@@ -1,17 +1,19 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
+import AppShell from './AppShell';
 import Footer from './Footer';
 import BackToTop from '@/components/sr/BackToTop';
 
-const HIDE_FOOTER_PATHS = new Set(['/login', '/register']);
+const HIDE_FOOTER_PATHS = new Set(['/login', '/register', '/forgot-password', '/verify-email']);
 
 export default function Layout() {
   const { pathname } = useLocation();
-  const hideFooter = HIDE_FOOTER_PATHS.has(pathname);
+  const isDashboard = pathname.startsWith('/dashboard');
+  const hideFooter = isDashboard || HIDE_FOOTER_PATHS.has(pathname);
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--color-sr-bg)]">
-      <Navbar />
+      {isDashboard ? <AppShell /> : <Navbar />}
       <main className="flex-1">
         <Outlet />
       </main>

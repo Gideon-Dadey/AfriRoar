@@ -1,0 +1,16 @@
+---
+description: Always commit and push completed work to GitHub without waiting to be asked
+alwaysApply: true
+---
+
+# Auto commit and push
+
+After finishing a meaningful set of code changes in this project, **commit and push to `origin` on the current branch without waiting for the user to ask**.
+
+Follow the existing git safety protocol:
+- Never update git config
+- Never force-push to main/master unless explicitly requested
+- Never commit secrets (`.env`, credentials) or `server/uploads/`
+- Use a concise commit message focused on why
+- Run status/diff/log before committing; push after a successful commit
+- Skip empty commits when there is nothing to push

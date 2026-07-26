@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { ChevronDown, LayoutDashboard, LogOut, Menu, Search, X } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGaugeHigh, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import { ChevronDown, Menu, Search, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -180,7 +182,7 @@ export default function Navbar() {
                   to="/dashboard"
                   className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold hover:text-[var(--color-sr-yellow)]"
                 >
-                  <LayoutDashboard className="w-4 h-4" />
+                  <FontAwesomeIcon icon={faGaugeHigh} className="text-[13px]" />
                   Dashboard
                 </Link>
                 <button
@@ -188,7 +190,7 @@ export default function Navbar() {
                   onClick={handleLogout}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold border border-white/30 hover:bg-white/10"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <FontAwesomeIcon icon={faRightFromBracket} className="text-[13px]" />
                   Log out
                 </button>
               </>
@@ -299,13 +301,23 @@ export default function Navbar() {
               <div className="border-t border-white/15 mt-3 pt-3">
                 {isAuthenticated ? (
                   <>
-                    <Link to="/dashboard" className="block px-3 py-3 hover:bg-white/10" onClick={closeAll}>
+                    <Link
+                      to="/dashboard"
+                      className="flex items-center gap-2.5 px-3 py-3 hover:bg-white/10"
+                      onClick={closeAll}
+                    >
+                      <FontAwesomeIcon icon={faGaugeHigh} className="w-4 text-[14px]" />
                       Dashboard {user?.name ? `(${user.name.split(' ')[0]})` : ''}
                     </Link>
                     <Link to="/dashboard/applications" className="block px-3 py-3 hover:bg-white/10" onClick={closeAll}>
                       My applications
                     </Link>
-                    <button type="button" className="block w-full text-left px-3 py-3 hover:bg-white/10" onClick={handleLogout}>
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-2.5 px-3 py-3 text-left hover:bg-white/10"
+                      onClick={handleLogout}
+                    >
+                      <FontAwesomeIcon icon={faRightFromBracket} className="w-4 text-[14px]" />
                       Log out
                     </button>
                   </>
