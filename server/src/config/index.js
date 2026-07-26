@@ -37,17 +37,22 @@ module.exports = {
 
   email: {
     host: process.env.EMAIL_HOST,
-    port: parseInt(process.env.EMAIL_PORT, 10) || 587,
+    port: parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT, 10) || 587,
+    secure:
+      process.env.SMTP_SECURE === 'true' ||
+      process.env.SMTP_SECURE === '1' ||
+      String(process.env.SMTP_PORT || process.env.EMAIL_PORT || '') === '465',
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
     from: process.env.EMAIL_FROM || 'AfriRoar <noreply@afriroar.com>',
     support: process.env.SUPPORT_EMAIL || 'afriroar.support@gmail.com',
   },
 
-  clientUrl:
+  clientUrl: (
     process.env.CLIENT_URL ||
     process.env.RENDER_EXTERNAL_URL ||
-    'http://localhost:5173',
+    'http://localhost:5173'
+  ).replace(/\/$/, ''),
 
   redis: {
     url: process.env.REDIS_URL,

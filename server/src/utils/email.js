@@ -28,7 +28,7 @@ const createTransporter = () => {
       service: 'gmail',
       host: config.email.host || 'smtp.gmail.com',
       port: config.email.port || 587,
-      secure: false,
+      secure: Boolean(config.email.secure),
       auth: {
         user: config.email.user,
         pass: config.email.pass,
