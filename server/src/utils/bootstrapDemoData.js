@@ -722,6 +722,360 @@ const buildJobsCatalog = () => {
   ];
 };
 
+/**
+ * CMS editorial catalogue for Guides, Internships, Lists, and Jobs posts.
+ * Upserted by slug on every server start so /dashboard/admin/content is populated.
+ */
+const buildContentCatalog = () => {
+  return [
+    {
+      title: 'How to write a Motivation Letter for Scholarship (5 Examples)',
+      slug: 'motivation-letter-examples',
+      category: 'guide',
+      excerpt:
+        'Step-by-step guidance and real examples to help you craft a winning motivation letter.',
+      coverImage: '/sr/posts/motivation.png',
+      tags: ['guide', 'motivation-letter', 'essays'],
+      status: 'published',
+      body: `A strong motivation letter explains who you are, why this programme fits, and what you will do with the opportunity. Committees read hundreds of letters. Clarity and honesty beat dramatic claims.
+
+Your letter should answer three questions without fluff: Why this scholarship or university? Why you? What happens after you graduate?
+
+Keep it between 500 and 800 words unless the provider sets a different limit. One page is often ideal. Use short paragraphs and concrete examples from your studies, work, or community service.
+
+Recommended structure
+Opening (2 to 3 sentences): who you are and the exact programme you are applying for.
+Academic path: relevant degrees, projects, grades, or research that prepare you for this opportunity.
+Motivation: a specific problem or goal tied to your country, field, or career.
+Fit: why this university, scholarship, or country is the right next step.
+Impact: how you will use the training when you return home or advance your field.
+Close: thank the committee and confirm you are ready to meet the programme demands.
+
+Common mistakes to avoid
+Copy-pasting the same letter for every scholarship without changing names and goals.
+Listing your CV again instead of explaining decisions and impact.
+Exaggerating achievements or inventing hardship stories.
+Writing only about money. Funding matters, but purpose matters more.
+Submitting without a careful proofread for grammar and tone.
+
+Use AfriRoar to draft, revise, and store your letter alongside transcripts and references before you submit.`,
+    },
+    {
+      title: 'How to Get an Acceptance Letter from Chinese Universities (CSC Scholarship) 2027',
+      slug: 'csc-acceptance-letter-guide',
+      category: 'guide',
+      excerpt:
+        'Practical tips for securing a pre-admission or acceptance letter for CSC applications.',
+      coverImage: '/sr/posts/csc.webp',
+      country: 'China',
+      tags: ['guide', 'csc', 'china', 'acceptance-letter'],
+      status: 'published',
+      body: `Many Chinese Government Scholarship (CSC) pathways ask for a pre-admission or acceptance letter from a host university. Getting one early can strengthen your application and clarify which supervisor or department will host you.
+
+Start with programme fit
+Identify universities and supervisors whose research matches your background. Read recent papers, not just faculty bios. Prepare a short research proposal or study plan you can send with your CV.
+
+Contact supervisors professionally
+Write a concise email: who you are, your degree goal, why their lab or programme, and what you attach (CV, transcripts, proposal). Follow up once after 7 to 10 days if you hear nothing.
+
+Documents that help
+Passport biodata page, degree certificates, transcripts, language scores (English or Chinese as required), two recommendation letters, and a study plan. Keep PDF file names clean and professional.
+
+Timelines
+CSC Type A and Type B calendars differ by country and university. Begin outreach several months before the official CSC window closes so supervisors have time to respond.
+
+AfriRoar helps you organise these documents and track each university contact before you submit through the CSC or university portal.`,
+    },
+    {
+      title: 'Scholarship Deadlines 2026-2027 | Month-by-Month Calendar',
+      slug: 'scholarship-deadlines-2026-2027',
+      category: 'guide',
+      excerpt: 'A month-by-month calendar of major international scholarship deadlines.',
+      coverImage: '/sr/posts/deadlines.webp',
+      tags: ['guide', 'deadlines', 'calendar'],
+      status: 'published',
+      body: `Missing a deadline is the most common reason strong candidates lose awards. Use this month-by-month view as a planning scaffold, then confirm every date on the official provider site.
+
+August to October
+Many European and UK programmes open or close in this window. Chevening, DAAD, and several Commonwealth tracks often need early essay and reference work.
+
+November to January
+CSC, some Canadian awards, and spring-intake university scholarships intensify. Request transcripts and recommendation letters before campuses close for holidays.
+
+February to April
+US and Canadian university funding decisions, Fulbright country panels, and several African foundation awards move quickly. Keep a shared folder of final PDFs ready to upload.
+
+May to July
+Summer language programmes, late university scholarships, and rolling internship applications. Use quieter months to refresh essays and gather missing documents.
+
+Build a personal calendar with AfriRoar applications, set reminders two weeks before each close date, and never rely on a single blog list as the final authority.`,
+    },
+    {
+      title: 'Scholarship Documents Checklist | What to Prepare Before You Apply',
+      slug: 'scholarship-documents-checklist',
+      category: 'guide',
+      excerpt:
+        'A practical packet checklist: passport, transcripts, essays, references, and file naming that looks professional.',
+      coverImage: '/sr/posts/motivation.png',
+      tags: ['guide', 'documents', 'checklist'],
+      status: 'published',
+      body: `A complete packet looks professional and reduces last-minute panic. Assemble these items once, then reuse and customise per award.
+
+Identity and academics
+Valid passport biodata page
+Degree certificates and official transcripts (scan both sides if stamped)
+English or other language test scores if required
+Curriculum vitae tailored to study or research, not a generic job CV
+
+Essays and statements
+Motivation letter or personal statement
+Study or research plan where required
+Short answers saved in a draft document so you can paste cleanly into portals
+
+References and extras
+Two or three recommenders briefed with deadlines and programme names
+Medical certificate or police clearance if the award lists them
+Passport photos to the exact size the portal requests
+
+File hygiene
+Use clear PDF names such as Surname_Transcript_BSc.pdf
+Keep each file under portal size limits
+Store a master folder on AfriRoar so every application starts from the same base pack.`,
+    },
+    {
+      title: 'Common Scholarship Mistakes (And How to Avoid Them)',
+      slug: 'common-scholarship-mistakes',
+      category: 'guide',
+      excerpt:
+        'Eligibility skips, generic essays, late recommenders, and fee scams. Fix these before you submit.',
+      coverImage: '/sr/posts/deadlines.webp',
+      tags: ['guide', 'mistakes', 'tips'],
+      status: 'published',
+      body: `Strong grades alone do not win scholarships. These mistakes knock out otherwise competitive applicants every cycle.
+
+Skipping eligibility
+Age, citizenship, return-home rules, and work-experience minimums are hard filters. Read them before you write a single essay.
+
+Generic essays
+Committees notice copy-paste letters that could fit any university. Name the programme, modules, labs, or country context that make this award the right next step.
+
+Late recommenders
+Ask referees early, share your CV and draft statement, and send a polite reminder one week before the deadline.
+
+Ignoring document quality
+Blurry scans, wrong file types, and incomplete transcripts signal carelessness. Follow each portal checklist line by line.
+
+Fee and agent scams
+Legitimate government and university scholarships do not ask you to pay a private agent for a guarantee. Verify URLs and never share passwords.
+
+Use AfriRoar to track status, store documents, and review essays before you hit submit.`,
+    },
+    {
+      title: 'Fully Funded Scholarships in Malaysia 2027 for International Students',
+      slug: 'fully-funded-scholarships-malaysia-2027',
+      category: 'list',
+      country: 'Malaysia',
+      excerpt: 'Curated list of fully funded scholarships available in Malaysia for 2027 intake.',
+      coverImage: '/sr/posts/malaysia.png',
+      tags: ['list', 'malaysia', 'fully-funded'],
+      status: 'published',
+      body: `Malaysia remains a strong destination for African and Asian students seeking English-taught degrees with competitive funding.
+
+What this list covers
+Government and university awards that commonly include tuition and living support for international students. Always confirm the latest intake rules on official sites.
+
+Where to look
+Malaysian government scholarship tracks for international students
+Public university international scholarships (research and coursework)
+Industry and foundation awards tied to STEM, education, and public health
+
+How to use this list
+Shortlist programmes that match your level and field
+Note English requirements and whether a supervisor letter is needed
+Prepare transcripts and a motivation letter early so portal openings do not catch you unprepared
+
+AfriRoar lists related Malaysia programmes on the scholarships board and helps you organise documents before you apply.`,
+    },
+    {
+      title: 'Fully Funded Scholarships in Norway 2027 (Updated Guide and List)',
+      slug: 'fully-funded-scholarships-norway-2027',
+      category: 'list',
+      country: 'Norway',
+      excerpt: 'Updated guide and list of fully funded scholarships for studying in Norway.',
+      coverImage: '/sr/posts/norway.webp',
+      tags: ['list', 'norway', 'europe', 'fully-funded'],
+      status: 'published',
+      body: `Norway is known for high-quality public universities and competitive international funding for masters and research degrees.
+
+What to expect
+Many Norwegian programmes teach in English at graduate level. Living costs are high, so scholarships or part-time work planning matters.
+
+Funding angles
+University international scholarships
+Research council and project-funded PhD positions
+Nordic and European mobility schemes that include Norwegian hosts
+
+Application tips
+Check each university admissions portal for programme-specific deadlines
+Prepare a focused CV and statement that show academic fit
+Confirm whether you apply for funding in the same form as admission
+
+Browse AfriRoar Norway listings and save documents so you can move quickly when portals open.`,
+    },
+    {
+      title: 'Scholarship Deadlines List 2026-2027 | Month-by-Month Calendar',
+      slug: 'scholarship-deadlines-list-2026-2027',
+      category: 'list',
+      excerpt: 'A practical month-by-month calendar of major international scholarship deadlines.',
+      coverImage: '/sr/posts/deadlines.webp',
+      tags: ['list', 'deadlines'],
+      status: 'published',
+      body: `This list format is built for quick scanning. Pair it with official provider calendars before you submit.
+
+Peak seasons
+Late summer and autumn: UK and many European awards
+Winter: CSC and several North American cycles
+Spring: rolling university awards and late foundation grants
+
+How to work the list
+Add each deadline to your personal calendar with a two-week buffer
+Request references before peak exam or holiday periods
+Keep one master document folder so every portal upload is ready
+
+AfriRoar application tracking helps you see what is open, submitted, or closing soon across scholarships and jobs.`,
+    },
+    {
+      title: 'United Nations Internship Programme 2027 | Fully Funded Opportunities',
+      slug: 'un-internship-programme',
+      category: 'internship',
+      country: 'Global',
+      excerpt: 'Explore UN internship tracks for students and recent graduates worldwide.',
+      coverImage: '/sr/posts/chevening.png',
+      tags: ['internship', 'un', 'global'],
+      status: 'published',
+      body: `United Nations internship programmes place students and recent graduates in offices across the UN system. Terms, pay, and eligibility vary by entity, so read each vacancy carefully.
+
+Who typically qualifies
+Enrolled students or recent graduates in a relevant field
+Strong written English; additional UN languages are an advantage
+Interest in international development, human rights, humanitarian work, or specialised technical areas
+
+How to apply
+Create profiles on official UN careers portals
+Tailor your cover letter to the duty station and job family
+Highlight coursework, volunteering, or research that matches the terms of reference
+
+Preparation tips
+Many UN internships are competitive and some remain unpaid depending on the office. Plan living costs and visas early. Keep a polished CV and writing sample ready.
+
+AfriRoar can store your CV and cover letter drafts while you track scholarship and internship applications side by side.`,
+    },
+    {
+      title: 'Google Student Internship Programmes 2027',
+      slug: 'google-summer-internship',
+      category: 'internship',
+      country: 'USA',
+      excerpt: 'Software engineering and related internship opportunities for students at Google.',
+      coverImage: '/sr/posts/shanghai.webp',
+      tags: ['internship', 'google', 'tech', 'usa'],
+      status: 'published',
+      body: `Google student internships span software engineering, product, UX, and related roles. Timelines and locations change by year, so treat official Google Careers pages as the source of truth.
+
+What recruiters look for
+Problem-solving ability and coding fundamentals for engineering tracks
+Clear impact stories from projects, open source, or previous internships
+Collaboration and communication in team settings
+
+How to prepare
+Practise data structures and algorithms if applying to software roles
+Build a portfolio or GitHub that shows real projects
+Draft a concise CV that leads with outcomes, not only responsibilities
+
+Application rhythm
+Engineering internships often recruit months ahead of the start date. Apply early, complete assessments promptly, and keep interview logistics organised.
+
+Use AfriRoar to keep your CV, cover letter, and related documents in one place while you also pursue scholarships and other internships.`,
+    },
+    {
+      title: 'Remote Jobs for African Graduates 2027 | Where to Start',
+      slug: 'remote-jobs-african-graduates-2027',
+      category: 'job',
+      country: 'Global',
+      excerpt:
+        'A practical starter list of remote-friendly roles and how to present yourself to international employers.',
+      coverImage: '/sr/posts/shanghai.webp',
+      tags: ['job', 'remote', 'careers', 'africa'],
+      status: 'published',
+      body: `Remote work expands the job market beyond your city, but competition is global. Focus on roles that match your skills and time zone, then present a clean digital application packet.
+
+Role families that often hire remotely
+Customer support and success
+Virtual assistance and operations
+Content, marketing, and design
+Software and data roles for candidates with portfolios
+
+How to stand out
+Write a CV that leads with tools and measurable results
+Keep a short cover letter that names the company and role
+Prepare a quiet workspace and reliable internet for interviews
+
+Next steps on AfriRoar
+Browse the Jobs board for open roles, save your CV in job applications, and use Guides if you still need scholarship funding while you job hunt.`,
+    },
+    {
+      title: 'How to Write a CV for International Job Applications',
+      slug: 'cv-for-international-job-applications',
+      category: 'job',
+      excerpt:
+        'Layout, wording, and evidence that help hiring managers outside your country understand your experience quickly.',
+      coverImage: '/sr/posts/motivation.png',
+      tags: ['job', 'cv', 'careers'],
+      status: 'published',
+      body: `An international CV should be easy to scan in under a minute. Hiring managers compare many applicants across countries and education systems.
+
+Core sections
+Contact details with professional email and city or time zone
+Summary of three to four lines focused on the target role
+Experience with bullets that start with strong verbs and end with results
+Education with degree titles that translate clearly
+Skills: tools, languages, and certifications that matter for the job
+
+What to avoid
+Photos or personal details that are not requested
+Long paragraphs with no bullets
+Unexplained gaps without a brief note
+File formats the portal rejects
+
+AfriRoar job applications let you upload your CV once and reuse it across roles while you refine the wording.`,
+    },
+    {
+      title: 'Entry-Level International Jobs Without a Master Degree',
+      slug: 'entry-level-jobs-without-masters',
+      category: 'job',
+      excerpt:
+        'Roles and application tactics for candidates who are ready to work abroad or remotely without a postgraduate degree.',
+      coverImage: '/sr/posts/chevening.png',
+      tags: ['job', 'entry-level', 'careers'],
+      status: 'published',
+      body: `Not every international role requires a masters. Many employers hire for skills, reliability, and communication.
+
+Where entry-level candidates succeed
+Hospitality and tourism operations
+Retail and customer experience brands with global hubs
+NGO and programme assistant roles
+Tech support and junior operations in remote-first companies
+
+Strengthen your profile
+Highlight internships, volunteering, and campus leadership
+Show language ability and cross-cultural experience
+Complete short certificates only when they map to the job tools
+
+Combine paths
+Some candidates work while applying for scholarships. Others use a first job to fund later study. AfriRoar supports both tracks with Jobs and Scholarships in one account.`,
+    },
+  ];
+};
+
 const bootstrapDemoData = async () => {
   try {
     let provider = await User.findOne({ role: 'provider' });
@@ -871,9 +1225,65 @@ const bootstrapDemoData = async () => {
         `AfriRoar jobs catalogue synced: ${jobsCreated} created, ${jobsRefreshed} refreshed (${sampleJobs.length} total in catalogue)`,
       );
     }
+
+    // Seed / refresh CMS content (guides, internships, lists, jobs posts)
+    const Content = require('../models/Content');
+    const contentAuthor =
+      (await User.findOne({ role: 'admin' })) || provider;
+    const sampleContent = buildContentCatalog();
+
+    let contentCreated = 0;
+    let contentRefreshed = 0;
+    for (const item of sampleContent) {
+      const existingContent = await Content.findOne({ slug: item.slug });
+      if (!existingContent) {
+        await Content.create({
+          ...item,
+          createdBy: contentAuthor._id,
+          publishedAt: new Date(),
+        });
+        contentCreated += 1;
+      } else {
+        let dirty = false;
+        const syncFields = [
+          'title',
+          'category',
+          'excerpt',
+          'body',
+          'coverImage',
+          'country',
+          'tags',
+          'status',
+        ];
+        for (const key of syncFields) {
+          if (item[key] !== undefined) {
+            existingContent[key] = item[key];
+            dirty = true;
+          }
+        }
+        if (existingContent.isDeleted) {
+          existingContent.isDeleted = false;
+          existingContent.deletedAt = undefined;
+          dirty = true;
+        }
+        if (existingContent.status === 'published' && !existingContent.publishedAt) {
+          existingContent.publishedAt = new Date();
+          dirty = true;
+        }
+        if (dirty) {
+          await existingContent.save();
+          contentRefreshed += 1;
+        }
+      }
+    }
+    if (contentCreated || contentRefreshed) {
+      logger.info(
+        `AfriRoar content catalogue synced: ${contentCreated} created, ${contentRefreshed} refreshed (${sampleContent.length} total in catalogue)`,
+      );
+    }
   } catch (error) {
     logger.warn(`Demo data bootstrap skipped: ${error.message}`);
   }
 };
 
-module.exports = { bootstrapDemoData, buildCatalog, buildJobsCatalog };
+module.exports = { bootstrapDemoData, buildCatalog, buildJobsCatalog, buildContentCatalog };

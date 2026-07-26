@@ -60,14 +60,13 @@ contentSchema.index({ category: 1, status: 1 });
 contentSchema.index({ slug: 1 });
 contentSchema.index({ createdAt: -1 });
 
-contentSchema.pre('save', function (next) {
+contentSchema.pre('save', function () {
   if (!this.slug && this.title) {
     this.slug = `${slugify(this.title, { lower: true, strict: true })}-${Date.now().toString(36)}`;
   }
   if (this.isModified('status') && this.status === 'published' && !this.publishedAt) {
     this.publishedAt = new Date();
   }
-  next();
 });
 
 module.exports = mongoose.model('Content', contentSchema);
