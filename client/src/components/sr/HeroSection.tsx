@@ -10,7 +10,7 @@ const SLIDES = [
   },
   {
     src: '/sr/hero/slide-2',
-    alt: 'University students working through advanced equations on a chalkboard',
+    alt: 'African university students solving equations together at a classroom chalkboard',
     label: 'Serious study',
   },
   {
