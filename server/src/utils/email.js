@@ -75,12 +75,12 @@ const clientUrl = () => String(config.clientUrl || 'https://afriroar.com').repla
 const supportEmail = () => config.email.support || 'afriroar.support@gmail.com';
 const year = () => new Date().getFullYear();
 
-/** Gold primary CTA — matches AfriRoar product UI */
+/** Gold primary CTA — matches AfriRoar product UI (works in light + dark) */
 const ctaButton = (href, label) => `
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0 0;">
     <tr>
-      <td align="left" bgcolor="${BRAND.gold}" style="border-radius:4px;">
-        <a href="${href}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;font-weight:700;line-height:1;color:${BRAND.navyDeep};text-decoration:none;border-radius:4px;">
+      <td align="left" class="ar-btn" bgcolor="${BRAND.gold}" style="border-radius:4px;background:${BRAND.gold};">
+        <a href="${href}" target="_blank" class="ar-btn-label" style="display:inline-block;padding:14px 28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;font-weight:700;line-height:1;color:${BRAND.navyDeep};text-decoration:none;border-radius:4px;">
           ${label}
         </a>
       </td>
@@ -88,15 +88,15 @@ const ctaButton = (href, label) => `
   </table>
 `;
 
-/** OTP / reset code — gold accent, easy to read on mobile */
+/** OTP / reset code — neutral card (no gold), theme-aware */
 const codeBlock = (label, code) => `
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;">
     <tr>
-      <td bgcolor="${BRAND.soft}" style="background:${BRAND.soft};border:1px solid ${BRAND.border};border-left:4px solid ${BRAND.gold};padding:22px 20px;text-align:center;">
-        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:${BRAND.muted};margin:0 0 12px;">
+      <td class="ar-code" bgcolor="${BRAND.soft}" style="background:${BRAND.soft};border:1px solid ${BRAND.border};padding:22px 20px;text-align:center;">
+        <div class="ar-code-label" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:${BRAND.muted};margin:0 0 12px;">
           ${label}
         </div>
-        <div style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:34px;font-weight:700;letter-spacing:0.28em;color:${BRAND.navyDeep};line-height:1.15;">
+        <div class="ar-code-value" style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:34px;font-weight:700;letter-spacing:0.28em;color:${BRAND.navyDeep};line-height:1.15;">
           ${escapeHtml(code)}
         </div>
       </td>
@@ -105,7 +105,7 @@ const codeBlock = (label, code) => `
 `;
 
 /**
- * Shared shell — text wordmark (no image), navy + gold brand system.
+ * Shared shell — text wordmark, navy + gold brand, follows system light/dark theme.
  * Table layout for Gmail / Outlook / Apple Mail.
  */
 const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
@@ -119,29 +119,50 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="color-scheme" content="light only">
-  <meta name="supported-color-schemes" content="light">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
   <title>${escapeHtml(title)}</title>
+  <style>
+    :root { color-scheme: light dark; }
+    @media (prefers-color-scheme: dark) {
+      .ar-canvas { background-color: #0b1220 !important; }
+      .ar-card { background-color: #121a2b !important; }
+      .ar-body { background-color: #121a2b !important; color: #e8edf5 !important; }
+      .ar-footer { background-color: #0f1624 !important; border-top-color: #243044 !important; color: #94a3b8 !important; }
+      .ar-footer-brand { color: #f5c518 !important; }
+      .ar-footer a { color: #cbd5e1 !important; }
+      .ar-heading { color: #f8fafc !important; }
+      .ar-text { color: #cbd5e1 !important; }
+      .ar-text-muted { color: #94a3b8 !important; }
+      .ar-code { background-color: #0f1624 !important; border-color: #2a3a52 !important; }
+      .ar-code-label { color: #94a3b8 !important; }
+      .ar-code-value { color: #f8fafc !important; }
+      .ar-panel { background-color: #0f1624 !important; border-color: #2a3a52 !important; color: #cbd5e1 !important; }
+      .ar-ignore { color: #64748b !important; }
+      .ar-header { background-color: #0f1624 !important; }
+      .ar-tagline { color: rgba(226,232,240,0.75) !important; }
+    }
+  </style>
   <!--[if mso]><style>table,td{font-family:Arial,Helvetica,sans-serif!important;}</style><![endif]-->
 </head>
-<body style="margin:0;padding:0;background:${BRAND.canvas};-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+<body class="ar-canvas" style="margin:0;padding:0;background:${BRAND.canvas};-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;opacity:0;">
     ${safePreheader}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
   </div>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.canvas};">
+  <table role="presentation" class="ar-canvas" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.canvas};">
     <tr>
       <td align="center" style="padding:32px 12px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:${BRAND.white};">
+        <table role="presentation" class="ar-card" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:${BRAND.white};">
 
           <!-- Brand header: AfriRoar text on navy -->
           <tr>
-            <td bgcolor="${BRAND.navyDeep}" style="background:${BRAND.navyDeep};padding:28px 32px;text-align:left;">
+            <td class="ar-header" bgcolor="${BRAND.navyDeep}" style="background:${BRAND.navyDeep};padding:28px 32px;text-align:left;">
               <a href="${site}" target="_blank" style="text-decoration:none;">
                 <span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:22px;font-weight:800;letter-spacing:0.06em;color:${BRAND.gold};line-height:1;">
                   AfriRoar
                 </span>
               </a>
-              <div style="margin-top:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:1.4;color:rgba(255,255,255,0.72);">
+              <div class="ar-tagline" style="margin-top:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:1.4;color:rgba(255,255,255,0.72);">
                 Scholarships for African ambition
               </div>
             </td>
@@ -154,15 +175,15 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
 
           <!-- Body -->
           <tr>
-            <td bgcolor="${BRAND.white}" style="padding:32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${BRAND.text};background:${BRAND.white};">
+            <td class="ar-body" bgcolor="${BRAND.white}" style="padding:32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${BRAND.text};background:${BRAND.white};">
               ${bodyHtml}
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td bgcolor="${BRAND.soft}" style="padding:22px 32px 28px;border-top:1px solid ${BRAND.border};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:1.7;color:${BRAND.muted};background:${BRAND.soft};">
-              <p style="margin:0 0 6px;font-weight:700;color:${BRAND.navy};">AfriRoar</p>
+            <td class="ar-footer" bgcolor="${BRAND.soft}" style="padding:22px 32px 28px;border-top:1px solid ${BRAND.border};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:1.7;color:${BRAND.muted};background:${BRAND.soft};">
+              <p class="ar-footer-brand" style="margin:0 0 6px;font-weight:700;color:${BRAND.navy};">AfriRoar</p>
               <p style="margin:0 0 10px;">
                 <a href="${site}" target="_blank" style="color:${BRAND.navy};text-decoration:underline;">Open AfriRoar</a>
                 &nbsp;·&nbsp;
@@ -175,7 +196,7 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
 
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
           <tr>
-            <td align="center" style="padding:16px 8px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5;color:#94a3b8;">
+            <td class="ar-ignore" align="center" style="padding:16px 8px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5;color:#94a3b8;">
               If you did not expect this email, you can safely ignore it.
             </td>
           </tr>
@@ -189,13 +210,13 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
 };
 
 const heading = (text) => `
-  <h1 style="margin:0 0 14px;font-size:22px;font-weight:700;line-height:1.3;color:${BRAND.navyDeep};">
+  <h1 class="ar-heading" style="margin:0 0 14px;font-size:22px;font-weight:700;line-height:1.3;color:${BRAND.navyDeep};">
     ${text}
   </h1>
 `;
 
 const paragraph = (text, { muted = false, bottom = 16 } = {}) => `
-  <p style="margin:0 0 ${bottom}px;font-size:${muted ? '14' : '16'}px;line-height:1.65;color:${muted ? BRAND.muted : BRAND.body};">
+  <p class="${muted ? 'ar-text-muted' : 'ar-text'}" style="margin:0 0 ${bottom}px;font-size:${muted ? '14' : '16'}px;line-height:1.65;color:${muted ? BRAND.muted : BRAND.body};">
     ${text}
   </p>
 `;
@@ -357,7 +378,7 @@ const templates = {
           </table>
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
-              <td style="padding:16px;background:${BRAND.soft};border:1px solid ${BRAND.border};border-left:4px solid ${BRAND.gold};font-size:15px;line-height:1.65;color:${BRAND.body};">
+              <td class="ar-panel" style="padding:16px;background:${BRAND.soft};border:1px solid ${BRAND.border};font-size:15px;line-height:1.65;color:${BRAND.body};">
                 ${safeMessage}
               </td>
             </tr>
