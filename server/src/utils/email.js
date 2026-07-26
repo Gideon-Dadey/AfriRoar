@@ -151,15 +151,15 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
       }
       .ar-shell { background-color: #121212 !important; }
       .ar-body { background-color: #121212 !important; color: #ffffff !important; }
-      .ar-footer { background-color: #0e0e0e !important; border-top-color: #2a2a2a !important; color: #a1a1aa !important; }
-      .ar-footer a { color: #cbd5e1 !important; }
+      .ar-footer { background-color: #0e0e0e !important; border-top-color: #2a2a2a !important; color: #ffffff !important; }
+      .ar-footer a { color: #ffffff !important; }
       .ar-heading { color: #ffffff !important; }
       .ar-text { color: #ffffff !important; }
-      .ar-text-muted { color: #a1a1aa !important; }
+      .ar-text-muted { color: #ffffff !important; }
       .ar-code { background-color: #1a1a1b !important; border-color: #2a2a2a !important; }
-      .ar-code-label { color: #a1a1aa !important; }
+      .ar-code-label { color: #ffffff !important; }
       .ar-code-value { color: #ffffff !important; }
-      .ar-panel { background-color: #1a1a1b !important; border-color: #2a2a2a !important; color: #e4e4e7 !important; }
+      .ar-panel { background-color: #1a1a1b !important; border-color: #2a2a2a !important; color: #ffffff !important; }
       .ar-link { color: #f5c518 !important; }
       .ar-btn { background-color: #f5c518 !important; background-image: linear-gradient(#f5c518, #f5c518) !important; }
       .ar-btn-label { color: #1e2f4a !important; }
