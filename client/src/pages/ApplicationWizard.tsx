@@ -1765,7 +1765,6 @@ export default function ApplicationWizard() {
                     value={personalStatement}
                     onChange={(e) => setPersonalStatement(e.target.value)}
                     className={`${inputClass} resize-y`}
-                    placeholder="I am a final-year student focused on…"
                   />
                   <p
                     className={[
@@ -1791,7 +1790,6 @@ export default function ApplicationWizard() {
                     value={motivation}
                     onChange={(e) => setMotivation(e.target.value)}
                     className={`${inputClass} resize-y`}
-                    placeholder="This scholarship matters because…"
                   />
                   <p
                     className={[
