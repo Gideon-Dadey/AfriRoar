@@ -80,7 +80,7 @@ export default function AdminShell() {
             className="h-7 w-auto max-w-[150px] object-contain object-left"
           />
         </Link>
-        <span className="inline-flex items-center gap-1 border border-[var(--color-sr-yellow)]/40 bg-[var(--color-sr-yellow)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--color-sr-yellow)]">
+        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--color-sr-yellow)]">
           <FontAwesomeIcon icon={faUserShield} className="text-[10px]" />
           Admin
         </span>
