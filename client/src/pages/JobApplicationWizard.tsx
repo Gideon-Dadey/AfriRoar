@@ -20,6 +20,7 @@ import {
   getEmploymentTypeLabel,
   getWorkplaceTypeLabel,
 } from '@/lib/utils';
+import { useConfirm } from '@/components/ConfirmModal';
 import { useAuthStore } from '@/stores/authStore';
 import type { Job, JobApplication, JobApplicationPersonal } from '@/types';
 
@@ -102,6 +103,7 @@ export default function JobApplicationWizard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
+  const { confirm, dialog } = useConfirm();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState(1);
@@ -313,7 +315,13 @@ export default function JobApplicationWizard() {
 
   const withdraw = async () => {
     if (!id || !application) return;
-    if (!window.confirm('Withdraw this application?')) return;
+    const ok = await confirm({
+      title: 'Withdraw this application?',
+      description: 'You will stop the review process for this role. You can start a new application later if the job is still open.',
+      confirmLabel: 'Withdraw application',
+      variant: 'danger',
+    });
+    if (ok === false) return;
     try {
       await api.post(`/job-applications/${id}/withdraw`);
       queryClient.invalidateQueries({ queryKey: ['job-applications'] });
@@ -418,6 +426,7 @@ export default function JobApplicationWizard() {
 
   return (
     <>
+      {dialog}
       <Helmet>
         <title>
           {job ? `${job.title} application` : 'Job application'} | AfriRoar

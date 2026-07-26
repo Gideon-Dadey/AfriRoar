@@ -6,6 +6,7 @@ import { Plus, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { formatDate, getLevelLabel } from '@/lib/utils';
+import { useConfirm } from '@/components/ConfirmModal';
 import type { ApiResponse, Pagination, Scholarship } from '@/types';
 import {
   AdminTable,
@@ -32,6 +33,7 @@ type ScholarshipsPayload = {
 
 export default function AdminScholarships() {
   const queryClient = useQueryClient();
+  const { confirm, dialog } = useConfirm();
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -98,20 +100,30 @@ export default function AdminScholarships() {
     onError: () => toast.error('Could not delete'),
   });
 
-  const handleReject = (s: Scholarship) => {
-    if (!window.confirm(`Reject "${s.title}"?`)) return;
-    const reason = window.prompt('Reason for rejection:', 'Does not meet listing standards');
-    if (reason == null) return;
-    const trimmed = reason.trim();
-    if (!trimmed) {
-      toast.error('A reason is required');
-      return;
-    }
-    rejectMutation.mutate({ id: s._id, reason: trimmed });
+  const handleReject = async (s: Scholarship) => {
+    const reason = await confirm({
+      title: `Reject “${s.title}”?`,
+      description: 'This scholarship will be marked rejected and hidden from public browse.',
+      confirmLabel: 'Reject scholarship',
+      variant: 'warning',
+      input: {
+        label: 'Reason for rejection',
+        defaultValue: 'Does not meet listing standards',
+        required: true,
+      },
+    });
+    if (reason === false) return;
+    rejectMutation.mutate({ id: s._id, reason });
   };
 
-  const handleDelete = (s: Scholarship) => {
-    if (!window.confirm(`Delete "${s.title}"? This cannot be undone.`)) return;
+  const handleDelete = async (s: Scholarship) => {
+    const ok = await confirm({
+      title: `Delete “${s.title}”?`,
+      description: 'This cannot be undone. Related application links may break.',
+      confirmLabel: 'Delete scholarship',
+      variant: 'danger',
+    });
+    if (ok === false) return;
     deleteMutation.mutate(s._id);
   };
 
@@ -123,6 +135,7 @@ export default function AdminScholarships() {
 
   return (
     <>
+      {dialog}
       <Helmet>
         <title>Admin · Scholarships | AfriRoar</title>
       </Helmet>

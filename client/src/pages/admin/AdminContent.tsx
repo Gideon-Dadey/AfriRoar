@@ -6,6 +6,7 @@ import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { formatDate } from '@/lib/utils';
+import { useConfirm } from '@/components/ConfirmModal';
 import type { ApiResponse, ContentItem, Pagination } from '@/types';
 import {
   AdminTable,
@@ -40,6 +41,7 @@ const CATEGORIES = [
 
 export default function AdminContent() {
   const queryClient = useQueryClient();
+  const { confirm, dialog } = useConfirm();
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(1);
   const [category, setCategory] = useState('');
@@ -80,8 +82,14 @@ export default function AdminContent() {
     onError: () => toast.error('Could not delete content'),
   });
 
-  const handleDelete = (item: ContentItem) => {
-    if (!window.confirm(`Delete "${item.title}"? This cannot be undone.`)) return;
+  const handleDelete = async (item: ContentItem) => {
+    const ok = await confirm({
+      title: `Delete “${item.title}”?`,
+      description: 'This cannot be undone. The page will be removed from the site.',
+      confirmLabel: 'Delete content',
+      variant: 'danger',
+    });
+    if (ok === false) return;
     deleteMutation.mutate(item._id);
   };
 
@@ -93,6 +101,7 @@ export default function AdminContent() {
 
   return (
     <>
+      {dialog}
       <Helmet>
         <title>Admin · Content | AfriRoar</title>
       </Helmet>

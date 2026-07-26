@@ -6,6 +6,7 @@ import { Plus, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { formatDate, getEmploymentTypeLabel, getWorkplaceTypeLabel } from '@/lib/utils';
+import { useConfirm } from '@/components/ConfirmModal';
 import type { ApiResponse, Job, Pagination } from '@/types';
 import {
   AdminTable,
@@ -32,6 +33,7 @@ type JobsPayload = {
 
 export default function AdminJobs() {
   const queryClient = useQueryClient();
+  const { confirm, dialog } = useConfirm();
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -78,8 +80,14 @@ export default function AdminJobs() {
     onError: () => toast.error('Could not delete'),
   });
 
-  const handleDelete = (job: Job) => {
-    if (!window.confirm(`Delete "${job.title}"? This cannot be undone.`)) return;
+  const handleDelete = async (job: Job) => {
+    const ok = await confirm({
+      title: `Delete “${job.title}”?`,
+      description: 'This cannot be undone. Related applications may break.',
+      confirmLabel: 'Delete job',
+      variant: 'danger',
+    });
+    if (ok === false) return;
     deleteMutation.mutate(job._id);
   };
 
@@ -91,6 +99,7 @@ export default function AdminJobs() {
 
   return (
     <>
+      {dialog}
       <Helmet>
         <title>Admin · Jobs | AfriRoar</title>
       </Helmet>

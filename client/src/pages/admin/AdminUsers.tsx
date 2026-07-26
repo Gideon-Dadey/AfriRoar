@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { formatDate } from '@/lib/utils';
+import { useConfirm } from '@/components/ConfirmModal';
 import type { ApiResponse, Pagination, User } from '@/types';
 import {
   AdminTable,
@@ -30,6 +31,7 @@ type UsersPayload = {
 
 export default function AdminUsers() {
   const queryClient = useQueryClient();
+  const { confirm, dialog } = useConfirm();
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -89,20 +91,30 @@ export default function AdminUsers() {
     onError: () => toast.error('Could not unsuspend user'),
   });
 
-  const handleSuspend = (user: User) => {
-    if (!window.confirm(`Suspend ${user.name}? They will lose access until unsuspended.`)) return;
-    const reason = window.prompt('Reason for suspension:', 'Policy violation');
-    if (reason == null) return;
-    const trimmed = reason.trim();
-    if (!trimmed) {
-      toast.error('A reason is required');
-      return;
-    }
-    suspendMutation.mutate({ id: user._id, reason: trimmed });
+  const handleSuspend = async (user: User) => {
+    const reason = await confirm({
+      title: `Suspend ${user.name}?`,
+      description: 'They will lose access until unsuspended.',
+      confirmLabel: 'Suspend user',
+      variant: 'danger',
+      input: {
+        label: 'Reason for suspension',
+        defaultValue: 'Policy violation',
+        required: true,
+      },
+    });
+    if (reason === false) return;
+    suspendMutation.mutate({ id: user._id, reason });
   };
 
-  const handleUnsuspend = (user: User) => {
-    if (!window.confirm(`Restore access for ${user.name}?`)) return;
+  const handleUnsuspend = async (user: User) => {
+    const ok = await confirm({
+      title: `Restore access for ${user.name}?`,
+      description: 'This user will be able to sign in again immediately.',
+      confirmLabel: 'Restore access',
+      variant: 'default',
+    });
+    if (ok === false) return;
     unsuspendMutation.mutate(user._id);
   };
 
@@ -114,6 +126,7 @@ export default function AdminUsers() {
 
   return (
     <>
+      {dialog}
       <Helmet>
         <title>Admin · Users | AfriRoar</title>
       </Helmet>
