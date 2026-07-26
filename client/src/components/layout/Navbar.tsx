@@ -65,7 +65,8 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sr-safe-top bg-[var(--color-sr-navy)] text-white sticky top-0 z-50 shadow-sm">
+    <>
+    <header className="sr-safe-top fixed inset-x-0 top-0 z-50 bg-[var(--color-sr-navy)] text-white shadow-sm">
       <div className="sr-container flex items-center justify-between gap-3 h-14 md:h-16">
         <Link to="/" className="shrink-0 flex items-center h-full" onClick={closeAll}>
           <img
@@ -337,5 +338,9 @@ export default function Navbar() {
         </div>
       )}
     </header>
+    <div className="sr-fixed-nav-spacer" aria-hidden="true">
+      <div className="sr-fixed-nav-spacer-bar" />
+    </div>
+    </>
   );
 }

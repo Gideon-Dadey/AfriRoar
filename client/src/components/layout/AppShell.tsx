@@ -75,7 +75,8 @@ export default function AppShell() {
   };
 
   return (
-    <header className="sr-safe-top sticky top-0 z-50 w-full border-b border-white/10 bg-[var(--color-sr-navy)] text-white">
+    <>
+    <header className="sr-safe-top fixed inset-x-0 top-0 z-50 w-full border-b border-white/10 bg-[var(--color-sr-navy)] text-white">
       <div className="sr-container flex h-14 min-w-0 items-center justify-between gap-3 md:h-16">
         <div className="flex min-w-0 items-center gap-3 md:gap-6">
           <Link to="/dashboard" className="min-w-0 shrink" onClick={closeMenu}>
@@ -171,5 +172,9 @@ export default function AppShell() {
         </div>
       ) : null}
     </header>
+    <div className="sr-fixed-nav-spacer" aria-hidden="true">
+      <div className="sr-fixed-nav-spacer-bar" />
+    </div>
+    </>
   );
 }

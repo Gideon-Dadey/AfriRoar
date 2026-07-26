@@ -123,12 +123,12 @@ export default function AdminShell() {
 
   return (
     <div className="flex min-h-screen max-w-[100vw] overflow-x-hidden bg-[var(--color-sr-bg)]">
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 overflow-y-auto bg-[var(--color-sr-navy)] text-white lg:block">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 overflow-y-auto bg-[var(--color-sr-navy)] text-white lg:block">
         {sidebar}
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
-        <header className="sr-safe-top sticky top-0 z-40 border-b border-[var(--color-sr-border)] bg-[var(--color-sr-navy)] text-white lg:hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden lg:pl-60">
+        <header className="sr-safe-top fixed inset-x-0 top-0 z-40 border-b border-[var(--color-sr-border)] bg-[var(--color-sr-navy)] text-white lg:hidden">
           <div className="flex h-14 items-center justify-between gap-3 px-3 sm:px-4">
             <div className="flex min-w-0 items-center gap-2">
               <Link to="/dashboard/admin" className="min-w-0 shrink">
@@ -148,6 +148,9 @@ export default function AdminShell() {
             </button>
           </div>
         </header>
+        <div className="sr-fixed-nav-spacer lg:hidden" aria-hidden="true">
+          <div className="h-14" />
+        </div>
 
         {drawerOpen ? (
           <div className="fixed inset-0 z-50 lg:hidden">

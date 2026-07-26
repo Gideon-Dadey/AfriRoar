@@ -111,6 +111,22 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+  /* Spacer matching fixed nav height (safe-area + bar) so content is not covered */
+  .sr-fixed-nav-spacer {
+    flex-shrink: 0;
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .sr-fixed-nav-spacer > .sr-fixed-nav-spacer-bar {
+    height: 3.5rem; /* h-14 */
+  }
+
+  @media (min-width: 768px) {
+    .sr-fixed-nav-spacer > .sr-fixed-nav-spacer-bar {
+      height: 4rem; /* h-16 */
+    }
+  }
+
   .sr-container {
     width: 100%;
     max-width: 1180px;
