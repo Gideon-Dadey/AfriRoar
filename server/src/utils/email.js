@@ -1,8 +1,13 @@
 const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
 const config = require('../config');
 const logger = require('./logger');
 
 let transporter;
+
+const LOGO_CID = 'afriroar-logo';
+const LOGO_PATH = path.join(__dirname, '../assets/email-logo.png');
 
 const createTransporter = () => {
   if (!transporter) {
@@ -23,7 +28,21 @@ const createTransporter = () => {
   return transporter;
 };
 
-const sendEmail = async ({ to, subject, html, text, replyTo }) => {
+const getLogoAttachment = () => {
+  if (!fs.existsSync(LOGO_PATH)) {
+    logger.warn('Email logo missing at server/src/assets/email-logo.png');
+    return null;
+  }
+  return {
+    filename: 'afriroar-logo.png',
+    path: LOGO_PATH,
+    cid: LOGO_CID,
+    contentType: 'image/png',
+    contentDisposition: 'inline',
+  };
+};
+
+const sendEmail = async ({ to, subject, html, text, replyTo, attachments = [] }) => {
   try {
     const transport = createTransporter();
     if (!transport) {
@@ -31,6 +50,7 @@ const sendEmail = async ({ to, subject, html, text, replyTo }) => {
       return { skipped: true };
     }
 
+    const logo = getLogoAttachment();
     const info = await transport.sendMail({
       from: config.email.from,
       to,
@@ -38,6 +58,7 @@ const sendEmail = async ({ to, subject, html, text, replyTo }) => {
       html,
       text,
       ...(replyTo ? { replyTo } : {}),
+      attachments: [...(logo ? [logo] : []), ...attachments],
     });
     logger.info(`Email sent: ${info.messageId} to ${to}`);
     return info;
@@ -56,7 +77,6 @@ const escapeHtml = (value = '') =>
     .replace(/'/g, '&#39;');
 
 const clientUrl = () => String(config.clientUrl || 'https://afriroar.com').replace(/\/$/, '');
-const logoUrl = () => `${clientUrl()}/sr/logo.png`;
 const supportEmail = () => config.email.support || 'afriroar.support@gmail.com';
 const year = () => new Date().getFullYear();
 
@@ -90,21 +110,24 @@ const codeBlock = (label, code) => `
 `;
 
 /**
- * Shared shell: logo-only header (no text wordmark), clean body, quiet footer.
+ * Shared shell: logo-only header (CID-embedded so it works even when CLIENT_URL is localhost).
  * Table-based for Outlook / Gmail compatibility.
  */
 const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
-  const logo = logoUrl();
   const site = clientUrl();
   const safePreheader = escapeHtml(preheader);
+  // Always use CID so Gmail/mobile clients render the logo without fetching a public URL.
+  const logo = `cid:${LOGO_CID}`;
 
   return `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
   <title>${escapeHtml(title)}</title>
   <!--[if mso]><style>table,td{font-family:Arial,Helvetica,sans-serif!important;}</style><![endif]-->
 </head>
@@ -114,33 +137,37 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
   </div>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f6f8;">
     <tr>
-      <td align="center" style="padding:32px 16px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#ffffff;border:1px solid #e5e7eb;">
-          <!-- Logo header (replaces text brand bar) -->
+      <td align="center" style="padding:28px 12px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#ffffff;">
+          <!-- Logo header -->
           <tr>
-            <td align="left" style="padding:28px 32px 22px;border-bottom:1px solid #eef1f5;">
-              <a href="${site}" target="_blank" style="text-decoration:none;">
+            <td align="left" bgcolor="#ffffff" style="padding:28px 28px 20px;background:#ffffff;">
+              <a href="${site}" target="_blank" style="text-decoration:none;border:0;">
                 <img
                   src="${logo}"
                   alt="AfriRoar"
-                  width="148"
-                  style="display:block;width:148px;max-width:148px;height:auto;border:0;outline:none;text-decoration:none;"
+                  width="140"
+                  height="44"
+                  style="display:block;width:140px;max-width:140px;height:auto;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;"
                 />
               </a>
             </td>
           </tr>
+          <tr>
+            <td bgcolor="#f5c518" style="height:3px;line-height:3px;font-size:0;background:#f5c518;">&nbsp;</td>
+          </tr>
           <!-- Body -->
           <tr>
-            <td style="padding:32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1e1e1e;">
+            <td bgcolor="#ffffff" style="padding:28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1e1e1e;background:#ffffff;">
               ${bodyHtml}
             </td>
           </tr>
           <!-- Footer -->
           <tr>
-            <td style="padding:20px 32px 28px;border-top:1px solid #eef1f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:1.65;color:#94a3b8;">
+            <td bgcolor="#ffffff" style="padding:18px 28px 26px;border-top:1px solid #eef1f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:1.65;color:#94a3b8;background:#ffffff;">
               <p style="margin:0 0 8px;">
                 Sent by AfriRoar ·
-                <a href="${site}" target="_blank" style="color:#64748b;text-decoration:underline;">afriroar.com</a>
+                <a href="${site}" target="_blank" style="color:#64748b;text-decoration:underline;">Visit AfriRoar</a>
               </p>
               <p style="margin:0 0 8px;">
                 Need help?
@@ -152,7 +179,7 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
         </table>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
           <tr>
-            <td align="center" style="padding:16px 8px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5;color:#94a3b8;">
+            <td align="center" style="padding:14px 8px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5;color:#94a3b8;">
               If you did not expect this email, you can safely ignore it.
             </td>
           </tr>
