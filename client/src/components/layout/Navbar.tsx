@@ -24,9 +24,28 @@ const scholarshipMenu = {
   ],
 };
 
+const jobsMenu = {
+  browse: { label: 'Browse all jobs', to: '/jobs' },
+  countries: [
+    { label: 'Jobs in United States', to: '/jobs?country=United%20States' },
+    { label: 'Jobs in Canada', to: '/jobs?country=Canada' },
+    { label: 'Jobs in New Zealand', to: '/jobs?country=New%20Zealand' },
+    { label: 'Jobs in United Kingdom', to: '/jobs?country=United%20Kingdom' },
+    { label: 'Remote jobs', to: '/jobs?country=Remote' },
+  ],
+  types: [
+    { label: 'Full-time', to: '/jobs?employmentType=full-time' },
+    { label: 'Part-time', to: '/jobs?employmentType=part-time' },
+    { label: 'Contract', to: '/jobs?employmentType=contract' },
+    { label: 'Internship', to: '/jobs?employmentType=internship' },
+    { label: 'Closing soon', to: '/jobs?closing=soon' },
+  ],
+};
+
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scholarOpen, setScholarOpen] = useState(false);
+  const [jobsOpen, setJobsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
@@ -50,6 +69,7 @@ export default function Navbar() {
   const closeAll = () => {
     setMenuOpen(false);
     setScholarOpen(false);
+    setJobsOpen(false);
   };
 
   const handleLogout = async () => {
@@ -148,14 +168,60 @@ export default function Navbar() {
           >
             Internships
           </NavLink>
-          <NavLink
-            to="/jobs"
-            className={({ isActive }) =>
-              `sr-nav-link px-3 py-2 hover:text-[var(--color-sr-yellow)] transition-colors ${isActive ? 'text-[var(--color-sr-yellow)]' : ''}`
-            }
+
+          <div
+            className="relative"
+            onMouseEnter={() => setJobsOpen(true)}
+            onMouseLeave={() => setJobsOpen(false)}
           >
-            Jobs
-          </NavLink>
+            <button
+              type="button"
+              className="sr-nav-link px-3 py-2 inline-flex items-center gap-1 hover:text-[var(--color-sr-yellow)] transition-colors"
+            >
+              Jobs
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            {jobsOpen ? (
+              <div className="absolute left-0 top-full min-w-[280px] pt-1">
+                <div className="border border-white/10 bg-[var(--color-sr-navy)] py-2 text-[15px] font-normal text-white shadow-xl">
+                  <Link
+                    to={jobsMenu.browse.to}
+                    className="block px-4 py-2 transition-colors hover:bg-white/10 hover:text-[var(--color-sr-yellow)]"
+                    onClick={closeAll}
+                  >
+                    {jobsMenu.browse.label}
+                  </Link>
+                  <div className="px-4 pb-1 pt-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                    By country
+                  </div>
+                  {jobsMenu.countries.map((item) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className="block px-4 py-2 transition-colors hover:bg-white/10 hover:text-[var(--color-sr-yellow)]"
+                      onClick={closeAll}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                  <div className="px-4 pb-1 pt-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                    Role type
+                  </div>
+                  {jobsMenu.types.map((item) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className="block px-4 py-2 transition-colors hover:bg-white/10 hover:text-[var(--color-sr-yellow)]"
+                      onClick={closeAll}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+
           <NavLink
             to="/guides"
             className={({ isActive }) =>
@@ -300,9 +366,47 @@ export default function Navbar() {
               <Link to="/internships" className="block px-3 py-3 hover:bg-white/10" onClick={closeAll}>
                 Internships
               </Link>
-              <Link to="/jobs" className="block px-3 py-3 hover:bg-white/10" onClick={closeAll}>
+              <button
+                type="button"
+                className="flex w-full items-center justify-between px-3 py-3 hover:bg-white/10"
+                onClick={() => setJobsOpen((v) => !v)}
+              >
                 Jobs
-              </Link>
+                <ChevronDown className={`h-4 w-4 transition-transform ${jobsOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {jobsOpen ? (
+                <div className="pb-2 text-[15px] font-normal">
+                  <Link to="/jobs" className="block px-5 py-2.5 hover:bg-white/10" onClick={closeAll}>
+                    Browse all jobs
+                  </Link>
+                  <p className="px-5 pt-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                    By country
+                  </p>
+                  {jobsMenu.countries.map((item) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className="block px-5 py-2.5 hover:bg-white/10"
+                      onClick={closeAll}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                  <p className="px-5 pt-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                    Role type
+                  </p>
+                  {jobsMenu.types.map((item) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className="block px-5 py-2.5 hover:bg-white/10"
+                      onClick={closeAll}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
               <Link to="/guides" className="block px-3 py-3 hover:bg-white/10" onClick={closeAll}>
                 Scholarship Guides
               </Link>
