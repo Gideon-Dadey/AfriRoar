@@ -141,7 +141,7 @@ export default function ForgotPassword() {
       </Helmet>
 
       <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-sr-bg)] lg:grid lg:grid-cols-2">
-        {/* Brand panel — same as login */}
+        {/* Brand panel - same as login */}
         <aside className="relative hidden overflow-hidden bg-[var(--color-sr-navy-deeper)] lg:block">
           <picture>
             <source srcSet="/sr/hero/panel-1.webp" type="image/webp" />

@@ -49,7 +49,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Rate limiting — generous in development so dashboard polling / Strict Mode
+// Rate limiting - generous in development so dashboard polling / Strict Mode
 // remounts do not lock out the local UI.
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -85,7 +85,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// Data sanitization (Express 5-safe — req.query is read-only)
+// Data sanitization (Express 5-safe - req.query is read-only)
 const sanitizeValue = (value) => {
   if (value && typeof value === 'object') {
     if (Array.isArray(value)) return value.map(sanitizeValue);
@@ -116,7 +116,7 @@ app.use(
   express.static(path.join(__dirname, '../uploads'), {
     setHeaders(res, filePath) {
       const ext = path.extname(filePath).toLowerCase();
-      // Legacy avatar uploads were saved as .bin — sniff bytes so mobile Safari can render them
+      // Legacy avatar uploads were saved as .bin - sniff bytes so mobile Safari can render them
       if (ext === '.bin') {
         try {
           const fd = fs.openSync(filePath, 'r');

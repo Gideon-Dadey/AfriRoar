@@ -75,7 +75,7 @@ const clientUrl = () => String(config.clientUrl || 'https://afriroar.com').repla
 const supportEmail = () => config.email.support || 'afriroar.support@gmail.com';
 const year = () => new Date().getFullYear();
 
-/** Full-width gold CTA — Omnisend-style single primary action */
+/** Full-width gold CTA - Omnisend-style single primary action */
 const ctaButton = (href, label) => `
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:32px 0 0;">
     <tr>
@@ -94,7 +94,7 @@ const ctaButton = (href, label) => `
   </table>
 `;
 
-/** OTP / reset code — neutral card, no gold accent */
+/** OTP / reset code - neutral card, no gold accent */
 const codeBlock = (label, code) => `
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0;">
     <tr>
@@ -186,7 +186,7 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
       <td align="center" style="padding:0;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:${BRAND.white};">
 
-          <!-- Brand header — navy + gold (locked for light and dark) -->
+          <!-- Brand header - navy + gold (locked for light and dark) -->
           <tr>
             <td class="ar-header" bgcolor="#1e2f4a" style="background-color:#1e2f4a;background-image:linear-gradient(#1e2f4a,#1e2f4a);padding:18px 24px;text-align:left;">
               <a href="${site}" target="_blank" style="text-decoration:none;">
@@ -275,7 +275,7 @@ const templates = {
     const title = escapeHtml(scholarshipTitle || 'your scholarship');
     const site = clientUrl();
     return {
-      subject: `Application received — ${scholarshipTitle}`,
+      subject: `Application received - ${scholarshipTitle}`,
       text: `Hi ${userName},\n\nYour application for ${scholarshipTitle} was submitted successfully. We will notify you when the status changes.\n\nView: ${site}/dashboard/applications`,
       html: wrapEmail({
         title: 'Application submitted',
@@ -299,7 +299,7 @@ const templates = {
     const safeStatus = escapeHtml(String(status || '').replace(/_/g, ' '));
     const site = clientUrl();
     return {
-      subject: `Application update — ${scholarshipTitle}`,
+      subject: `Application update - ${scholarshipTitle}`,
       text: `Hi ${userName},\n\nYour application for ${scholarshipTitle} is now ${status}.\n\nView: ${site}/dashboard/applications`,
       html: wrapEmail({
         title: 'Application update',

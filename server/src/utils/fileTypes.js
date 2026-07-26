@@ -34,7 +34,7 @@ const sniffExtFromBuffer = (buffer) => {
   }
   if (buffer.toString('ascii', 0, 5) === '%PDF-') return '.pdf';
 
-  // HEIC/HEIF (iPhone) — not renderable in most browsers without conversion
+  // HEIC/HEIF (iPhone) - not renderable in most browsers without conversion
   const brand = buffer.toString('ascii', 4, 8);
   if (brand === 'ftyp') {
     const ftyp = buffer.toString('ascii', 8, 12);

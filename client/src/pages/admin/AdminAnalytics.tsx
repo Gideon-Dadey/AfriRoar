@@ -227,7 +227,7 @@ export default function AdminAnalytics() {
           ) : (
             <div className="border border-[var(--color-sr-border)] bg-white px-4 py-3 text-[13px] text-[var(--color-sr-muted)]">
               <FontAwesomeIcon icon={faArrowTrendUp} className="mr-2 text-[var(--color-sr-navy)]" />
-              No urgent queues — platform looks clear.
+              No urgent queues - platform looks clear.
             </div>
           )}
 
@@ -363,7 +363,7 @@ export default function AdminAnalytics() {
                         <p className="truncate text-[13px] font-semibold text-[var(--color-sr-navy-deeper)]">
                           {s.title || 'Scholarship'}
                         </p>
-                        <p className="text-[12px] text-[var(--color-sr-muted)]">{s.country || '—'}</p>
+                        <p className="text-[12px] text-[var(--color-sr-muted)]">{s.country || '-'}</p>
                       </div>
                       <span className="shrink-0 tabular-nums text-[14px] font-bold text-[var(--color-sr-navy)]">
                         {s.applicationCount ?? 0}
@@ -412,7 +412,7 @@ export default function AdminAnalytics() {
                             {student?.name || 'Unknown'}
                           </div>
                           <div className="text-[12px] text-[var(--color-sr-muted)]">
-                            {student?.email || '—'}
+                            {student?.email || '-'}
                           </div>
                         </td>
                         <td className={tdClass()}>
@@ -424,7 +424,7 @@ export default function AdminAnalytics() {
                           <StatusBadge status={app.status || 'draft'} />
                         </td>
                         <td className={tdClass()}>
-                          {app.updatedAt ? formatDate(app.updatedAt) : '—'}
+                          {app.updatedAt ? formatDate(app.updatedAt) : '-'}
                         </td>
                         <td className={tdClass()}>
                           <Link

@@ -285,7 +285,7 @@ export default function JobDetail() {
                   Who should apply
                 </h2>
                 <p className="mb-5 text-[13px] text-[var(--color-sr-muted)]">
-                  Minimum qualifications — experience and certificates often count
+                  Minimum qualifications - experience and certificates often count
                 </p>
                 <ul className="space-y-3">
                   {requirements.map((p, i) => (
@@ -309,7 +309,7 @@ export default function JobDetail() {
                 How to apply on AfriRoar
               </h2>
               <p className="mb-5 text-[13px] text-[var(--color-sr-muted)]">
-                Prepare these materials before you start — the form will not submit without them
+                Prepare these materials before you start - the form will not submit without them
               </p>
               <ol className="space-y-4">
                 {APPLY_MATERIALS.map((item, index) => (

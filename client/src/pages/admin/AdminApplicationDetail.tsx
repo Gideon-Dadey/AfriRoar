@@ -176,7 +176,7 @@ export default function AdminApplicationDetail() {
                     scholarship?.deadline ? `Deadline ${formatDate(scholarship.deadline)}` : null,
                   ]
                     .filter(Boolean)
-                    .join(' · ') || '—'}
+                    .join(' · ') || '-'}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">

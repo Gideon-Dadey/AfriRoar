@@ -136,7 +136,7 @@ export default function AdminJobApplicationDetail() {
                     job?.deadline ? `Deadline ${formatDate(job.deadline)}` : null,
                   ]
                     .filter(Boolean)
-                    .join(' · ') || '—'}
+                    .join(' · ') || '-'}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">

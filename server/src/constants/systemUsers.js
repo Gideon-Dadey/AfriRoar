@@ -1,4 +1,4 @@
-/** Accounts created for catalogue ownership — not real platform users. */
+/** Accounts created for catalogue ownership - not real platform users. */
 const SYSTEM_USER_EMAILS = ['provider@afriror.com'];
 
 const systemUserFilter = {

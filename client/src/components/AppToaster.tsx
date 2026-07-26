@@ -3,7 +3,7 @@ import { Toaster } from 'react-hot-toast';
 
 /**
  * Desktop: top-right, clear of chrome.
- * Mobile: bottom-center snackbar — avoids status bar, notch, and fixed nav.
+ * Mobile: bottom-center snackbar - avoids status bar, notch, and fixed nav.
  */
 export default function AppToaster() {
   const [isMobile, setIsMobile] = useState(false);

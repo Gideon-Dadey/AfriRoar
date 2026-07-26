@@ -102,7 +102,7 @@ const logout = catchAsync(async (req, res) => {
         await authService.logout(decoded.id, req);
       }
     } catch {
-      // Token may already be expired — still clear the cookie below
+      // Token may already be expired - still clear the cookie below
     }
   }
 

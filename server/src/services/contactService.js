@@ -19,7 +19,7 @@ const TOPIC_LABELS = {
 const submitContact = async (body) => {
   const { name, email, topic, message, company } = body;
 
-  // Silent success for bots — do not tip them off
+  // Silent success for bots - do not tip them off
   if (company && String(company).trim()) {
     logger.warn(`Contact honeypot triggered from ${email || 'unknown'}`);
     return {

@@ -18,10 +18,10 @@ AfriRoar deploys as **one Web Service**: Express API + built React app.
 3. Select the **AfriRoar** repo (branch `main`).
 4. Render reads `render.yaml` and creates the `afriror` web service.
 5. Fill required env vars when prompted:
-   - `MONGODB_URI` — Atlas URI  
-   - `EMAIL_USER` / `EMAIL_PASS` — Gmail + app password (for verify / contact)  
-   - `GOOGLE_CLIENT_ID` — same as your local Google Web client ID  
-   - `CLIENT_URL` — leave blank first deploy (auto uses `RENDER_EXTERNAL_URL`), then set to `https://YOUR-SERVICE.onrender.com`
+   - `MONGODB_URI` - Atlas URI  
+   - `EMAIL_USER` / `EMAIL_PASS` - Gmail + app password (for verify / contact)  
+   - `GOOGLE_CLIENT_ID` - same as your local Google Web client ID  
+   - `CLIENT_URL` - leave blank first deploy (auto uses `RENDER_EXTERNAL_URL`), then set to `https://YOUR-SERVICE.onrender.com`
 
 **Build Command** (paste exactly if creating the service manually):
 
@@ -39,8 +39,8 @@ npm start --prefix server
 
 ## After deploy
 
-1. Open `https://YOUR-SERVICE.onrender.com/api/health` — should return JSON success.
-2. Open `https://YOUR-SERVICE.onrender.com` — AfriRoar UI.
+1. Open `https://YOUR-SERVICE.onrender.com/api/health` - should return JSON success.
+2. Open `https://YOUR-SERVICE.onrender.com` - AfriRoar UI.
 3. **Google Cloud Console** → your OAuth client → add:
    - Authorized JavaScript origins: `https://YOUR-SERVICE.onrender.com`
    - Authorized redirect URIs: `https://YOUR-SERVICE.onrender.com` (if required)

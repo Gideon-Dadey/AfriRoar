@@ -1,4 +1,4 @@
-# ScholarHive — SaaS Scholarship Platform
+# ScholarHive - SaaS Scholarship Platform
 
 A production-ready SaaS scholarship platform for international students with advanced filtering, application tracking, Stripe subscription system, and admin moderation.
 

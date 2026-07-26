@@ -1,4 +1,4 @@
-# AfriRoar — Render Blueprint (single Web Service)
+# AfriRoar - Render Blueprint (single Web Service)
 # Connect this repo in Render → New → Blueprint
 # Docs: https://render.com/docs/blueprint-spec
 
@@ -15,7 +15,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      # Do not hardcode PORT — Render injects it. Overriding (e.g. 5000) breaks routing.
+      # Do not hardcode PORT - Render injects it. Overriding (e.g. 5000) breaks routing.
       - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
@@ -44,7 +44,7 @@ services:
         value: AfriRoar <afriroar.support@gmail.com>
       - key: SUPPORT_EMAIL
         value: afriroar.support@gmail.com
-      # Optional Stripe / Cloudinary — leave blank until needed
+      # Optional Stripe / Cloudinary - leave blank until needed
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_WEBHOOK_SECRET

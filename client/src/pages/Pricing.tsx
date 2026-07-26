@@ -30,7 +30,7 @@ export default function Pricing() {
           <h1 className="max-w-2xl text-3xl font-bold md:text-4xl">Free for students</h1>
           <p className="mt-3 max-w-2xl text-white/85">
             AfriRoar is currently free while we expand verified listings. Create an account to save
-            programmes, draft applications, and receive deadline alerts. Paid plans may return later —
+            programmes, draft applications, and receive deadline alerts. Paid plans may return later - 
             we will not advertise features we do not ship.
           </p>
         </div>

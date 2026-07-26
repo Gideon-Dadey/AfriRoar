@@ -1,4 +1,4 @@
-/* AfriRoar service worker — network-first shell, fast production updates */
+/* AfriRoar service worker - network-first shell, fast production updates */
 const CACHE = 'afriroar-shell-v3';
 const PRECACHE = ['/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
 
@@ -36,7 +36,7 @@ self.addEventListener('fetch', (event) => {
   // Never cache API or auth traffic
   if (url.pathname.startsWith('/api/')) return;
 
-  // Never let the SW cache itself or the HTML entry — always hit the network
+  // Never let the SW cache itself or the HTML entry - always hit the network
   if (url.pathname === '/sw.js' || url.pathname === '/index.html') {
     event.respondWith(fetch(request));
     return;

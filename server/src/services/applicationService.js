@@ -181,7 +181,7 @@ const submitApplication = async (id, userId, req) => {
   const programmeStep = application.steps?.find((s) => s.stepNumber === 1);
   if (programmeStep) {
     const existing = programmeStep.data || {};
-    // Legacy apps stored personal details on step 1 — leave those alone.
+    // Legacy apps stored personal details on step 1 - leave those alone.
     if (!existing.fullName && !existing.phone) {
       programmeStep.data = {
         intendedLevel: existing.intendedLevel || '',

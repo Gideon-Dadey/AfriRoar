@@ -23,7 +23,7 @@ const mapLevel = (level) => {
 };
 
 /**
- * Full AfriRoar applyable catalogue — mirrors homepage scholarship posts
+ * Full AfriRoar applyable catalogue - mirrors homepage scholarship posts
  * plus flagship Africa programmes (Mastercard, DAAD).
  * Upserted by slug on every server start so existing DBs gain new listings.
  */
@@ -115,7 +115,7 @@ const buildCatalog = () => {
       title: 'Korea University Scholarships 2027 for International Students',
       slug: 'korea-university-scholarships-2027',
       description:
-        'Korea University offers Global KU scholarships, GKS quotas, and graduate assistantships covering tuition and living costs for competitive international applicants.\n\nUndergraduate Global KU awards recognise academic excellence; graduate funding often pairs research assistantships with tuition waivers in engineering, business, and social sciences.\n\nBuild your AfriRoar application packet—statement, CV, and recommendations—then complete the Korea University online application by the posted deadline.',
+        'Korea University offers Global KU scholarships, GKS quotas, and graduate assistantships covering tuition and living costs for competitive international applicants.\n\nUndergraduate Global KU awards recognise academic excellence; graduate funding often pairs research assistantships with tuition waivers in engineering, business, and social sciences.\n\nBuild your AfriRoar application packet - statement, CV, and recommendations - then complete the Korea University online application by the posted deadline.',
       shortDescription: 'Competitive KU funding packages for international degree seekers.',
       country: 'South Korea',
       level: 'any',
@@ -278,7 +278,7 @@ const buildCatalog = () => {
 };
 
 /**
- * Multi-country careers catalogue — US, Canada, NZ, UK, Africa + remote.
+ * Multi-country careers catalogue - US, Canada, NZ, UK, Africa + remote.
  * Mix of degree and non-degree pathways; upserted by slug on every boot.
  */
 const buildJobsCatalog = () => {
@@ -287,7 +287,7 @@ const buildJobsCatalog = () => {
 
   return [
     {
-      title: 'Graduate Analyst — Development Finance',
+      title: 'Graduate Analyst - Development Finance',
       slug: 'graduate-analyst-development-finance',
       company: 'AfriRoar Partners',
       companyWebsite: 'https://afriror.com',
@@ -296,7 +296,7 @@ const buildJobsCatalog = () => {
       description:
         'Join a small research team tracking scholarship pipelines, donor programmes, and graduate outcomes.\n\nYou will prepare briefing notes, maintain opportunity databases, and support outreach to universities and employers.\n\nThis is a strong fit for recent graduates who care about education access and can write clearly under deadlines.\n\nCompensation is competitive for Accra market rates, with hybrid flexibility after onboarding.',
       requirements:
-        'Bachelor’s degree in economics, public policy, international relations, or related field — or equivalent analytical experience.\nStrong written English.\nComfortable with spreadsheets and remote collaboration tools.\nAfrica-focused interest is a plus.',
+        'Bachelor’s degree in economics, public policy, international relations, or related field - or equivalent analytical experience.\nStrong written English.\nComfortable with spreadsheets and remote collaboration tools.\nAfrica-focused interest is a plus.',
       responsibilities:
         'Research and summarise funding programmes.\nUpdate opportunity listings and quality checks.\nDraft short reports for partners.\nSupport virtual information sessions.',
       country: 'Ghana',
@@ -312,19 +312,19 @@ const buildJobsCatalog = () => {
       isFeatured: true,
     },
     {
-      title: 'Remote Content Intern — Scholarships Desk',
+      title: 'Remote Content Intern - Scholarships Desk',
       slug: 'remote-content-intern-scholarships-desk',
       company: 'AfriRoar Editorial',
       shortDescription:
         'Paid internship writing clear guides and listing summaries for African applicants.',
       description:
-        'Help the editorial team turn dense programme pages into practical applicant guides.\n\nYou will draft short explainers, fact-check deadlines, and keep country pages accurate.\n\nRemote-friendly with weekly check-ins. No bachelor’s degree required — strong writing samples matter more.',
+        'Help the editorial team turn dense programme pages into practical applicant guides.\n\nYou will draft short explainers, fact-check deadlines, and keep country pages accurate.\n\nRemote-friendly with weekly check-ins. No bachelor’s degree required - strong writing samples matter more.',
       requirements:
         'Enrolled student, HND/diploma holder, or recent graduate.\nExcellent English writing (portfolio or sample required in cover letter).\nReliable internet and attention to detail.\nInterest in higher education and careers.',
       responsibilities:
         'Draft and edit guide sections.\nVerify official links and deadlines.\nSuggest topics based on applicant questions.',
       country: 'Remote',
-      location: 'Remote — Africa timezone preferred',
+      location: 'Remote - Africa timezone preferred',
       employmentType: 'internship',
       workplaceType: 'remote',
       field: 'Media & Communications',
@@ -336,7 +336,7 @@ const buildJobsCatalog = () => {
       isFeatured: true,
     },
     {
-      title: 'Programme Coordinator — University Partnerships',
+      title: 'Programme Coordinator - University Partnerships',
       slug: 'programme-coordinator-university-partnerships',
       company: 'AfriRoar Partners',
       shortDescription: 'Coordinate university partnerships and applicant support workflows.',
@@ -364,9 +364,9 @@ const buildJobsCatalog = () => {
       company: 'Harborline Support Co.',
       companyWebsite: 'https://example.com',
       shortDescription:
-        'Full-time customer support role in Austin serving North American clients — diploma or strong experience accepted.',
+        'Full-time customer support role in Austin serving North American clients - diploma or strong experience accepted.',
       description:
-        'Harborline runs high-volume support for e-commerce and SaaS brands. We hire for clarity, patience, and ownership — not for a specific degree.\n\nYou will handle tickets and live chat, escalate product bugs cleanly, and hit quality targets with coaching from a team lead.\n\nTraining is paid for the first two weeks. Night and weekend rotation is shared fairly across the floor.\n\nThis role is open to candidates with secondary school certificates, HND/diplomas, or prior call-centre experience. A bachelor’s degree is welcome but not required.',
+        'Harborline runs high-volume support for e-commerce and SaaS brands. We hire for clarity, patience, and ownership - not for a specific degree.\n\nYou will handle tickets and live chat, escalate product bugs cleanly, and hit quality targets with coaching from a team lead.\n\nTraining is paid for the first two weeks. Night and weekend rotation is shared fairly across the floor.\n\nThis role is open to candidates with secondary school certificates, HND/diplomas, or prior call-centre experience. A bachelor’s degree is welcome but not required.',
       requirements:
         'Secondary school certificate, HND, diploma, or equivalent work experience (no bachelor’s required).\nClear spoken and written English.\nAbility to follow SOPs and document cases accurately.\nComfortable with computers and typing ~40 WPM.\nEligible to work in the United States.',
       responsibilities:
@@ -388,11 +388,11 @@ const buildJobsCatalog = () => {
       slug: 'warehouse-operations-associate-ohio-usa',
       company: 'Midwest Fulfillment Hub',
       shortDescription:
-        'On-site warehouse associate role in Columbus — physical work, clear shifts, no degree required.',
+        'On-site warehouse associate role in Columbus - physical work, clear shifts, no degree required.',
       description:
-        'Midwest Fulfillment Hub ships consumer goods across the US Midwest. We need reliable associates who take safety seriously and work well in a paced environment.\n\nShifts include receiving, picking, packing, and inventory counts. Safety gear and on-the-job training are provided.\n\nAdvancement to team lead is available based on attendance and accuracy — not academic credentials.',
+        'Midwest Fulfillment Hub ships consumer goods across the US Midwest. We need reliable associates who take safety seriously and work well in a paced environment.\n\nShifts include receiving, picking, packing, and inventory counts. Safety gear and on-the-job training are provided.\n\nAdvancement to team lead is available based on attendance and accuracy - not academic credentials.',
       requirements:
-        'No degree required — secondary school or equivalent preferred.\nAble to lift up to 25 kg / 50 lbs with proper technique.\nReliable attendance and willingness to work rotating shifts.\nBasic English for safety briefings.\nEligible to work in the United States.',
+        'No degree required - secondary school or equivalent preferred.\nAble to lift up to 25 kg / 50 lbs with proper technique.\nReliable attendance and willingness to work rotating shifts.\nBasic English for safety briefings.\nEligible to work in the United States.',
       responsibilities:
         'Receive, scan, and stage inbound inventory.\nPick and pack orders to accuracy targets.\nKeep work areas clean and report hazards.\nSupport cycle counts with the inventory team.',
       country: 'United States',
@@ -412,7 +412,7 @@ const buildJobsCatalog = () => {
       slug: 'it-helpdesk-technician-l1-atlanta-usa',
       company: 'Pinnacle Campus IT',
       shortDescription:
-        'Level-1 IT helpdesk supporting staff and students — CompTIA or hands-on experience valued over degrees.',
+        'Level-1 IT helpdesk supporting staff and students - CompTIA or hands-on experience valued over degrees.',
       description:
         'Pinnacle Campus IT supports a multi-site education client. Level-1 technicians own password resets, device imaging, ticket triage, and clear handoffs to L2.\n\nWe invest in certifications. A bachelor’s is not required if you can demonstrate troubleshooting skill and customer patience.\n\nHybrid after the first 90 days for strong performers.',
       requirements:
@@ -436,11 +436,11 @@ const buildJobsCatalog = () => {
       slug: 'sales-development-representative-chicago-usa',
       company: 'Northshore SaaS',
       shortDescription:
-        'Outbound SDR role for a B2B SaaS company — hungry communicators welcome; degree not mandatory.',
+        'Outbound SDR role for a B2B SaaS company - hungry communicators welcome; degree not mandatory.',
       description:
         'Northshore SaaS sells workflow software to mid-market operations teams. SDRs book qualified meetings for account executives.\n\nYou will run outbound sequences, qualify inbound leads, and keep CRM hygiene tight. Coaching is weekly and metrics are transparent.\n\nWe hire for coachability and persistence. Prior sales or hospitality experience can substitute for a degree.',
       requirements:
-        'Secondary school, diploma, HND, or bachelor’s — any path accepted with strong communication.\nComfortable with phone and email outreach.\nOrganised, resilient, and target-driven.\nEligible to work in the United States.',
+        'Secondary school, diploma, HND, or bachelor’s - any path accepted with strong communication.\nComfortable with phone and email outreach.\nOrganised, resilient, and target-driven.\nEligible to work in the United States.',
       responsibilities:
         'Prospect and book discovery meetings.\nQualify leads against ICP criteria.\nUpdate Salesforce / HubSpot accurately.\nHit weekly activity and meeting targets.',
       country: 'United States',
@@ -456,11 +456,11 @@ const buildJobsCatalog = () => {
       isFeatured: false,
     },
     {
-      title: 'Administrative Assistant — Healthcare Clinic',
+      title: 'Administrative Assistant - Healthcare Clinic',
       slug: 'administrative-assistant-healthcare-clinic-toronto',
       company: 'Maple Care Clinics',
       shortDescription:
-        'Front-desk and admin support in Toronto — diploma preferred; experience can replace a degree.',
+        'Front-desk and admin support in Toronto - diploma preferred; experience can replace a degree.',
       description:
         'Maple Care Clinics operate multi-doctor practices across Greater Toronto. Administrative assistants keep patient flow smooth, calendars accurate, and records compliant.\n\nYou will greet patients, schedule appointments, process intake forms, and support billing follow-ups under supervision.\n\nWe welcome candidates with office admin diplomas, HNDs, or 2+ years of front-desk experience. A bachelor’s degree is not required.',
       requirements:
@@ -484,7 +484,7 @@ const buildJobsCatalog = () => {
       slug: 'junior-bookkeeper-vancouver-canada',
       company: 'Cascade Ledger Services',
       shortDescription:
-        'Junior bookkeeping role in Vancouver — accounting diploma/HND or QuickBooks experience accepted.',
+        'Junior bookkeeping role in Vancouver - accounting diploma/HND or QuickBooks experience accepted.',
       description:
         'Cascade Ledger Services supports SMEs with monthly bookkeeping, payroll inputs, and year-end prep for accountants.\n\nAs a junior bookkeeper you will reconcile bank feeds, code expenses, and chase missing receipts with clients.\n\nWe train on our stack. Formal accounting degrees are helpful but not mandatory if you have a diploma and clean attention to detail.',
       requirements:
@@ -504,15 +504,15 @@ const buildJobsCatalog = () => {
       isFeatured: false,
     },
     {
-      title: 'Retail Team Member — Electronics',
+      title: 'Retail Team Member - Electronics',
       slug: 'retail-team-member-electronics-calgary',
       company: 'Northern Circuit Retail',
       shortDescription:
-        'Customer-facing retail role in Calgary — no degree required; product curiosity valued.',
+        'Customer-facing retail role in Calgary - no degree required; product curiosity valued.',
       description:
         'Northern Circuit is a regional electronics retailer. Team members help customers choose devices, process sales, and keep the floor presentation sharp.\n\nShifts include evenings and weekends. Product training is continuous.\n\nWe hire for energy and reliability. Secondary school completion is enough; university degrees are not required.',
       requirements:
-        'No degree required — secondary school or equivalent preferred.\nFriendly customer service mindset.\nAble to stand for long periods and lift light stock.\nEligible to work in Canada.',
+        'No degree required - secondary school or equivalent preferred.\nFriendly customer service mindset.\nAble to stand for long periods and lift light stock.\nEligible to work in Canada.',
       responsibilities:
         'Greet and assist customers on the floor.\nProcess sales and returns accurately.\nRestock and maintain displays.\nMeet weekly attach and NPS goals with coaching.',
       country: 'Canada',
@@ -532,7 +532,7 @@ const buildJobsCatalog = () => {
       slug: 'construction-site-labourer-auckland-nz',
       company: 'Harbourview Civils',
       shortDescription:
-        'Site labourer roles in Auckland — trade interest welcome; no tertiary degree required.',
+        'Site labourer roles in Auckland - trade interest welcome; no tertiary degree required.',
       description:
         'Harbourview Civils builds civil and light commercial projects across Auckland. Site labourers support carpenters and supervisors with prep, material moves, and site housekeeping.\n\nPPE is supplied. Safety induction is mandatory before first shift.\n\nThis pathway is ideal for candidates who prefer hands-on work. A university degree is not required; willingness to learn and follow site rules is.',
       requirements:
@@ -552,15 +552,15 @@ const buildJobsCatalog = () => {
       isFeatured: true,
     },
     {
-      title: 'Hospitality Front of House — Café',
+      title: 'Hospitality Front of House - Café',
       slug: 'hospitality-front-of-house-wellington-nz',
       company: 'Southern Roast Café Group',
       shortDescription:
-        'Café front-of-house in Wellington — hospitality experience valued over academic credentials.',
+        'Café front-of-house in Wellington - hospitality experience valued over academic credentials.',
       description:
-        'Southern Roast runs busy city cafés. Front-of-house staff take orders, manage the till, and keep service warm and fast during peaks.\n\nWe provide barista basics training for strong hires. Weekend availability is a plus.\n\nNo tertiary degree required — prior café, restaurant, or retail experience helps.',
+        'Southern Roast runs busy city cafés. Front-of-house staff take orders, manage the till, and keep service warm and fast during peaks.\n\nWe provide barista basics training for strong hires. Weekend availability is a plus.\n\nNo tertiary degree required - prior café, restaurant, or retail experience helps.',
       requirements:
-        'No degree required — prior hospitality or retail experience preferred.\nCalm under pressure and guest-focused.\nBasic cash handling and food hygiene awareness (training available).\nEligible to work in New Zealand.',
+        'No degree required - prior hospitality or retail experience preferred.\nCalm under pressure and guest-focused.\nBasic cash handling and food hygiene awareness (training available).\nEligible to work in New Zealand.',
       responsibilities:
         'Take orders and process payments accurately.\nDeliver excellent guest service during rush periods.\nKeep the floor and counters clean.\nSupport opening/closing checklists.',
       country: 'New Zealand',
@@ -580,7 +580,7 @@ const buildJobsCatalog = () => {
       slug: 'junior-digital-marketing-assistant-christchurch-nz',
       company: 'Kiwi Reach Agency',
       shortDescription:
-        'Junior marketing assistant in Christchurch — portfolio and certificates can replace a degree.',
+        'Junior marketing assistant in Christchurch - portfolio and certificates can replace a degree.',
       description:
         'Kiwi Reach is a boutique agency helping local brands with social content, email campaigns, and basic SEO.\n\nAs a junior assistant you will schedule posts, pull simple reports, and help with asset organisation. Senior strategists own creative direction.\n\nGoogle Digital Garage, Meta Blueprint, or a strong personal portfolio can substitute for a marketing degree.',
       requirements:
@@ -604,11 +604,11 @@ const buildJobsCatalog = () => {
       slug: 'remote-data-entry-specialist-uk-remote',
       company: 'Clearform Data Services',
       shortDescription:
-        'Fully remote data entry for UK business hours — accuracy first; no degree required.',
+        'Fully remote data entry for UK business hours - accuracy first; no degree required.',
       description:
         'Clearform digitises forms and CRM updates for professional services clients. Specialists enter structured data, flag exceptions, and hit accuracy KPIs.\n\nWork is fully remote with UK-overlap hours. Equipment stipend available after probation.\n\nWe do not require a university degree. Reliable internet, typing speed, and integrity are the bar.',
       requirements:
-        'No degree required — secondary school or diploma preferred.\nTyping accuracy over 98% on sample tests.\nReliable internet and quiet workspace.\nEligible to invoice / work with UK clients (discuss status at interview).',
+        'No degree required - secondary school or diploma preferred.\nTyping accuracy over 98% on sample tests.\nReliable internet and quiet workspace.\nEligible to invoice / work with UK clients (discuss status at interview).',
       responsibilities:
         'Enter and validate structured records.\nFlag incomplete or inconsistent source files.\nMeet daily volume and accuracy targets.\nFollow data protection procedures strictly.',
       country: 'United Kingdom',
@@ -628,7 +628,7 @@ const buildJobsCatalog = () => {
       slug: 'community-health-outreach-worker-lagos',
       company: 'CivicCare Outreach',
       shortDescription:
-        'Community outreach in Lagos — certificate or community experience accepted; bachelor’s not mandatory.',
+        'Community outreach in Lagos - certificate or community experience accepted; bachelor’s not mandatory.',
       description:
         'CivicCare runs neighbourhood health education campaigns on maternal health and vaccination awareness.\n\nOutreach workers engage households, log visits, and escalate clinical concerns to nurses. Cultural sensitivity and reliability matter more than academic titles.\n\nCommunity health certificates, nursing assistant training, or NGO field experience are all accepted pathways.',
       requirements:
@@ -652,7 +652,7 @@ const buildJobsCatalog = () => {
       slug: 'junior-software-qa-tester-berlin-remote',
       company: 'Nordic Soft Labs',
       shortDescription:
-        'Remote-friendly junior QA role — bootcamp or self-taught testers welcome alongside degree holders.',
+        'Remote-friendly junior QA role - bootcamp or self-taught testers welcome alongside degree holders.',
       description:
         'Nordic Soft Labs builds B2B productivity tools. Junior QA testers write test cases, run regression suites, and log clear bug reports.\n\nMentorship is built into the first six months. ISTQB Foundation or a solid portfolio of test write-ups can replace a computer science degree.\n\nCore hours overlap with CET; fully remote within approved countries.',
       requirements:
@@ -676,11 +676,11 @@ const buildJobsCatalog = () => {
       slug: 'farm-operations-assistant-canterbury-nz',
       company: 'Greenridge Agri Co-op',
       shortDescription:
-        'Seasonal-to-permanent farm operations support in Canterbury — practical skills over degrees.',
+        'Seasonal-to-permanent farm operations support in Canterbury - practical skills over degrees.',
       description:
         'Greenridge supports dairy and mixed farms with seasonal labour coordination and on-farm assistance.\n\nAssistants help with animal care routines, equipment checks, and harvest logistics under experienced supervisors.\n\nAgricultural certificates help but are not mandatory. Reliability, fitness, and respect for farm safety culture are essential.',
       requirements:
-        'No degree required — agricultural certificate or farm experience preferred.\nPhysically capable of outdoor work.\nWilling to start early and follow biosecurity rules.\nEligible to work in New Zealand.',
+        'No degree required - agricultural certificate or farm experience preferred.\nPhysically capable of outdoor work.\nWilling to start early and follow biosecurity rules.\nEligible to work in New Zealand.',
       responsibilities:
         'Support daily animal and paddock routines.\nAssist with equipment checks and cleaning.\nHelp load and record harvest or feed movements.\nReport animal welfare concerns immediately.',
       country: 'New Zealand',
@@ -700,7 +700,7 @@ const buildJobsCatalog = () => {
       slug: 'remote-virtual-assistant-global',
       company: 'Atlas Executive Support',
       shortDescription:
-        'Remote VA supporting founders across time zones — organisation and English first; degree optional.',
+        'Remote VA supporting founders across time zones - organisation and English first; degree optional.',
       description:
         'Atlas matches skilled virtual assistants with startups and consultants. You will manage calendars, inbox triage, travel research, and light research briefs.\n\nTools include Google Workspace, Notion, and Slack. We measure turnaround time and communication quality.\n\nA university degree is optional. Proven admin experience, HND/diploma, or strong freelance references are enough.',
       requirements:
@@ -708,7 +708,7 @@ const buildJobsCatalog = () => {
       responsibilities:
         'Manage calendars and meeting logistics.\nTriage email and draft routine replies.\nPrepare simple research summaries.\nKeep task boards current for principals.',
       country: 'Remote',
-      location: 'Remote — global (overlap with GMT / EST)',
+      location: 'Remote - global (overlap with GMT / EST)',
       employmentType: 'contract',
       workplaceType: 'remote',
       field: 'Administration',

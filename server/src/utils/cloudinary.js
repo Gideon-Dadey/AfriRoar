@@ -63,7 +63,7 @@ const uploadLocally = async (buffer, options = {}) => {
 
 const uploadToCloudinary = (buffer, options = {}) => {
   if (!hasCloudinary) {
-    logger.warn('Cloudinary not configured — storing upload locally');
+    logger.warn('Cloudinary not configured - storing upload locally');
     return uploadLocally(buffer, options);
   }
 

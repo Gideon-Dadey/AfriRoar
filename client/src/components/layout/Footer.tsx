@@ -49,7 +49,7 @@ export default function Footer() {
         source: 'footer',
         company: honeypot,
       });
-      toast.success('Subscribed — watch your inbox for new listings.');
+      toast.success('Subscribed - watch your inbox for new listings.');
       setEmail('');
     } catch {
       toast.error('Could not subscribe. Try again shortly.');

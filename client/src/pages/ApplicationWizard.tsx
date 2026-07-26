@@ -1429,7 +1429,7 @@ export default function ApplicationWizard() {
                     <p className="mt-2 font-semibold text-[var(--color-sr-navy-deeper)]">
                       {[getLevelLabel(programme.intendedLevel), programme.intendedField]
                         .filter(Boolean)
-                        .join(' · ') || '—'}
+                        .join(' · ') || '-'}
                     </p>
                     {programme.specialization ? (
                       <p className="mt-1">{programme.specialization}</p>
@@ -1684,7 +1684,7 @@ export default function ApplicationWizard() {
             {step === 3 && (
               <div className="grid gap-5 sm:grid-cols-2">
                 <p className="sm:col-span-2 text-[14px] text-[var(--color-sr-muted)]">
-                  Your current or most recent education — not the programme you are applying for.
+                  Your current or most recent education - not the programme you are applying for.
                 </p>
                 <Field id="app-education" label="Highest education completed / in progress *">
                   <select

@@ -438,7 +438,7 @@ export default function AdminJobForm() {
               value={form.salaryPeriod}
               onChange={set('salaryPeriod')}
             >
-              <option value="">—</option>
+              <option value=""> - </option>
               <option value="hour">Hour</option>
               <option value="month">Month</option>
               <option value="year">Year</option>

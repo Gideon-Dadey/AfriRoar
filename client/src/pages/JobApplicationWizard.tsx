@@ -870,10 +870,10 @@ export default function JobApplicationWizard() {
               <ul className="mt-2 list-disc space-y-1.5 pl-4 text-[var(--color-sr-muted)]">
                 <li>Personal details (name, email, phone, country)</li>
                 <li>Cover letter (minimum 80 characters)</li>
-                <li>At least one document — CV / resume (PDF preferred)</li>
+                <li>At least one document - CV / resume (PDF preferred)</li>
               </ul>
               <p className="mt-3 border-t border-[var(--color-sr-border)] pt-3 text-[var(--color-sr-muted)]">
-                Save often — drafts stay editable until you submit.
+                Save often - drafts stay editable until you submit.
               </p>
               {user?.email ? (
                 <p className="mt-2 text-[var(--color-sr-muted)]">Signed in as {user.email}</p>

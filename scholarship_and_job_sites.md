@@ -1,6 +1,6 @@
 # Scholarship & Job Opportunity Websites
 
-Curated list of **solid, useful platforms** that are strong for product/UX research — focused on mid-tier and specialized sites rather than only the ultra-popular giants (e.g. Fastweb, Scholarships.com).
+Curated list of **solid, useful platforms** that are strong for product/UX research - focused on mid-tier and specialized sites rather than only the ultra-popular giants (e.g. Fastweb, Scholarships.com).
 
 Use the links below to open each site and study layout, navigation, filtering, and how they present scholarships vs jobs.
 
@@ -8,7 +8,7 @@ Use the links below to open each site and study layout, navigation, filtering, a
 
 ## A. Sites that offer both Scholarships and Jobs
 
-These platforms mix funding opportunities with careers, internships, or graduate roles — closest to a “scholarship + job” product.
+These platforms mix funding opportunities with careers, internships, or graduate roles - closest to a “scholarship + job” product.
 
 | # | Platform | What they offer | Link |
 |---|----------|-----------------|------|
@@ -50,7 +50,7 @@ Strong scholarship-focused directories and aggregators worth reviewing for UI/UX
 
 ## Quick open list (clickable)
 
-### Hybrid — scholarships + jobs
+### Hybrid - scholarships + jobs
 1. [Opportunity Desk](https://opportunitydesk.org/)
 2. [FillyDash](https://fillydash.com/)
 3. [StipiAid](https://stipiaid.com/)
@@ -84,11 +84,11 @@ Strong scholarship-focused directories and aggregators worth reviewing for UI/UX
 
 When you open each site, note:
 
-- **First viewport** — brand strength, hero, primary CTA
-- **Discovery** — filters (country, level, field, funding type)
-- **Listing cards** — deadline, amount, eligibility clarity
-- **Hybrid UX** — how they switch between scholarships and jobs (tabs, nav, combined feed)
-- **Trust signals** — verification badges, official source links, scam warnings
+- **First viewport** - brand strength, hero, primary CTA
+- **Discovery** - filters (country, level, field, funding type)
+- **Listing cards** - deadline, amount, eligibility clarity
+- **Hybrid UX** - how they switch between scholarships and jobs (tabs, nav, combined feed)
+- **Trust signals** - verification badges, official source links, scam warnings
 
 ---
 

@@ -93,7 +93,7 @@ export default function Jobs() {
           </p>
           <h1 className="text-2xl font-bold md:text-3xl">Jobs & careers</h1>
           <p className="mt-2 max-w-3xl text-white/85">
-            Competitive roles across the United States, Canada, New Zealand, Africa, and remote —
+            Competitive roles across the United States, Canada, New Zealand, Africa, and remote - 
             many open to diploma, HND, and experience-based applicants, not only bachelor’s degrees.
           </p>
         </div>
@@ -223,7 +223,7 @@ export default function Jobs() {
             <Briefcase className="mx-auto h-8 w-8 text-[var(--color-sr-navy)]" />
             <p className="mt-3 font-semibold">No open roles match these filters</p>
             <p className="mt-1 text-sm text-[var(--color-sr-muted)]">
-              Clear filters or check back soon — new jobs are published regularly.
+              Clear filters or check back soon - new jobs are published regularly.
             </p>
           </div>
         ) : (
