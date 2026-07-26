@@ -82,8 +82,8 @@ const ctaButton = (href, label) => `
       <td align="center">
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:100%;">
           <tr>
-            <td align="center" class="ar-btn" bgcolor="${BRAND.gold}" style="border-radius:6px;background:${BRAND.gold};">
-              <a href="${href}" target="_blank" class="ar-btn-label" style="display:block;padding:16px 24px;font-family:Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;line-height:1.2;color:${BRAND.navyDeep};text-decoration:none;border-radius:6px;text-align:center;">
+            <td align="center" class="ar-btn" bgcolor="${BRAND.gold}" style="background:${BRAND.gold};">
+              <a href="${href}" target="_blank" class="ar-btn-label" style="display:block;padding:16px 24px;font-family:Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;line-height:1.2;color:${BRAND.navyDeep};text-decoration:none;text-align:center;">
                 ${label}
               </a>
             </td>
@@ -98,7 +98,7 @@ const ctaButton = (href, label) => `
 const codeBlock = (label, code) => `
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0;">
     <tr>
-      <td class="ar-code" bgcolor="${BRAND.soft}" style="background:${BRAND.soft};border:1px solid ${BRAND.border};border-radius:8px;padding:28px 20px;text-align:center;">
+      <td class="ar-code" bgcolor="${BRAND.soft}" style="background:${BRAND.soft};border:1px solid ${BRAND.border};padding:28px 20px;text-align:center;">
         <div class="ar-code-label" style="font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:${BRAND.muted};margin:0 0 14px;">
           ${label}
         </div>
@@ -161,7 +161,7 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
   <table role="presentation" class="ar-canvas" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.canvas};">
     <tr>
       <td class="ar-outer" align="center" style="padding:40px 16px;">
-        <table role="presentation" class="ar-card" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:${BRAND.white};border-radius:8px;overflow:hidden;">
+        <table role="presentation" class="ar-card" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:${BRAND.white};overflow:hidden;">
 
           <!-- Simple brand header (fixed colors in light + dark) -->
           <tr>
