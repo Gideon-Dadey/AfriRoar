@@ -17,6 +17,7 @@ const users = [
     email: 'admin@afriroar.com',
     password: 'admin@123',
     role: 'admin',
+    isEmailVerified: true,
     profile: {
       country: 'United States',
       bio: 'Platform administrator',
@@ -27,6 +28,7 @@ const users = [
     email: 'student@scholarhive.com',
     password: 'Student@123456',
     role: 'student',
+    isEmailVerified: true,
     profile: {
       country: 'Nigeria',
       educationLevel: 'bachelors',
@@ -43,6 +45,7 @@ const users = [
     email: 'maria@scholarhive.com',
     password: 'Student@123456',
     role: 'student',
+    isEmailVerified: true,
     profile: {
       country: 'Colombia',
       educationLevel: 'masters',
@@ -59,6 +62,7 @@ const users = [
     email: 'provider@scholarhive.com',
     password: 'Provider@123456',
     role: 'provider',
+    isEmailVerified: true,
     profile: {
       country: 'United Kingdom',
       bio: 'International education foundation supporting students worldwide.',
@@ -69,6 +73,7 @@ const users = [
     email: 'techfuture@scholarhive.com',
     password: 'Provider@123456',
     role: 'provider',
+    isEmailVerified: true,
     profile: {
       country: 'United States',
       bio: 'Technology company providing STEM scholarships.',
