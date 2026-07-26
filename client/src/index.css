@@ -31,10 +31,20 @@
     scroll-behavior: auto;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* Top overscroll matches navy header; bottom matches page canvas */
+    background: linear-gradient(
+      to bottom,
+      var(--color-sr-navy) 0%,
+      var(--color-sr-navy) 40%,
+      var(--color-sr-bg) 40%,
+      var(--color-sr-bg) 100%
+    );
+    background-color: var(--color-sr-navy);
   }
 
   body {
     margin: 0;
+    min-height: 100%;
     font-family: var(--font-sans);
     font-size: 18px;
     font-weight: 400;
