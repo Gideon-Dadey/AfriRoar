@@ -14,8 +14,8 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/schola
 const users = [
   {
     name: 'Admin User',
-    email: 'admin@scholarhive.com',
-    password: 'Admin@123456',
+    email: 'admin@afriroar.com',
+    password: 'admin@123',
     role: 'admin',
     profile: {
       country: 'United States',
@@ -269,7 +269,7 @@ const seed = async () => {
     console.log(`Created ${createdScholarships.length} scholarships`);
 
     console.log('\n--- Test Accounts ---');
-    console.log('Admin:    admin@scholarhive.com / Admin@123456');
+    console.log('Admin:    admin@afriroar.com / admin@123');
     console.log('Student:  student@scholarhive.com / Student@123456');
     console.log('Student2: maria@scholarhive.com / Student@123456');
     console.log('Provider: provider@scholarhive.com / Provider@123456');

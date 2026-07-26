@@ -62,7 +62,7 @@ npm run seed
 This creates test accounts:
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@scholarhive.com | Admin@123456 |
+| Admin | admin@afriroar.com | admin@123 |
 | Student | student@scholarhive.com | Student@123456 |
 | Student | maria@scholarhive.com | Student@123456 |
 | Provider | provider@scholarhive.com | Provider@123456 |
