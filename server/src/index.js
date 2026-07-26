@@ -168,7 +168,6 @@ app.get('/api/health', (req, res) => {
 });
 
 // Serve the Vite client build when present (Render / production single-service)
-const fs = require('fs');
 const clientDist = path.join(__dirname, '../../client/dist');
 const serveClient = fs.existsSync(path.join(clientDist, 'index.html'));
 
