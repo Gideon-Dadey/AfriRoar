@@ -29,6 +29,8 @@
   html {
     font-size: 16px;
     scroll-behavior: auto;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
@@ -40,6 +42,8 @@
     background: var(--color-sr-bg);
     color: var(--color-sr-text);
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
   }
 
   a {
@@ -55,6 +59,24 @@
   ::selection {
     background: var(--color-sr-yellow);
     color: #111;
+  }
+
+  /*
+   * iOS Safari zooms focused inputs under 16px. Keep form controls at 16px+
+   * so login, register, profile, dashboard, and apply flows feel app-native.
+   */
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='hidden']),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  @media (hover: none) and (pointer: coarse) {
+    input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='hidden']),
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
   }
 }
 

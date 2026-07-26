@@ -17,7 +17,7 @@ function safeRedirect(raw: string | null | undefined) {
 }
 
 const inputClass =
-  'w-full border border-[var(--color-sr-border)] bg-white px-3 py-3 text-[15px] text-[var(--color-sr-text)] outline-none transition-colors placeholder:text-[var(--color-sr-muted)]/70 focus:border-[var(--color-sr-navy)] disabled:cursor-not-allowed disabled:bg-[var(--color-sr-bg)]';
+  'w-full border border-[var(--color-sr-border)] bg-white px-3 py-3 text-[16px] text-[var(--color-sr-text)] outline-none transition-colors placeholder:text-[var(--color-sr-muted)]/70 focus:border-[var(--color-sr-navy)] disabled:cursor-not-allowed disabled:bg-[var(--color-sr-bg)]';
 
 export default function Login() {
   const [email, setEmail] = useState('');

@@ -103,7 +103,7 @@ function Field({
 }
 
 const inputClass =
-  'w-full border border-[var(--color-sr-border)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-sr-text)] outline-none transition-colors placeholder:text-[var(--color-sr-muted)]/70 focus:border-[var(--color-sr-navy)]';
+  'w-full border border-[var(--color-sr-border)] bg-white px-3 py-2.5 text-[16px] text-[var(--color-sr-text)] outline-none transition-colors placeholder:text-[var(--color-sr-muted)]/70 focus:border-[var(--color-sr-navy)]';
 
 export default function Profile() {
   const { user, updateUser } = useAuthStore();

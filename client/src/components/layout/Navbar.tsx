@@ -229,7 +229,7 @@ export default function Navbar() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search scholarships, countries, guides..."
-              className="flex-1 px-3 py-2.5 bg-white text-[var(--color-sr-text)] outline-none"
+              className="flex-1 px-3 py-2.5 bg-white text-[16px] text-[var(--color-sr-text)] outline-none"
             />
             <button
               type="submit"

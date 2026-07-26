@@ -127,7 +127,7 @@ function programmeFromScholarship(s?: Scholarship | null): ProgrammeData {
 }
 
 const inputClass =
-  'w-full border border-[var(--color-sr-border)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-sr-text)] outline-none transition-colors placeholder:text-[var(--color-sr-muted)]/70 focus:border-[var(--color-sr-navy)] disabled:cursor-not-allowed disabled:bg-[var(--color-sr-bg)] disabled:text-[var(--color-sr-muted)]';
+  'w-full border border-[var(--color-sr-border)] bg-white px-3 py-2.5 text-[16px] text-[var(--color-sr-text)] outline-none transition-colors placeholder:text-[var(--color-sr-muted)]/70 focus:border-[var(--color-sr-navy)] disabled:cursor-not-allowed disabled:bg-[var(--color-sr-bg)] disabled:text-[var(--color-sr-muted)]';
 
 function Field({
   id,
@@ -871,7 +871,7 @@ export default function ApplicationWizard() {
                     value={pickerQuery}
                     onChange={(e) => setPickerQuery(e.target.value)}
                     placeholder="Search by title, country, or field…"
-                    className="w-full border border-[var(--color-sr-border)] bg-white py-2.5 pl-10 pr-3 text-[15px] text-[var(--color-sr-text)] outline-none placeholder:text-[var(--color-sr-muted)]/70 focus:border-[var(--color-sr-navy)]"
+                    className="w-full border border-[var(--color-sr-border)] bg-white py-2.5 pl-10 pr-3 text-[16px] text-[var(--color-sr-text)] outline-none placeholder:text-[var(--color-sr-muted)]/70 focus:border-[var(--color-sr-navy)]"
                   />
                 </div>
 
