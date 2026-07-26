@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
+const fs = require('fs');
 const path = require('path');
 
 dotenv.config({ path: path.join(__dirname, '../../.env') });
@@ -10,6 +10,13 @@ const Scholarship = require('../models/Scholarship');
 const Application = require('../models/Application');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/scholarhive';
+
+const RESTORE_APP_ID = '6a64f82168ab271b1ea9038d';
+const RESTORE_APP_DIR = path.join(
+  __dirname,
+  '../../uploads/afriror/applications',
+  RESTORE_APP_ID
+);
 
 const users = [
   {
@@ -55,6 +62,17 @@ const users = [
       interests: ['environment', 'sustainability', 'biology'],
       languages: ['Spanish', 'English'],
       gpa: 3.9,
+    },
+  },
+  // Real registered student — keep on new DBs so admin always sees them
+  {
+    name: 'Ruiping Ding',
+    email: 'ruipingding720@gmail.com',
+    password: 'Student@123456',
+    role: 'student',
+    isEmailVerified: true,
+    profile: {
+      bio: 'Registered student account',
     },
   },
   {
@@ -252,6 +270,7 @@ const upsertDemoUsers = async () => {
   const results = [];
   for (const userData of users) {
     const email = userData.email.toLowerCase();
+    const isRegisteredRestore = email === 'ruipingding720@gmail.com';
     let user = await User.findOne({ email }).select('+password');
     if (user) {
       user.name = userData.name;
@@ -259,7 +278,10 @@ const upsertDemoUsers = async () => {
       user.isEmailVerified = true;
       user.isDeleted = false;
       user.isSuspended = false;
-      user.password = userData.password;
+      // Keep existing password for real registered accounts; reset demo passwords.
+      if (!isRegisteredRestore) {
+        user.password = userData.password;
+      }
       if (userData.profile) {
         user.profile = { ...user.profile?.toObject?.() ?? user.profile ?? {}, ...userData.profile };
       }
@@ -271,6 +293,127 @@ const upsertDemoUsers = async () => {
     }
   }
   return results;
+};
+
+const restoreRegisteredApplication = async () => {
+  const student = await User.findOne({ email: 'ruipingding720@gmail.com' });
+  if (!student) return { action: 'skipped', reason: 'student missing' };
+
+  const scholarship = await Scholarship.findOne({
+    slug: 'shanghai-jiao-tong-university-scholarships-2027',
+    isDeleted: { $ne: true },
+  });
+  if (!scholarship) return { action: 'skipped', reason: 'scholarship missing' };
+
+  if (!fs.existsSync(RESTORE_APP_DIR)) {
+    return { action: 'skipped', reason: 'upload folder missing' };
+  }
+
+  const files = fs.readdirSync(RESTORE_APP_DIR).filter((f) => f.endsWith('.pdf'));
+  const documents = files.map((filename) => {
+    const full = path.join(RESTORE_APP_DIR, filename);
+    const stat = fs.statSync(full);
+    return {
+      name: filename,
+      url: `/uploads/afriror/applications/${RESTORE_APP_ID}/${filename}`,
+      publicId: `afriror/applications/${RESTORE_APP_ID}/${filename.replace(/\.pdf$/, '')}`,
+      fileType: 'application/pdf',
+      fileSize: stat.size,
+      uploadedAt: stat.mtime,
+    };
+  });
+
+  const profile = student.profile || {};
+  const appId = new mongoose.Types.ObjectId(RESTORE_APP_ID);
+  const submittedAt = new Date('2026-07-25T17:57:00.000Z');
+  const payload = {
+    _id: appId,
+    userId: student._id,
+    scholarshipId: scholarship._id,
+    status: 'submitted',
+    currentStep: 5,
+    personalStatement: '',
+    motivation: '',
+    submittedAt,
+    lastSavedAt: submittedAt,
+    documents,
+    isDeleted: false,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Personal Information',
+        completed: true,
+        completedAt: submittedAt,
+        data: {
+          fullName: student.name,
+          phone: profile.phone || '',
+          country: profile.country || '',
+          dateOfBirth: profile.dateOfBirth || '',
+          address: '',
+          nationality: profile.country || '',
+        },
+      },
+      {
+        stepNumber: 2,
+        title: 'Academic Background',
+        completed: true,
+        completedAt: submittedAt,
+        data: {
+          educationLevel: profile.educationLevel || '',
+          institution: profile.institution || '',
+          fieldOfStudy: profile.fieldOfStudy || '',
+          gpa: profile.gpa || '',
+          graduationYear: '',
+          languages: Array.isArray(profile.languages) ? profile.languages.join(', ') : '',
+        },
+      },
+      {
+        stepNumber: 3,
+        title: 'Statement & Motivation',
+        completed: true,
+        completedAt: submittedAt,
+        data: { personalStatement: '', motivation: '' },
+      },
+      {
+        stepNumber: 4,
+        title: 'Documents',
+        completed: true,
+        completedAt: submittedAt,
+        data: { documentCount: documents.length },
+      },
+      {
+        stepNumber: 5,
+        title: 'Review & Submit',
+        completed: true,
+        completedAt: submittedAt,
+        data: {},
+      },
+    ],
+  };
+
+  const existing = await Application.findById(appId);
+  if (existing) {
+    Object.assign(existing, payload);
+    await existing.save();
+  } else {
+    await mongoose.connection.db.collection('applications').insertOne({
+      ...payload,
+      createdAt: new Date('2026-07-25T17:56:00.000Z'),
+      updatedAt: new Date(),
+      __v: 0,
+    });
+  }
+
+  await Scholarship.updateOne(
+    { _id: scholarship._id },
+    { $set: { applicationCount: Math.max(scholarship.applicationCount || 0, 1) } }
+  );
+
+  return {
+    action: existing ? 'updated' : 'created',
+    email: student.email,
+    docs: documents.length,
+  };
 };
 
 const seed = async () => {
@@ -296,6 +439,9 @@ const seed = async () => {
       createdScholarshipCount = createdScholarships.length;
     }
 
+    const restoredApp = await restoreRegisteredApplication();
+    console.log(`Registered application restore: ${JSON.stringify(restoredApp)}`);
+
     const studentCount = await User.countDocuments({ role: 'student', isDeleted: { $ne: true } });
     const totalUsers = await User.countDocuments({ isDeleted: { $ne: true } });
 
@@ -306,6 +452,7 @@ const seed = async () => {
     console.log('Admin:    admin@afriroar.com / admin@123');
     console.log('Student:  student@scholarhive.com / Student@123456');
     console.log('Student2: maria@scholarhive.com / Student@123456');
+    console.log('Student3: ruipingding720@gmail.com / Student@123456');
     console.log('Provider: provider@scholarhive.com / Provider@123456');
     console.log('Provider2: techfuture@scholarhive.com / Provider@123456');
     console.log('\nSeed complete! ✅');
