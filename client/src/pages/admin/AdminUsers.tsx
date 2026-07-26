@@ -93,8 +93,8 @@ export default function AdminUsers() {
 
   const handleSuspend = async (user: User) => {
     const reason = await confirm({
-      title: `Suspend ${user.name}?`,
-      description: 'They will lose access until unsuspended.',
+      title: 'Confirm Suspension',
+      description: `Are you sure you want to suspend ${user.name}? They will lose access until unsuspended.`,
       confirmLabel: 'Suspend user',
       variant: 'danger',
       input: {
@@ -109,8 +109,8 @@ export default function AdminUsers() {
 
   const handleUnsuspend = async (user: User) => {
     const ok = await confirm({
-      title: `Restore access for ${user.name}?`,
-      description: 'This user will be able to sign in again immediately.',
+      title: 'Restore Access',
+      description: `Are you sure you want to restore access for ${user.name}? They will be able to sign in again immediately.`,
       confirmLabel: 'Restore access',
       variant: 'default',
     });

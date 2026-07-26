@@ -102,8 +102,8 @@ export default function AdminScholarships() {
 
   const handleReject = async (s: Scholarship) => {
     const reason = await confirm({
-      title: `Reject “${s.title}”?`,
-      description: 'This scholarship will be marked rejected and hidden from public browse.',
+      title: 'Confirm Rejection',
+      description: `Are you sure you want to reject “${s.title}”? It will be hidden from public browse.`,
       confirmLabel: 'Reject scholarship',
       variant: 'warning',
       input: {
@@ -118,8 +118,8 @@ export default function AdminScholarships() {
 
   const handleDelete = async (s: Scholarship) => {
     const ok = await confirm({
-      title: `Delete “${s.title}”?`,
-      description: 'This cannot be undone. Related application links may break.',
+      title: 'Confirm Deletion',
+      description: `Are you sure you want to permanently remove “${s.title}”? Related application links may break.`,
       confirmLabel: 'Delete scholarship',
       variant: 'danger',
     });

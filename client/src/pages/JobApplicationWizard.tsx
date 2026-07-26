@@ -316,8 +316,8 @@ export default function JobApplicationWizard() {
   const withdraw = async () => {
     if (!id || !application) return;
     const ok = await confirm({
-      title: 'Withdraw this application?',
-      description: 'You will stop the review process for this role. You can start a new application later if the job is still open.',
+      title: 'Confirm Withdrawal',
+      description: 'Are you sure you want to withdraw this application? You can start a new one later if the job is still open.',
       confirmLabel: 'Withdraw application',
       variant: 'danger',
     });

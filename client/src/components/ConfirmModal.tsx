@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Info, Trash2 } from 'lucide-react';
 
 export type ConfirmVariant = 'danger' | 'warning' | 'default';
 
@@ -24,20 +24,23 @@ type ActiveState = ConfirmRequest & { resolve: Resolver };
 
 const variantStyles: Record<
   ConfirmVariant,
-  { icon: string; confirm: string; ring: string }
+  { iconWrap: string; icon: typeof Trash2; confirm: string; ring: string }
 > = {
   danger: {
-    icon: 'bg-red-50 text-red-700',
-    confirm: 'bg-red-700 text-white hover:bg-red-800',
-    ring: 'focus-visible:ring-red-700/30',
+    iconWrap: 'bg-red-50 text-red-600',
+    icon: Trash2,
+    confirm: 'bg-red-600 text-white hover:bg-red-700',
+    ring: 'focus-visible:ring-red-600/30',
   },
   warning: {
-    icon: 'bg-amber-50 text-amber-800',
-    confirm: 'bg-amber-700 text-white hover:bg-amber-800',
-    ring: 'focus-visible:ring-amber-700/30',
+    iconWrap: 'bg-amber-50 text-amber-700',
+    icon: AlertTriangle,
+    confirm: 'bg-amber-600 text-white hover:bg-amber-700',
+    ring: 'focus-visible:ring-amber-600/30',
   },
   default: {
-    icon: 'bg-[var(--color-sr-bg)] text-[var(--color-sr-navy)]',
+    iconWrap: 'bg-[var(--color-sr-bg)] text-[var(--color-sr-navy)]',
+    icon: Info,
     confirm: 'bg-[var(--color-sr-navy)] text-white hover:bg-[var(--color-sr-navy-dark)]',
     ring: 'focus-visible:ring-[var(--color-sr-navy)]/30',
   },
@@ -48,7 +51,7 @@ export function ConfirmModal({
   title,
   description,
   confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  cancelLabel = 'Nevermind',
   variant = 'danger',
   input,
   inputValue,
@@ -77,6 +80,7 @@ export function ConfirmModal({
   const inputId = useId();
   const confirmRef = useRef<HTMLButtonElement>(null);
   const styles = variantStyles[variant];
+  const Icon = styles.icon;
 
   useEffect(() => {
     if (!open) return;
@@ -101,10 +105,13 @@ export function ConfirmModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center p-4 sm:items-center" role="presentation">
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      role="presentation"
+    >
       <button
         type="button"
-        className="absolute inset-0 bg-[var(--color-sr-navy-deeper)]/55"
+        className="absolute inset-0 bg-[var(--color-sr-navy-deeper)]/50 backdrop-blur-[2px]"
         aria-label="Close dialog"
         disabled={busy}
         onClick={onCancel}
@@ -114,68 +121,77 @@ export function ConfirmModal({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
-        className="relative w-full max-w-md border border-[var(--color-sr-border)] bg-white shadow-2xl"
+        className={`relative flex w-full max-w-[22rem] flex-col rounded-2xl bg-white p-7 shadow-[0_24px_64px_rgba(15,23,42,0.22)] sm:p-8 ${
+          input ? '' : 'aspect-square justify-center'
+        }`}
       >
-        <div className="flex gap-3 p-5 sm:p-6">
+        <div className="flex flex-1 flex-col items-center text-center">
           <div
-            className={`flex h-10 w-10 shrink-0 items-center justify-center ${styles.icon}`}
+            className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl ${styles.iconWrap}`}
             aria-hidden
           >
-            <AlertTriangle className="h-5 w-5" />
+            <Icon className="h-6 w-6" strokeWidth={2} />
           </div>
-          <div className="min-w-0 flex-1">
-            <h2 id={titleId} className="text-[1.05rem] font-bold text-[var(--color-sr-navy-deeper)]">
-              {title}
-            </h2>
-            {description ? (
-              <p id={descId} className="mt-1.5 text-[14px] leading-relaxed text-[var(--color-sr-muted)]">
-                {description}
-              </p>
-            ) : null}
-            {input ? (
-              <div className="mt-4">
-                <label
-                  htmlFor={inputId}
-                  className="mb-1.5 block text-[13px] font-semibold text-[var(--color-sr-navy)]"
-                >
-                  {input.label}
-                  {input.required ? <span className="text-red-600"> *</span> : null}
-                </label>
-                <textarea
-                  id={inputId}
-                  rows={3}
-                  value={inputValue ?? ''}
-                  onChange={(e) => onInputChange?.(e.target.value)}
-                  placeholder={input.placeholder}
-                  disabled={busy}
-                  className="w-full border border-[var(--color-sr-border)] px-3 py-2.5 text-[16px] text-[var(--color-sr-text)] outline-none focus:border-[var(--color-sr-navy)] disabled:opacity-60"
-                />
-                {inputError ? (
-                  <p className="mt-1.5 text-[12px] font-medium text-red-700">{inputError}</p>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
-        </div>
 
-        <div className="flex flex-col-reverse gap-2 border-t border-[var(--color-sr-border)] bg-[var(--color-sr-bg)] px-5 py-3 sm:flex-row sm:justify-end sm:gap-2.5 sm:px-6">
-          <button
-            type="button"
-            disabled={busy}
-            onClick={onCancel}
-            className="inline-flex h-9 min-w-[5.5rem] items-center justify-center border border-[var(--color-sr-border)] bg-white px-4 text-[13px] font-semibold text-[var(--color-sr-navy)] transition hover:border-[var(--color-sr-navy)] disabled:opacity-50"
+          <h2
+            id={titleId}
+            className="text-[1.25rem] font-bold leading-snug tracking-tight text-[var(--color-sr-navy-deeper)]"
           >
-            {cancelLabel}
-          </button>
-          <button
-            ref={confirmRef}
-            type="button"
-            disabled={busy}
-            onClick={onConfirm}
-            className={`inline-flex h-9 min-w-[5.5rem] items-center justify-center px-4 text-[13px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 disabled:opacity-50 ${styles.confirm} ${styles.ring}`}
-          >
-            {busy ? 'Working…' : confirmLabel}
-          </button>
+            {title}
+          </h2>
+
+          {description ? (
+            <p
+              id={descId}
+              className="mt-2.5 max-w-[18rem] text-[14px] leading-relaxed text-[var(--color-sr-muted)]"
+            >
+              {description}
+            </p>
+          ) : null}
+
+          {input ? (
+            <div className="mt-5 w-full text-left">
+              <label
+                htmlFor={inputId}
+                className="mb-1.5 block text-[13px] font-semibold text-[var(--color-sr-navy)]"
+              >
+                {input.label}
+                {input.required ? <span className="text-red-600"> *</span> : null}
+              </label>
+              <textarea
+                id={inputId}
+                rows={3}
+                value={inputValue ?? ''}
+                onChange={(e) => onInputChange?.(e.target.value)}
+                placeholder={input.placeholder}
+                disabled={busy}
+                className="w-full rounded-xl border border-[var(--color-sr-border)] px-3 py-2.5 text-[15px] text-[var(--color-sr-text)] outline-none focus:border-[var(--color-sr-navy)] disabled:opacity-60"
+              />
+              {inputError ? (
+                <p className="mt-1.5 text-[12px] font-medium text-red-700">{inputError}</p>
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className={`flex w-full flex-col gap-2.5 ${input ? 'mt-6' : 'mt-auto pt-8'}`}>
+            <button
+              ref={confirmRef}
+              type="button"
+              disabled={busy}
+              onClick={onConfirm}
+              className={`inline-flex h-11 w-full items-center justify-center rounded-xl px-4 text-[14px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 disabled:opacity-50 ${styles.confirm} ${styles.ring}`}
+            >
+              {busy ? 'Working…' : confirmLabel}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={onCancel}
+              className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-slate-100 px-4 text-[14px] font-semibold text-slate-700 transition hover:bg-slate-200 disabled:opacity-50"
+            >
+              {cancelLabel}
+            </button>
+          </div>
         </div>
       </div>
     </div>
