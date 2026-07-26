@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, ArrowRight, Eye, EyeOff, KeyRound, Loader2 } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 
@@ -23,6 +23,7 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string }>({});
 
   useEffect(() => {
     const q = params.get('email');
@@ -39,14 +40,17 @@ export default function ForgotPassword() {
     [password, confirmPassword],
   );
 
+  const loginHref = `/login${email.trim() ? `?email=${encodeURIComponent(email.trim())}` : ''}`;
+
   const requestCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
     const trimmed = email.trim().toLowerCase();
     if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setFormError('Enter a valid email address.');
+      setFieldErrors({ email: 'Enter a valid email address.' });
       return;
     }
+    setFieldErrors({});
 
     setLoading(true);
     try {
@@ -136,40 +140,85 @@ export default function ForgotPassword() {
         <meta name="description" content="Reset your AfriRoar account password with an email code." />
       </Helmet>
 
-      <div className="flex min-h-[80vh] items-center justify-center bg-[var(--color-sr-bg)] px-4 py-12">
-        <div className="w-full max-w-md">
-          <div className="mb-8 text-center">
-            <Link to="/" className="mb-5 inline-block">
-              <img src="/sr/logo.png" alt="AfriRoar" className="mx-auto h-12 object-contain" />
+      <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-sr-bg)] lg:grid lg:grid-cols-2">
+        {/* Brand panel — same as login */}
+        <aside className="relative hidden overflow-hidden bg-[var(--color-sr-navy-deeper)] lg:block">
+          <picture>
+            <source srcSet="/sr/hero/panel-1.webp" type="image/webp" />
+            <img
+              src="/sr/hero/panel-1.jpg"
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+              width={1600}
+              height={1066}
+              decoding="async"
+              fetchPriority="high"
+            />
+          </picture>
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-sr-navy-deeper)] via-[var(--color-sr-navy-deeper)]/75 to-[var(--color-sr-navy)]/40" />
+          <div className="relative flex h-full min-h-[70vh] flex-col justify-between p-10 xl:p-14">
+            <Link to="/" className="inline-flex items-center gap-3 text-white">
+              <img src="/sr/logo.png" alt="AfriRoar" className="h-10 w-auto object-contain" />
             </Link>
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center bg-[var(--color-sr-navy)] text-[var(--color-sr-yellow)]">
-              <KeyRound className="h-7 w-7" />
+
+            <div className="max-w-md">
+              <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--color-sr-yellow)]">
+                Account recovery
+              </p>
+              <h2
+                className="text-[2rem] font-bold leading-tight text-white xl:text-[2.35rem]"
+                style={{ fontFamily: 'var(--font-hero)' }}
+              >
+                Get back into your scholarship workspace.
+              </h2>
+              <p className="mt-4 text-[16px] leading-relaxed text-white/80">
+                Reset your password securely and continue tracking drafts, documents, and deadlines.
+              </p>
+              <ul className="mt-8 space-y-3 text-[14px] text-white/85">
+                {[
+                  'Email code verification in minutes',
+                  'Choose a strong new password',
+                  'Pick up applications right where you left off',
+                ].map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 bg-[var(--color-sr-yellow)]" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <h1
-              className="mb-2 text-[26px] font-bold text-[var(--color-sr-navy-deeper)]"
-              style={{ fontFamily: 'var(--font-hero)' }}
-            >
-              {step === 'request' ? 'Forgot password?' : 'Choose a new password'}
+
+            <p className="text-[12px] text-white/55">AfriRoar · Scholarships for African ambition</p>
+          </div>
+        </aside>
+
+        {/* Form panel */}
+        <section className="flex items-center justify-center px-4 py-10 sm:px-8 lg:py-16">
+          <div className="w-full max-w-[420px]">
+            <Link to="/" className="mb-8 inline-flex items-center gap-2.5 lg:hidden">
+              <img src="/sr/logo.png" alt="AfriRoar" className="h-9 object-contain" />
+            </Link>
+
+            <h1 className="sr-only">
+              {step === 'request' ? 'Forgot password' : 'Choose a new password'}
             </h1>
-            <p className="text-[15px] text-[var(--color-sr-muted)]">
+            <p className="text-[15px] leading-relaxed text-[var(--color-sr-muted)]">
               {step === 'request'
                 ? 'Enter your email and we will send a reset code.'
                 : `Enter the code sent to ${email}, then set a new password.`}
             </p>
-          </div>
-
-          <div className="border border-[var(--color-sr-border)] bg-white p-8">
-            {formError ? (
-              <div
-                role="alert"
-                className="mb-5 border border-red-200 bg-red-50 px-4 py-3 text-[13px] leading-relaxed text-red-900"
-              >
-                {formError}
-              </div>
-            ) : null}
 
             {step === 'request' ? (
-              <form onSubmit={requestCode} className="space-y-5" noValidate>
+              <form onSubmit={requestCode} className="mt-8 space-y-5" noValidate>
+                {formError ? (
+                  <div
+                    role="alert"
+                    className="border border-red-200 bg-red-50 px-4 py-3 text-[13px] leading-relaxed text-red-900"
+                  >
+                    {formError}
+                  </div>
+                ) : null}
+
                 <div>
                   <label
                     htmlFor="forgot-email"
@@ -180,12 +229,29 @@ export default function ForgotPassword() {
                   <input
                     id="forgot-email"
                     type="email"
+                    name="email"
                     autoComplete="email"
+                    autoFocus
+                    inputMode="email"
                     value={email}
                     disabled={loading}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={inputClass}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (fieldErrors.email) setFieldErrors({});
+                      if (formError) setFormError(null);
+                    }}
+                    className={[
+                      inputClass,
+                      fieldErrors.email ? 'border-red-400 focus:border-red-500' : '',
+                    ].join(' ')}
+                    aria-invalid={Boolean(fieldErrors.email)}
+                    aria-describedby={fieldErrors.email ? 'forgot-email-error' : undefined}
                   />
+                  {fieldErrors.email ? (
+                    <p id="forgot-email-error" className="mt-1.5 text-[12px] text-red-700">
+                      {fieldErrors.email}
+                    </p>
+                  ) : null}
                 </div>
 
                 <button
@@ -207,31 +273,46 @@ export default function ForgotPassword() {
                 </button>
               </form>
             ) : (
-              <form onSubmit={submitReset} className="space-y-5" noValidate>
-                <div>
-                  <label
-                    htmlFor="reset-code"
-                    className="mb-1.5 block text-[13px] font-semibold text-[var(--color-sr-navy)]"
+              <form onSubmit={submitReset} className="mt-8 space-y-5" noValidate>
+                {formError ? (
+                  <div
+                    role="alert"
+                    className="border border-red-200 bg-red-50 px-4 py-3 text-[13px] leading-relaxed text-red-900"
                   >
-                    Reset code
-                  </label>
+                    {formError}
+                  </div>
+                ) : null}
+
+                <div>
+                  <div className="mb-1.5 flex items-center justify-between gap-3">
+                    <label
+                      htmlFor="reset-code"
+                      className="block text-[13px] font-semibold text-[var(--color-sr-navy)]"
+                    >
+                      Reset code
+                    </label>
+                    <button
+                      type="button"
+                      onClick={resendCode}
+                      disabled={resending || loading}
+                      className="text-[12px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline disabled:opacity-60"
+                    >
+                      {resending ? 'Sending…' : 'Resend code'}
+                    </button>
+                  </div>
                   <input
                     id="reset-code"
                     inputMode="numeric"
                     autoComplete="one-time-code"
+                    autoFocus
                     value={code}
                     disabled={loading}
-                    onChange={(e) => setCode(e.target.value.replace(/\s/g, ''))}
+                    onChange={(e) => {
+                      setCode(e.target.value.replace(/\s/g, ''));
+                      if (formError) setFormError(null);
+                    }}
                     className={inputClass}
                   />
-                  <button
-                    type="button"
-                    onClick={resendCode}
-                    disabled={resending || loading}
-                    className="mt-2 text-[13px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline disabled:opacity-60"
-                  >
-                    {resending ? 'Sending…' : 'Resend code'}
-                  </button>
                 </div>
 
                 <div>
@@ -248,14 +329,17 @@ export default function ForgotPassword() {
                       autoComplete="new-password"
                       value={password}
                       disabled={loading}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (formError) setFormError(null);
+                      }}
                       className={`${inputClass} pr-11`}
                     />
                     <button
                       type="button"
                       tabIndex={-1}
                       onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-sr-muted)] hover:text-[var(--color-sr-navy)]"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-sr-muted)] transition hover:text-[var(--color-sr-navy)]"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -276,7 +360,10 @@ export default function ForgotPassword() {
                     autoComplete="new-password"
                     value={confirmPassword}
                     disabled={loading}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      if (formError) setFormError(null);
+                    }}
                     className={inputClass}
                   />
                   <ul className="mt-3 space-y-1 text-[12px] text-[var(--color-sr-muted)]">
@@ -322,25 +409,36 @@ export default function ForgotPassword() {
                     setConfirmPassword('');
                     setFormError(null);
                   }}
-                  className="inline-flex w-full items-center justify-center gap-2 text-[13px] font-semibold text-[var(--color-sr-muted)] hover:text-[var(--color-sr-navy)]"
+                  className="w-full text-center text-[13px] font-semibold text-[var(--color-sr-muted)] underline-offset-2 hover:text-[var(--color-sr-navy)] hover:underline"
                 >
-                  <ArrowLeft className="h-3.5 w-3.5" />
                   Use a different email
                 </button>
               </form>
             )}
-          </div>
 
-          <p className="mt-6 text-center text-[14px] text-[var(--color-sr-muted)]">
-            Remembered it?{' '}
-            <Link
-              to={`/login${email ? `?email=${encodeURIComponent(email)}` : ''}`}
-              className="font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
-            >
-              Back to log in
-            </Link>
-          </p>
-        </div>
+            <p className="mt-6 text-[14px] text-[var(--color-sr-muted)]">
+              Remembered it?{' '}
+              <Link
+                to={loginHref}
+                className="font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
+              >
+                Back to log in
+              </Link>
+            </p>
+
+            <p className="mt-8 border-t border-[var(--color-sr-border)] pt-5 text-[12px] leading-relaxed text-[var(--color-sr-muted)]">
+              By continuing you agree to AfriRoar&apos;s{' '}
+              <Link to="/terms" className="underline-offset-2 hover:underline">
+                Terms
+              </Link>{' '}
+              and{' '}
+              <Link to="/privacy" className="underline-offset-2 hover:underline">
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </div>
+        </section>
       </div>
     </>
   );
