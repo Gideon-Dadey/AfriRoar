@@ -1746,7 +1746,6 @@ export default function ApplicationWizard() {
                     value={academic.languages}
                     onChange={(e) => setAcademic({ ...academic, languages: e.target.value })}
                     className={inputClass}
-                    placeholder="English, French, Twi"
                   />
                 </Field>
               </div>
