@@ -69,7 +69,9 @@ type ProgrammeData = {
 };
 
 type PersonalData = {
-  fullName: string;
+  firstName: string;
+  lastName: string;
+  otherName: string;
   phone: string;
   country: string;
   dateOfBirth: string;
@@ -93,7 +95,9 @@ const emptyProgramme = (): ProgrammeData => ({
 });
 
 const emptyPersonal = (): PersonalData => ({
-  fullName: '',
+  firstName: '',
+  lastName: '',
+  otherName: '',
   phone: '',
   country: '',
   dateOfBirth: '',
@@ -110,9 +114,69 @@ const emptyAcademic = (): AcademicData => ({
   languages: '',
 });
 
+function composeFullName(p: Pick<PersonalData, 'firstName' | 'lastName' | 'otherName'>) {
+  return [p.firstName, p.otherName, p.lastName]
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(' ');
+}
+
+function personalFromStored(raw: Record<string, unknown> | Partial<PersonalData> | undefined): PersonalData {
+  const data = (raw || {}) as Partial<PersonalData> & { fullName?: string };
+  if (data.firstName || data.lastName || data.otherName) {
+    return {
+      ...emptyPersonal(),
+      firstName: String(data.firstName || ''),
+      lastName: String(data.lastName || ''),
+      otherName: String(data.otherName || ''),
+      phone: String(data.phone || ''),
+      country: String(data.country || ''),
+      dateOfBirth: String(data.dateOfBirth || '').slice(0, 10),
+      address: String(data.address || ''),
+      nationality: String(data.nationality || ''),
+    };
+  }
+
+  const parts = String(data.fullName || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  return {
+    ...emptyPersonal(),
+    firstName: parts[0] || '',
+    lastName: parts.length > 1 ? parts[parts.length - 1] : '',
+    otherName: parts.length > 2 ? parts.slice(1, -1).join(' ') : '',
+    phone: String(data.phone || ''),
+    country: String(data.country || ''),
+    dateOfBirth: String(data.dateOfBirth || '').slice(0, 10),
+    address: String(data.address || ''),
+    nationality: String(data.nationality || ''),
+  };
+}
+
+function splitAccountName(name?: string) {
+  const parts = String(name || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  return {
+    firstName: parts[0] || '',
+    lastName: parts.length > 1 ? parts[parts.length - 1] : '',
+    otherName: parts.length > 2 ? parts.slice(1, -1).join(' ') : '',
+  };
+}
+
 function looksLikePersonalData(data: Record<string, unknown> | undefined) {
   if (!data) return false;
-  return Boolean(data.fullName || data.phone || data.nationality || data.country);
+  return Boolean(
+    data.fullName ||
+      data.firstName ||
+      data.lastName ||
+      data.phone ||
+      data.nationality ||
+      data.country,
+  );
 }
 
 function programmeFromScholarship(s?: Scholarship | null): ProgrammeData {
@@ -338,9 +402,12 @@ export default function ApplicationWizard() {
 
   useEffect(() => {
     if (!user || application) return;
+    const fromAccount = splitAccountName(user.name);
     setPersonal((prev) => ({
       ...prev,
-      fullName: prev.fullName || user.name || '',
+      firstName: prev.firstName || fromAccount.firstName,
+      lastName: prev.lastName || fromAccount.lastName,
+      otherName: prev.otherName || fromAccount.otherName,
       phone: prev.phone || user.profile?.phone || '',
       country: prev.country || user.profile?.country || '',
       dateOfBirth: prev.dateOfBirth || (user.profile?.dateOfBirth || '').slice(0, 10),
@@ -388,7 +455,7 @@ export default function ApplicationWizard() {
               ? (app.scholarshipId as Scholarship)
               : null;
           nextProgramme = programmeFromScholarship(sch);
-          nextPersonal = { ...emptyPersonal(), ...(step1 as Partial<PersonalData>) };
+          nextPersonal = personalFromStored(step1);
           nextAcademic = {
             ...emptyAcademic(),
             ...((app.steps?.find((s) => s.stepNumber === 2)?.data || {}) as Partial<AcademicData>),
@@ -402,10 +469,9 @@ export default function ApplicationWizard() {
             ...emptyProgramme(),
             ...(step1 as Partial<ProgrammeData>),
           };
-          nextPersonal = {
-            ...emptyPersonal(),
-            ...((app.steps?.find((s) => s.stepNumber === 2)?.data || {}) as Partial<PersonalData>),
-          };
+          nextPersonal = personalFromStored(
+            (app.steps?.find((s) => s.stepNumber === 2)?.data || {}) as Record<string, unknown>,
+          );
           nextAcademic = {
             ...emptyAcademic(),
             ...((app.steps?.find((s) => s.stepNumber === 3)?.data || {}) as Partial<AcademicData>),
@@ -528,7 +594,10 @@ export default function ApplicationWizard() {
       {
         stepNumber: 2,
         title: 'Personal Information',
-        data: personal,
+        data: {
+          ...personal,
+          fullName: composeFullName(personal),
+        },
         completed: step > 2,
       },
       {
@@ -575,7 +644,7 @@ export default function ApplicationWizard() {
       }
     }
     if (step === 2) {
-      if (!personal.fullName.trim() || !personal.phone.trim() || !personal.country.trim() || !personal.nationality.trim()) {
+      if (!personal.firstName.trim() || !personal.lastName.trim() || !personal.phone.trim() || !personal.country.trim() || !personal.nationality.trim()) {
         toast.error('Complete the required personal fields.');
         return false;
       }
@@ -674,7 +743,7 @@ export default function ApplicationWizard() {
       } else {
         setFieldChoice('');
       }
-      setPersonal(parsed.personal);
+      setPersonal(personalFromStored(parsed.personal as unknown as Record<string, unknown>));
       setAcademic(parsed.academic);
       setPersonalStatement(parsed.personalStatement);
       setMotivation(parsed.motivation);
@@ -772,7 +841,7 @@ export default function ApplicationWizard() {
       setStep(1);
       return;
     }
-    if (!personal.fullName.trim() || !personal.phone.trim() || !personal.country.trim() || !personal.nationality.trim()) {
+    if (!personal.firstName.trim() || !personal.lastName.trim() || !personal.phone.trim() || !personal.country.trim() || !personal.nationality.trim()) {
       toast.error('Personal details are incomplete.');
       setStep(2);
       return;
@@ -1511,14 +1580,34 @@ export default function ApplicationWizard() {
 
             {step === 2 && (
               <div className="grid gap-5 sm:grid-cols-2">
-                <Field id="app-fullName" label="Full legal name *" className="sm:col-span-2">
+                <Field id="app-firstName" label="First name *">
                   <input
-                    id="app-fullName"
+                    id="app-firstName"
                     disabled={locked}
-                    value={personal.fullName}
-                    onChange={(e) => setPersonal({ ...personal, fullName: e.target.value })}
+                    value={personal.firstName}
+                    onChange={(e) => setPersonal({ ...personal, firstName: e.target.value })}
                     className={inputClass}
-                    autoComplete="name"
+                    autoComplete="given-name"
+                  />
+                </Field>
+                <Field id="app-lastName" label="Last name *">
+                  <input
+                    id="app-lastName"
+                    disabled={locked}
+                    value={personal.lastName}
+                    onChange={(e) => setPersonal({ ...personal, lastName: e.target.value })}
+                    className={inputClass}
+                    autoComplete="family-name"
+                  />
+                </Field>
+                <Field id="app-otherName" label="Other name" className="sm:col-span-2">
+                  <input
+                    id="app-otherName"
+                    disabled={locked}
+                    value={personal.otherName}
+                    onChange={(e) => setPersonal({ ...personal, otherName: e.target.value })}
+                    className={inputClass}
+                    autoComplete="additional-name"
                   />
                 </Field>
                 <Field id="app-phone" label="Phone *">
@@ -1870,9 +1959,23 @@ export default function ApplicationWizard() {
 
                   <ReviewBlock title="Personal" locked={locked} onEdit={() => setStep(2)}>
                     <p className="font-semibold text-[var(--color-sr-navy-deeper)]">
-                      {personal.fullName || '-'}
+                      {composeFullName(personal) || '-'}
                     </p>
                     <dl className="mt-3 space-y-1.5 text-[14px]">
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-[var(--color-sr-muted)]">First name</dt>
+                        <dd className="text-right text-[var(--color-sr-text)]">{personal.firstName || '-'}</dd>
+                      </div>
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-[var(--color-sr-muted)]">Last name</dt>
+                        <dd className="text-right text-[var(--color-sr-text)]">{personal.lastName || '-'}</dd>
+                      </div>
+                      {personal.otherName ? (
+                        <div className="flex justify-between gap-3">
+                          <dt className="text-[var(--color-sr-muted)]">Other name</dt>
+                          <dd className="text-right text-[var(--color-sr-text)]">{personal.otherName}</dd>
+                        </div>
+                      ) : null}
                       <div className="flex justify-between gap-3">
                         <dt className="text-[var(--color-sr-muted)]">Nationality</dt>
                         <dd className="text-right text-[var(--color-sr-text)]">{personal.nationality || '-'}</dd>

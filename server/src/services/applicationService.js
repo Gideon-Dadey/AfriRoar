@@ -201,8 +201,20 @@ const submitApplication = async (id, userId, req) => {
   });
   if (personalStep) {
     const existing = personalStep.data || {};
+    const composed =
+      [existing.firstName, existing.otherName, existing.lastName].filter(Boolean).join(' ') ||
+      existing.fullName ||
+      user?.name ||
+      '';
+    const parts = String(composed).trim().split(/\s+/).filter(Boolean);
     personalStep.data = {
-      fullName: existing.fullName || user?.name || '',
+      firstName: existing.firstName || parts[0] || '',
+      lastName: existing.lastName || (parts.length > 1 ? parts[parts.length - 1] : '') || '',
+      otherName:
+        existing.otherName ||
+        (parts.length > 2 ? parts.slice(1, -1).join(' ') : '') ||
+        '',
+      fullName: composed,
       phone: existing.phone || profile.phone || '',
       country: existing.country || profile.country || '',
       dateOfBirth: existing.dateOfBirth || profile.dateOfBirth || '',

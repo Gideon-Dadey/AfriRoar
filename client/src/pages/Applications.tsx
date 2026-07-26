@@ -44,9 +44,15 @@ function titleOf(app: Application) {
 
 function programmeOf(app: Application): { level?: string; field?: string } {
   const step1 = app.steps?.find((s) => s.stepNumber === 1)?.data as
-    | { intendedLevel?: string; intendedField?: string; fullName?: string }
+    | {
+        intendedLevel?: string;
+        intendedField?: string;
+        fullName?: string;
+        firstName?: string;
+        lastName?: string;
+      }
     | undefined;
-  if (!step1 || step1.fullName) return {};
+  if (!step1 || step1.fullName || step1.firstName || step1.lastName) return {};
   return { level: step1.intendedLevel, field: step1.intendedField };
 }
 

@@ -109,7 +109,9 @@ export default function AdminApplicationDetail() {
   const student = application ? asUser(application.userId) : null;
   const scholarship = application ? asScholarship(application.scholarshipId) : null;
   const step1 = application ? stepData(application, 1) : {};
-  const legacyPersonalOnStep1 = Boolean(step1.fullName || step1.phone);
+  const legacyPersonalOnStep1 = Boolean(
+    step1.fullName || step1.firstName || step1.lastName || step1.phone,
+  );
   const programme = legacyPersonalOnStep1 ? {} : step1;
   const personal = legacyPersonalOnStep1
     ? step1
@@ -243,7 +245,7 @@ export default function AdminApplicationDetail() {
 
             <Section title="Student account">
               <dl>
-                <Field label="Name" value={student?.name || text(personal.fullName)} />
+                <Field label="Name" value={student?.name || text(personal.fullName) || [personal.firstName, personal.otherName, personal.lastName].filter(Boolean).join(' ') || '-'} />
                 <Field label="Email" value={student?.email || '-'} />
                 <Field label="Joined" value={student?.createdAt ? formatDate(student.createdAt) : '-'} />
                 <Field label="Country (profile)" value={profile?.country || '-'} />
@@ -261,7 +263,21 @@ export default function AdminApplicationDetail() {
 
             <Section title="Submitted personal details">
               <dl>
-                <Field label="Full name" value={text(personal.fullName) || student?.name || '-'} />
+                <Field label="First name" value={text(personal.firstName)} />
+                <Field label="Last name" value={text(personal.lastName)} />
+                <Field label="Other name" value={text(personal.otherName)} />
+                <Field
+                  label="Full name"
+                  value={
+                    text(personal.fullName) ||
+                    [personal.firstName, personal.otherName, personal.lastName]
+                      .map(String)
+                      .filter(Boolean)
+                      .join(' ') ||
+                    student?.name ||
+                    '-'
+                  }
+                />
                 <Field label="Nationality" value={text(personal.nationality)} />
                 <Field label="Residence" value={text(personal.country)} />
                 <Field label="Phone" value={text(personal.phone)} />
