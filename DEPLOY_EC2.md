@@ -59,6 +59,41 @@ git clone https://github.com/Gideon-Dadey/AfriRoar.git
 cd AfriRoar
 ```
 
+### If clone asks for a password (private repo)
+
+GitHub **does not accept your GitHub account password** for `git clone` / `git pull`. Use a **Personal Access Token (classic)**.
+
+1. Create a token: [GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)](https://github.com/settings/tokens)
+2. Generate new token (classic) with at least the **`repo`** scope.
+3. On EC2, clone like this (paste the token when asked for **Password**):
+
+```bash
+cd ~
+git clone https://github.com/Gideon-Dadey/AfriRoar.git
+# Username: Gideon-Dadey
+# Password: paste the PAT (ghp_...), NOT your GitHub login password
+cd AfriRoar
+```
+
+Or one shot (token stays in shell history — prefer the prompt method):
+
+```bash
+cd ~
+git clone https://Gideon-Dadey:YOUR_NEW_PAT@github.com/Gideon-Dadey/AfriRoar.git
+cd AfriRoar
+```
+
+If you previously typed a bad password, clear cached creds and retry:
+
+```bash
+git credential reject <<EOF
+protocol=https
+host=github.com
+EOF
+```
+
+**Security:** never paste a PAT into chat, commits, or `DEPLOY_EC2.md`. If a token leaks, revoke it immediately on the tokens page and create a new one.
+
 ---
 
 ## 3. Install dependencies and build the client
