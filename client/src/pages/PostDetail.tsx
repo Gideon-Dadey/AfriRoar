@@ -15,12 +15,12 @@ import {
   Wallet,
 } from 'lucide-react';
 import api from '@/lib/api';
-import { formatDeadline, getFundingTypeLabel, getLevelLabel } from '@/lib/utils';
+import { formatDate, formatDeadline, getFundingTypeLabel, getLevelLabel } from '@/lib/utils';
 import { getGuideArticle } from '@/data/guideArticles';
 import { getLatestScholarships, getPostBySlug, getPostsByCategory } from '@/data/srContent';
 import { useAuthStore } from '@/stores/authStore';
 import PostCard from '@/components/sr/PostCard';
-import type { Scholarship } from '@/types';
+import type { ContentItem, Scholarship } from '@/types';
 
 function splitParagraphs(text?: string) {
   if (!text?.trim()) return [];
@@ -39,12 +39,42 @@ function categoryHome(category?: string) {
 
 export default function PostDetail() {
   const { slug = '' } = useParams();
-  const post = getPostBySlug(slug);
+  const staticPost = getPostBySlug(slug);
   const article = getGuideArticle(slug);
   const { isAuthenticated } = useAuthStore();
 
+  const { data: cmsItem, isLoading: loadingCms } = useQuery({
+    queryKey: ['content-by-slug', slug],
+    queryFn: async () => {
+      const { data } = await api.get(`/content/slug/${slug}`);
+      return data.data.item as ContentItem;
+    },
+    enabled: Boolean(slug) && !staticPost && !article,
+    retry: 1,
+    staleTime: 60_000,
+  });
+
+  const post =
+    staticPost ||
+    (cmsItem
+      ? {
+          id: cmsItem._id,
+          slug: cmsItem.slug,
+          title: cmsItem.title,
+          date: formatDate(cmsItem.publishedAt || cmsItem.createdAt),
+          category:
+            cmsItem.category === 'job'
+              ? ('list' as const)
+              : (cmsItem.category as 'guide' | 'internship' | 'list' | 'scholarship'),
+          country: cmsItem.country,
+          image: cmsItem.coverImage || '/sr/posts/chevening.png',
+          excerpt: cmsItem.excerpt || '',
+        }
+      : undefined);
+
   const isGuideLike =
     Boolean(article) ||
+    Boolean(cmsItem) ||
     post?.category === 'guide' ||
     post?.category === 'list' ||
     post?.category === 'internship';
@@ -64,11 +94,11 @@ export default function PostDetail() {
     staleTime: 60_000,
   });
 
-  if (!post && loadingScholarship) {
+  if (!post && (loadingScholarship || loadingCms)) {
     return (
       <div className="sr-container flex items-center justify-center gap-2 py-20 text-[14px] text-[var(--color-sr-muted)]">
         <Loader2 className="h-4 w-4 animate-spin" />
-        Loading scholarship…
+        Loading…
       </div>
     );
   }
@@ -90,7 +120,7 @@ export default function PostDetail() {
   const levelLabel = scholarship?.level
     ? getLevelLabel(scholarship.level)
     : post?.level || undefined;
-  const excerpt = scholarship?.shortDescription || post?.excerpt || '';
+  const excerpt = scholarship?.shortDescription || cmsItem?.excerpt || post?.excerpt || '';
   const isScholarship = !isGuideLike && (post?.category === 'scholarship' || Boolean(scholarship));
 
   const relatedGuides = getPostsByCategory(post?.category === 'list' ? 'list' : 'guide')
@@ -110,6 +140,7 @@ export default function PostDetail() {
 
   const overviewParagraphs = splitParagraphs(scholarship?.description);
   const eligibilityParagraphs = splitParagraphs(scholarship?.eligibility);
+  const cmsParagraphs = splitParagraphs(cmsItem?.body);
   const backTo = categoryHome(post?.category);
 
   // ── Guide / list / internship article layout ─────────────────────────────
@@ -213,6 +244,17 @@ export default function PostDetail() {
                       ) : null}
                     </section>
                   ))
+                ) : cmsParagraphs.length > 0 ? (
+                  <div className="space-y-4 py-8">
+                    {cmsParagraphs.map((para) => (
+                      <p
+                        key={para.slice(0, 48)}
+                        className="text-[15px] leading-relaxed text-[var(--color-sr-muted)]"
+                      >
+                        {para}
+                      </p>
+                    ))}
+                  </div>
                 ) : (
                   <div className="py-8">
                     <p className="text-[15px] leading-relaxed text-[var(--color-sr-muted)]">{excerpt}</p>

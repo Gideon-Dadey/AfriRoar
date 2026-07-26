@@ -1,7 +1,12 @@
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { useQuery } from '@tanstack/react-query';
+import { Loader2 } from 'lucide-react';
 import PostCard from '@/components/sr/PostCard';
+import api from '@/lib/api';
+import { formatDate, getLevelLabel } from '@/lib/utils';
 import { getPostsByCategory, popularCountries, posts, type SrPost } from '@/data/srContent';
+import type { ContentItem, Scholarship } from '@/types';
 
 type ListingProps = {
   title: string;
@@ -10,12 +15,104 @@ type ListingProps = {
   filterFn?: (post: SrPost) => boolean;
 };
 
+const PLACEHOLDER_IMAGE = '/sr/posts/chevening.png';
+
+function scholarshipToPost(s: Scholarship): SrPost {
+  return {
+    id: s._id,
+    slug: s.slug,
+    title: s.title,
+    date: formatDate(s.createdAt || s.deadline),
+    category: 'scholarship',
+    level: getLevelLabel(s.level),
+    country: s.country,
+    image: s.coverImage || PLACEHOLDER_IMAGE,
+    excerpt: s.shortDescription || s.description?.slice(0, 180) || '',
+    featured: Boolean(s.isFeatured),
+  };
+}
+
+function contentToPost(item: ContentItem): SrPost {
+  const category =
+    item.category === 'job'
+      ? 'list'
+      : (item.category as SrPost['category']);
+  return {
+    id: item._id,
+    slug: item.slug,
+    title: item.title,
+    date: formatDate(item.publishedAt || item.createdAt),
+    category,
+    country: item.country,
+    image: item.coverImage || PLACEHOLDER_IMAGE,
+    excerpt: item.excerpt || item.body?.slice(0, 180) || '',
+  };
+}
+
+function mergeUnique(primary: SrPost[], secondary: SrPost[]) {
+  const seen = new Set(primary.map((p) => p.slug));
+  const extras = secondary.filter((p) => !seen.has(p.slug));
+  return [...primary, ...extras];
+}
+
 function ListingPage({ title, description, category, filterFn }: ListingProps) {
   const [params] = useSearchParams();
   const q = (params.get('q') || '').toLowerCase();
   const level = (params.get('level') || '').toLowerCase();
 
+  const loadScholarships = category === 'scholarship' || !category;
+  const contentCategory =
+    category === 'guide' || category === 'internship' || category === 'list'
+      ? category
+      : null;
+
+  const { data: apiScholarships = [], isLoading: loadingScholarships } = useQuery({
+    queryKey: ['public-scholarships', q],
+    queryFn: async () => {
+      const { data } = await api.get('/scholarships', {
+        params: { limit: 60, search: q || undefined, sort: '-createdAt' },
+      });
+      return (data.data.scholarships || []) as Scholarship[];
+    },
+    enabled: loadScholarships,
+    staleTime: 60_000,
+  });
+
+  const { data: apiContent = [], isLoading: loadingContent } = useQuery({
+    queryKey: ['public-content', contentCategory, q],
+    queryFn: async () => {
+      const { data } = await api.get('/content', {
+        params: {
+          limit: 60,
+          category: contentCategory || undefined,
+          search: q || undefined,
+        },
+      });
+      return (data.data.items || []) as ContentItem[];
+    },
+    enabled: Boolean(contentCategory),
+    staleTime: 60_000,
+  });
+
   let items = category ? getPostsByCategory(category) : [...posts];
+
+  if (loadScholarships) {
+    items = mergeUnique(
+      apiScholarships.map(scholarshipToPost),
+      category === 'scholarship' ? getPostsByCategory('scholarship') : items,
+    );
+  }
+
+  if (contentCategory) {
+    const mapped = apiContent.map(contentToPost);
+    if (contentCategory === 'list') {
+      // Jobs from CMS surface under lists for MVP
+      items = mergeUnique(mapped, getPostsByCategory('list'));
+    } else {
+      items = mergeUnique(mapped, getPostsByCategory(contentCategory));
+    }
+  }
+
   if (filterFn) items = items.filter(filterFn);
   if (level) {
     items = items.filter((p) => (p.level || '').toLowerCase().includes(level.slice(0, 4)));
@@ -25,9 +122,12 @@ function ListingPage({ title, description, category, filterFn }: ListingProps) {
       (p) =>
         p.title.toLowerCase().includes(q) ||
         p.excerpt.toLowerCase().includes(q) ||
-        (p.country || '').toLowerCase().includes(q)
+        (p.country || '').toLowerCase().includes(q),
     );
   }
+
+  const isLoading =
+    (loadScholarships && loadingScholarships) || (Boolean(contentCategory) && loadingContent);
 
   return (
     <>
@@ -51,7 +151,12 @@ function ListingPage({ title, description, category, filterFn }: ListingProps) {
       </div>
 
       <section className="sr-container py-8">
-        {items.length === 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center gap-2 py-16 text-[14px] text-[var(--color-sr-muted)]">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Loading listings…
+          </div>
+        ) : items.length === 0 ? (
           <div className="bg-white border border-[var(--color-sr-border)] p-8 text-center">
             <p className="font-semibold mb-2">No results found</p>
             <p className="text-[var(--color-sr-muted)] text-sm mb-4">
@@ -156,11 +261,11 @@ export function CountryDetailPage() {
     <ListingPage
       title={`Scholarships in ${name}`}
       description={`Featured and latest scholarship opportunities related to ${name}.`}
+      category="scholarship"
       filterFn={(p) => {
         if (p.category !== 'scholarship') return false;
         const hay = `${p.country || ''} ${p.title}`.toLowerCase();
         const matched = keys.some((k) => hay.includes(k));
-        // Soft fallback so MVP country pages never look empty
         return matched || p.featured === true;
       }}
     />

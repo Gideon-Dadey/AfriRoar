@@ -104,6 +104,7 @@ const createScholarshipSchema = z.object({
     applicationUrl: z.string().url().optional().or(z.literal('')),
     tags: z.array(z.string()).optional(),
     isEarlyAccess: z.boolean().optional(),
+    coverImage: z.string().optional().or(z.literal('')),
   }),
 });
 
@@ -125,6 +126,63 @@ const updateScholarshipSchema = z.object({
     applicationUrl: z.string().url().optional().or(z.literal('')),
     tags: z.array(z.string()).optional(),
     isEarlyAccess: z.boolean().optional(),
+    coverImage: z.string().optional().or(z.literal('')),
+    status: z.enum(['pending', 'approved', 'rejected']).optional(),
+    isFeatured: z.boolean().optional(),
+  }),
+});
+
+const adminScholarshipSchema = z.object({
+  body: z.object({
+    title: z.string().min(5).max(200),
+    description: z.string().min(20).max(10000),
+    shortDescription: z.string().max(300).optional(),
+    country: z.string().min(1),
+    level: z.enum(['high-school', 'bachelors', 'masters', 'phd', 'postdoc', 'any']),
+    field: z.string().min(1),
+    eligibility: z.string().optional(),
+    fundingType: z.enum(['full', 'partial', 'tuition', 'stipend', 'travel', 'research']),
+    amount: z
+      .object({
+        value: z.number().optional(),
+        currency: z.string().optional(),
+      })
+      .optional(),
+    deadline: z.string().min(1, 'Deadline is required'),
+    applicationUrl: z.string().url().optional().or(z.literal('')),
+    tags: z.array(z.string()).optional(),
+    isEarlyAccess: z.boolean().optional(),
+    coverImage: z.string().optional().or(z.literal('')),
+    status: z.enum(['pending', 'approved', 'rejected']).optional(),
+    isFeatured: z.boolean().optional(),
+  }),
+});
+
+const contentSchema = z.object({
+  body: z.object({
+    title: z.string().min(3).max(200),
+    category: z.enum(['guide', 'internship', 'list', 'job']),
+    excerpt: z.string().max(400).optional(),
+    body: z.string().min(20).max(50000),
+    coverImage: z.string().optional().or(z.literal('')),
+    country: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+    status: z.enum(['draft', 'published']).optional(),
+    slug: z.string().optional(),
+  }),
+});
+
+const updateContentSchema = z.object({
+  body: z.object({
+    title: z.string().min(3).max(200).optional(),
+    category: z.enum(['guide', 'internship', 'list', 'job']).optional(),
+    excerpt: z.string().max(400).optional(),
+    body: z.string().min(20).max(50000).optional(),
+    coverImage: z.string().optional().or(z.literal('')),
+    country: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+    status: z.enum(['draft', 'published']).optional(),
+    slug: z.string().optional(),
   }),
 });
 
@@ -134,12 +192,16 @@ const createApplicationSchema = z.object({
     scholarshipId: z.string().min(1, 'Scholarship ID is required'),
     personalStatement: z.string().max(5000).optional(),
     motivation: z.string().max(3000).optional(),
-    steps: z.array(z.object({
-      stepNumber: z.number(),
-      title: z.string(),
-      data: z.record(z.any()).optional(),
-      completed: z.boolean().optional(),
-    })).optional(),
+    steps: z
+      .array(
+        z.object({
+          stepNumber: z.number(),
+          title: z.string(),
+          data: z.record(z.any()).optional(),
+          completed: z.boolean().optional(),
+        }),
+      )
+      .optional(),
   }),
 });
 
@@ -193,4 +255,7 @@ module.exports = {
   createApplicationSchema,
   updateProfileSchema,
   contactSchema,
+  adminScholarshipSchema,
+  contentSchema,
+  updateContentSchema,
 };

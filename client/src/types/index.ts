@@ -140,11 +140,43 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
+export interface ContentItem {
+  _id: string;
+  title: string;
+  slug: string;
+  category: 'guide' | 'internship' | 'list' | 'job';
+  excerpt: string;
+  body: string;
+  coverImage?: string;
+  country?: string;
+  tags: string[];
+  status: 'draft' | 'published';
+  publishedAt?: string;
+  createdBy?: Partial<User> | string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Analytics {
-  users: { total: number; students: number; providers: number };
-  scholarships: { total: number; approved: number; pending: number };
+  users: {
+    total: number;
+    students: number;
+    providers: number;
+    admins?: number;
+    suspended?: number;
+  };
+  scholarships: {
+    total: number;
+    approved: number;
+    pending: number;
+    rejected?: number;
+  };
   applications: { total: number; byStatus: Record<string, number> };
-  revenue: { totalPremium: number; byPlan: Array<{ _id: string; count: number; totalRevenue: number }> };
+  content?: { total: number; published: number };
+  revenue: {
+    totalPremium: number;
+    byPlan: Array<{ _id: string; count: number; totalRevenue: number }>;
+  };
   recent: { users: Partial<User>[]; scholarships: Partial<Scholarship>[] };
 }
 

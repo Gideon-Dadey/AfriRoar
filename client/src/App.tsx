@@ -31,6 +31,14 @@ import Applications from '@/pages/Applications';
 import VerifyEmail from '@/pages/VerifyEmail';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ApplicationWizard from '@/pages/ApplicationWizard';
+import AdminOverview from '@/pages/admin/AdminOverview';
+import AdminUsers from '@/pages/admin/AdminUsers';
+import AdminScholarships from '@/pages/admin/AdminScholarships';
+import AdminScholarshipForm from '@/pages/admin/AdminScholarshipForm';
+import AdminApplications from '@/pages/admin/AdminApplications';
+import AdminContent from '@/pages/admin/AdminContent';
+import AdminContentForm from '@/pages/admin/AdminContentForm';
+import AdminActivity from '@/pages/admin/AdminActivity';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -90,6 +98,22 @@ function App() {
                 <Route path="/dashboard/applications" element={<Applications />} />
                 <Route path="/dashboard/applications/new" element={<ApplicationWizard />} />
                 <Route path="/dashboard/applications/:id" element={<ApplicationWizard />} />
+              </Route>
+
+              <Route element={<ProtectedRoute roles={['admin']} />}>
+                <Route path="/dashboard/admin" element={<AdminOverview />} />
+                <Route path="/dashboard/admin/users" element={<AdminUsers />} />
+                <Route path="/dashboard/admin/scholarships" element={<AdminScholarships />} />
+                <Route path="/dashboard/admin/scholarships/new" element={<AdminScholarshipForm />} />
+                <Route
+                  path="/dashboard/admin/scholarships/:id/edit"
+                  element={<AdminScholarshipForm />}
+                />
+                <Route path="/dashboard/admin/applications" element={<AdminApplications />} />
+                <Route path="/dashboard/admin/content" element={<AdminContent />} />
+                <Route path="/dashboard/admin/content/new" element={<AdminContentForm />} />
+                <Route path="/dashboard/admin/content/:id/edit" element={<AdminContentForm />} />
+                <Route path="/dashboard/admin/activity" element={<AdminActivity />} />
               </Route>
             </Route>
           </Routes>

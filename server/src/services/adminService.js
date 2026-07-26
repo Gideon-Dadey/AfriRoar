@@ -4,17 +4,19 @@ const Application = require('../models/Application');
 const Payment = require('../models/Payment');
 const AuditLog = require('../models/AuditLog');
 const Notification = require('../models/Notification');
+const Content = require('../models/Content');
 const { NotFoundError } = require('../utils/errors');
 const { createAuditLog } = require('../utils/auditLog');
 
-// ---- User management ----
 const getUsers = async (queryString) => {
   const page = parseInt(queryString.page, 10) || 1;
   const limit = parseInt(queryString.limit, 10) || 20;
   const skip = (page - 1) * limit;
 
-  const filter = {};
+  const filter = { isDeleted: { $ne: true } };
   if (queryString.role) filter.role = queryString.role;
+  if (queryString.suspended === 'true') filter.isSuspended = true;
+  if (queryString.suspended === 'false') filter.isSuspended = { $ne: true };
   if (queryString.search) {
     filter.$or = [
       { name: { $regex: queryString.search, $options: 'i' } },
@@ -29,7 +31,7 @@ const getUsers = async (queryString) => {
 
   return {
     users,
-    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) || 1 },
   };
 };
 
@@ -80,7 +82,120 @@ const unsuspendUser = async (userId, adminId, req) => {
   return user;
 };
 
-// ---- Scholarship moderation ----
+const getAdminScholarships = async (queryString) => {
+  const page = parseInt(queryString.page, 10) || 1;
+  const limit = parseInt(queryString.limit, 10) || 20;
+  const skip = (page - 1) * limit;
+
+  const filter = { isDeleted: { $ne: true } };
+  if (queryString.status) filter.status = queryString.status;
+  if (queryString.featured === 'true') filter.isFeatured = true;
+  if (queryString.search) {
+    filter.$or = [
+      { title: { $regex: queryString.search, $options: 'i' } },
+      { country: { $regex: queryString.search, $options: 'i' } },
+      { field: { $regex: queryString.search, $options: 'i' } },
+    ];
+  }
+
+  const [scholarships, total] = await Promise.all([
+    Scholarship.find(filter)
+      .populate('providerId', 'name email')
+      .sort('-createdAt')
+      .skip(skip)
+      .limit(limit),
+    Scholarship.countDocuments(filter),
+  ]);
+
+  return {
+    scholarships,
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) || 1 },
+  };
+};
+
+const createAdminScholarship = async (data, adminId, req) => {
+  const scholarship = await Scholarship.create({
+    ...data,
+    providerId: adminId,
+    status: data.status || 'approved',
+    approvedBy: adminId,
+    approvedAt: new Date(),
+  });
+
+  await createAuditLog({
+    action: 'scholarship.create',
+    userId: adminId,
+    targetId: scholarship._id,
+    targetModel: 'Scholarship',
+    metadata: { title: scholarship.title, source: 'admin' },
+    req,
+  });
+
+  return scholarship;
+};
+
+const updateAdminScholarship = async (id, data, adminId, req) => {
+  const scholarship = await Scholarship.findOne({ _id: id, isDeleted: { $ne: true } });
+  if (!scholarship) throw new NotFoundError('Scholarship not found.');
+
+  Object.assign(scholarship, data);
+  if (data.status === 'approved' && !scholarship.approvedAt) {
+    scholarship.approvedBy = adminId;
+    scholarship.approvedAt = new Date();
+  }
+  await scholarship.save();
+
+  await createAuditLog({
+    action: 'scholarship.update',
+    userId: adminId,
+    targetId: scholarship._id,
+    targetModel: 'Scholarship',
+    metadata: { title: scholarship.title, source: 'admin' },
+    req,
+  });
+
+  return scholarship;
+};
+
+const deleteAdminScholarship = async (id, adminId, req) => {
+  const scholarship = await Scholarship.findOne({ _id: id, isDeleted: { $ne: true } });
+  if (!scholarship) throw new NotFoundError('Scholarship not found.');
+
+  scholarship.isDeleted = true;
+  scholarship.deletedAt = new Date();
+  await scholarship.save({ validateBeforeSave: false });
+
+  await createAuditLog({
+    action: 'scholarship.delete',
+    userId: adminId,
+    targetId: scholarship._id,
+    targetModel: 'Scholarship',
+    metadata: { title: scholarship.title },
+    req,
+  });
+
+  return scholarship;
+};
+
+const setScholarshipCover = async (id, coverImage, adminId, req) => {
+  const scholarship = await Scholarship.findOne({ _id: id, isDeleted: { $ne: true } });
+  if (!scholarship) throw new NotFoundError('Scholarship not found.');
+
+  scholarship.coverImage = coverImage;
+  await scholarship.save({ validateBeforeSave: false });
+
+  await createAuditLog({
+    action: 'scholarship.update',
+    userId: adminId,
+    targetId: scholarship._id,
+    targetModel: 'Scholarship',
+    metadata: { coverImage: true },
+    req,
+  });
+
+  return scholarship;
+};
+
 const approveScholarship = async (scholarshipId, adminId, req) => {
   const scholarship = await Scholarship.findById(scholarshipId);
   if (!scholarship) throw new NotFoundError('Scholarship not found.');
@@ -90,13 +205,15 @@ const approveScholarship = async (scholarshipId, adminId, req) => {
   scholarship.approvedAt = new Date();
   await scholarship.save({ validateBeforeSave: false });
 
-  await Notification.create({
-    userId: scholarship.providerId,
-    type: 'scholarship_approved',
-    title: 'Scholarship Approved',
-    message: `Your scholarship "${scholarship.title}" has been approved and is now live.`,
-    link: `/scholarships/${scholarship.slug}`,
-  });
+  if (scholarship.providerId) {
+    await Notification.create({
+      userId: scholarship.providerId,
+      type: 'scholarship_approved',
+      title: 'Scholarship Approved',
+      message: `Your scholarship "${scholarship.title}" has been approved and is now live.`,
+      link: `/scholarships/${scholarship.slug}`,
+    });
+  }
 
   await createAuditLog({
     action: 'scholarship.approve',
@@ -118,12 +235,14 @@ const rejectScholarship = async (scholarshipId, reason, adminId, req) => {
   scholarship.rejectionReason = reason;
   await scholarship.save({ validateBeforeSave: false });
 
-  await Notification.create({
-    userId: scholarship.providerId,
-    type: 'scholarship_rejected',
-    title: 'Scholarship Rejected',
-    message: `Your scholarship "${scholarship.title}" was rejected. Reason: ${reason}`,
-  });
+  if (scholarship.providerId) {
+    await Notification.create({
+      userId: scholarship.providerId,
+      type: 'scholarship_rejected',
+      title: 'Scholarship Rejected',
+      message: `Your scholarship "${scholarship.title}" was rejected. Reason: ${reason}`,
+    });
+  }
 
   await createAuditLog({
     action: 'scholarship.reject',
@@ -156,56 +275,211 @@ const featureScholarship = async (scholarshipId, isFeatured, adminId, req) => {
   return scholarship;
 };
 
-// ---- Pending scholarships ----
 const getPendingScholarships = async (queryString) => {
   const page = parseInt(queryString.page, 10) || 1;
   const limit = parseInt(queryString.limit, 10) || 20;
   const skip = (page - 1) * limit;
 
   const [scholarships, total] = await Promise.all([
-    Scholarship.find({ status: 'pending' })
+    Scholarship.find({ status: 'pending', isDeleted: { $ne: true } })
       .populate('providerId', 'name email')
       .sort('-createdAt')
       .skip(skip)
       .limit(limit),
-    Scholarship.countDocuments({ status: 'pending' }),
+    Scholarship.countDocuments({ status: 'pending', isDeleted: { $ne: true } }),
   ]);
 
   return {
     scholarships,
-    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) || 1 },
   };
 };
 
-// ---- Analytics ----
+const getAdminApplications = async (queryString) => {
+  const page = parseInt(queryString.page, 10) || 1;
+  const limit = parseInt(queryString.limit, 10) || 20;
+  const skip = (page - 1) * limit;
+
+  const filter = {};
+  if (queryString.status) filter.status = queryString.status;
+
+  const [applications, total] = await Promise.all([
+    Application.find(filter)
+      .populate('userId', 'name email profile.country')
+      .populate('scholarshipId', 'title slug country deadline')
+      .sort('-updatedAt')
+      .skip(skip)
+      .limit(limit),
+    Application.countDocuments(filter),
+  ]);
+
+  return {
+    applications,
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) || 1 },
+  };
+};
+
+const getContents = async (queryString) => {
+  const page = parseInt(queryString.page, 10) || 1;
+  const limit = parseInt(queryString.limit, 10) || 20;
+  const skip = (page - 1) * limit;
+
+  const filter = { isDeleted: { $ne: true } };
+  if (queryString.category) filter.category = queryString.category;
+  if (queryString.status) filter.status = queryString.status;
+  if (queryString.search) {
+    filter.$or = [
+      { title: { $regex: queryString.search, $options: 'i' } },
+      { excerpt: { $regex: queryString.search, $options: 'i' } },
+    ];
+  }
+
+  const [items, total] = await Promise.all([
+    Content.find(filter)
+      .populate('createdBy', 'name email')
+      .sort('-updatedAt')
+      .skip(skip)
+      .limit(limit),
+    Content.countDocuments(filter),
+  ]);
+
+  return {
+    items,
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) || 1 },
+  };
+};
+
+const getContentById = async (id) => {
+  const item = await Content.findOne({ _id: id, isDeleted: { $ne: true } }).populate(
+    'createdBy',
+    'name email',
+  );
+  if (!item) throw new NotFoundError('Content not found.');
+  return item;
+};
+
+const createContent = async (data, adminId, req) => {
+  const item = await Content.create({
+    ...data,
+    createdBy: adminId,
+    publishedAt: data.status === 'published' ? new Date() : undefined,
+  });
+
+  await createAuditLog({
+    action: 'content.create',
+    userId: adminId,
+    targetId: item._id,
+    targetModel: 'Content',
+    metadata: { title: item.title, category: item.category },
+    req,
+  });
+
+  return item;
+};
+
+const updateContent = async (id, data, adminId, req) => {
+  const item = await Content.findOne({ _id: id, isDeleted: { $ne: true } });
+  if (!item) throw new NotFoundError('Content not found.');
+
+  Object.assign(item, data);
+  if (data.status === 'published' && !item.publishedAt) {
+    item.publishedAt = new Date();
+  }
+  await item.save();
+
+  await createAuditLog({
+    action: 'content.update',
+    userId: adminId,
+    targetId: item._id,
+    targetModel: 'Content',
+    metadata: { title: item.title, category: item.category },
+    req,
+  });
+
+  return item;
+};
+
+const deleteContent = async (id, adminId, req) => {
+  const item = await Content.findOne({ _id: id, isDeleted: { $ne: true } });
+  if (!item) throw new NotFoundError('Content not found.');
+
+  item.isDeleted = true;
+  item.deletedAt = new Date();
+  await item.save({ validateBeforeSave: false });
+
+  await createAuditLog({
+    action: 'content.delete',
+    userId: adminId,
+    targetId: item._id,
+    targetModel: 'Content',
+    metadata: { title: item.title, category: item.category },
+    req,
+  });
+
+  return item;
+};
+
+const setContentCover = async (id, coverImage, adminId, req) => {
+  const item = await Content.findOne({ _id: id, isDeleted: { $ne: true } });
+  if (!item) throw new NotFoundError('Content not found.');
+
+  item.coverImage = coverImage;
+  await item.save({ validateBeforeSave: false });
+
+  await createAuditLog({
+    action: 'content.update',
+    userId: adminId,
+    targetId: item._id,
+    targetModel: 'Content',
+    metadata: { coverImage: true },
+    req,
+  });
+
+  return item;
+};
+
 const getAnalytics = async () => {
   const [
     totalUsers,
     totalStudents,
     totalProviders,
+    totalAdmins,
+    suspendedUsers,
     totalScholarships,
     approvedScholarships,
     pendingScholarships,
+    rejectedScholarships,
     totalApplications,
     totalPremium,
+    totalContent,
+    publishedContent,
     recentUsers,
     recentScholarships,
     applicationsByStatus,
     revenueData,
   ] = await Promise.all([
-    User.countDocuments(),
-    User.countDocuments({ role: 'student' }),
-    User.countDocuments({ role: 'provider' }),
-    Scholarship.countDocuments(),
-    Scholarship.countDocuments({ status: 'approved' }),
-    Scholarship.countDocuments({ status: 'pending' }),
+    User.countDocuments({ isDeleted: { $ne: true } }),
+    User.countDocuments({ role: 'student', isDeleted: { $ne: true } }),
+    User.countDocuments({ role: 'provider', isDeleted: { $ne: true } }),
+    User.countDocuments({ role: 'admin', isDeleted: { $ne: true } }),
+    User.countDocuments({ isSuspended: true }),
+    Scholarship.countDocuments({ isDeleted: { $ne: true } }),
+    Scholarship.countDocuments({ status: 'approved', isDeleted: { $ne: true } }),
+    Scholarship.countDocuments({ status: 'pending', isDeleted: { $ne: true } }),
+    Scholarship.countDocuments({ status: 'rejected', isDeleted: { $ne: true } }),
     Application.countDocuments(),
     User.countDocuments({ subscriptionPlan: { $ne: 'free' }, subscriptionStatus: 'active' }),
-    User.find().sort('-createdAt').limit(5).select('name email role createdAt'),
-    Scholarship.find().sort('-createdAt').limit(5).select('title status createdAt'),
-    Application.aggregate([
-      { $group: { _id: '$status', count: { $sum: 1 } } },
-    ]),
+    Content.countDocuments({ isDeleted: { $ne: true } }),
+    Content.countDocuments({ status: 'published', isDeleted: { $ne: true } }),
+    User.find({ isDeleted: { $ne: true } })
+      .sort('-createdAt')
+      .limit(8)
+      .select('name email role createdAt isSuspended'),
+    Scholarship.find({ isDeleted: { $ne: true } })
+      .sort('-createdAt')
+      .limit(8)
+      .select('title status country createdAt'),
+    Application.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
     Payment.aggregate([
       { $match: { status: 'active' } },
       { $group: { _id: '$plan', count: { $sum: 1 }, totalRevenue: { $sum: '$amount' } } },
@@ -213,8 +487,19 @@ const getAnalytics = async () => {
   ]);
 
   return {
-    users: { total: totalUsers, students: totalStudents, providers: totalProviders },
-    scholarships: { total: totalScholarships, approved: approvedScholarships, pending: pendingScholarships },
+    users: {
+      total: totalUsers,
+      students: totalStudents,
+      providers: totalProviders,
+      admins: totalAdmins,
+      suspended: suspendedUsers,
+    },
+    scholarships: {
+      total: totalScholarships,
+      approved: approvedScholarships,
+      pending: pendingScholarships,
+      rejected: rejectedScholarships,
+    },
     applications: {
       total: totalApplications,
       byStatus: applicationsByStatus.reduce((acc, item) => {
@@ -222,6 +507,7 @@ const getAnalytics = async () => {
         return acc;
       }, {}),
     },
+    content: { total: totalContent, published: publishedContent },
     revenue: {
       totalPremium,
       byPlan: revenueData,
@@ -233,7 +519,6 @@ const getAnalytics = async () => {
   };
 };
 
-// ---- Audit Logs ----
 const getAuditLogs = async (queryString) => {
   const page = parseInt(queryString.page, 10) || 1;
   const limit = parseInt(queryString.limit, 10) || 50;
@@ -254,7 +539,7 @@ const getAuditLogs = async (queryString) => {
 
   return {
     logs,
-    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) || 1 },
   };
 };
 
@@ -262,10 +547,22 @@ module.exports = {
   getUsers,
   suspendUser,
   unsuspendUser,
+  getAdminScholarships,
+  createAdminScholarship,
+  updateAdminScholarship,
+  deleteAdminScholarship,
+  setScholarshipCover,
   approveScholarship,
   rejectScholarship,
   featureScholarship,
   getPendingScholarships,
+  getAdminApplications,
+  getContents,
+  getContentById,
+  createContent,
+  updateContent,
+  deleteContent,
+  setContentCover,
   getAnalytics,
   getAuditLogs,
 };

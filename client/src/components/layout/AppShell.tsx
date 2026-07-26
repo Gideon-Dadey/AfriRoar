@@ -6,6 +6,7 @@ import {
   faGaugeHigh,
   faMagnifyingGlass,
   faRightFromBracket,
+  faShieldHalved,
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
@@ -14,7 +15,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 
-const links: {
+const baseLinks: {
   to: string;
   label: string;
   icon: IconDefinition;
@@ -39,6 +40,18 @@ export default function AppShell() {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   const firstName = user?.name?.split(' ')[0] || 'Student';
+  const links =
+    user?.role === 'admin'
+      ? [
+          ...baseLinks,
+          {
+            to: '/dashboard/admin',
+            label: 'Admin',
+            icon: faShieldHalved,
+            end: false,
+          },
+        ]
+      : baseLinks;
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : '';

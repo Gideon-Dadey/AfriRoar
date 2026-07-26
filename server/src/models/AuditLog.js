@@ -31,6 +31,9 @@ const auditLogSchema = new mongoose.Schema(
         'payment.renew',
         'payment.failed',
         'admin.action',
+        'content.create',
+        'content.update',
+        'content.delete',
       ],
     },
     userId: {
@@ -42,7 +45,7 @@ const auditLogSchema = new mongoose.Schema(
     },
     targetModel: {
       type: String,
-      enum: ['User', 'Scholarship', 'Application', 'Payment'],
+      enum: ['User', 'Scholarship', 'Application', 'Payment', 'Content'],
     },
     metadata: {
       type: mongoose.Schema.Types.Mixed,
