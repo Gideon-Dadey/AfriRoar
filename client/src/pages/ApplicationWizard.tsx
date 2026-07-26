@@ -21,14 +21,23 @@ import api from '@/lib/api';
 import { formatDate, formatDeadline, getFundingTypeLabel, getLevelLabel } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
 import type { Application, Document, Scholarship } from '@/types';
+import {
+  INTENDED_DEGREE_LEVELS,
+  STUDY_FIELD_CATEGORIES,
+  STUDY_FIELD_OTHER,
+  isListedStudyField,
+} from '@/data/studyFields';
 
 const STEPS = [
+  { title: 'Programme', blurb: 'Degree level and field you are applying for' },
   { title: 'Personal', blurb: 'Identity and contact details' },
   { title: 'Academic', blurb: 'Education background' },
   { title: 'Statements', blurb: 'Personal statement and motivation' },
   { title: 'Documents', blurb: 'Supporting uploads' },
   { title: 'Review', blurb: 'Confirm and submit' },
 ] as const;
+
+const TOTAL_STEPS = STEPS.length;
 
 const DOC_HINTS = [
   'Passport or national ID',
@@ -53,6 +62,12 @@ const COUNTRIES = [
   'United States', 'Canada', 'Germany', 'France', 'Netherlands', 'China', 'Japan',
 ] as const;
 
+type ProgrammeData = {
+  intendedLevel: string;
+  intendedField: string;
+  specialization: string;
+};
+
 type PersonalData = {
   fullName: string;
   phone: string;
@@ -71,6 +86,12 @@ type AcademicData = {
   languages: string;
 };
 
+const emptyProgramme = (): ProgrammeData => ({
+  intendedLevel: '',
+  intendedField: '',
+  specialization: '',
+});
+
 const emptyPersonal = (): PersonalData => ({
   fullName: '',
   phone: '',
@@ -88,6 +109,22 @@ const emptyAcademic = (): AcademicData => ({
   graduationYear: '',
   languages: '',
 });
+
+function looksLikePersonalData(data: Record<string, unknown> | undefined) {
+  if (!data) return false;
+  return Boolean(data.fullName || data.phone || data.nationality || data.country);
+}
+
+function programmeFromScholarship(s?: Scholarship | null): ProgrammeData {
+  if (!s) return emptyProgramme();
+  const fieldHint = String(s.field || '').trim();
+  const genericField = !fieldHint || /^(any|any field|n\/?a|general)$/i.test(fieldHint);
+  return {
+    intendedLevel: s.level && s.level !== 'any' ? s.level : '',
+    intendedField: genericField ? '' : fieldHint,
+    specialization: '',
+  };
+}
 
 const inputClass =
   'w-full border border-[var(--color-sr-border)] bg-white px-3 py-2.5 text-[15px] text-[var(--color-sr-text)] outline-none transition-colors placeholder:text-[var(--color-sr-muted)]/70 focus:border-[var(--color-sr-navy)] disabled:cursor-not-allowed disabled:bg-[var(--color-sr-bg)] disabled:text-[var(--color-sr-muted)]';
@@ -198,6 +235,8 @@ export default function ApplicationWizard() {
   const [pickerLevel, setPickerLevel] = useState('');
   const [pickerFunding, setPickerFunding] = useState('');
 
+  const [programme, setProgramme] = useState<ProgrammeData>(emptyProgramme());
+  const [fieldChoice, setFieldChoice] = useState('');
   const [personal, setPersonal] = useState<PersonalData>(emptyPersonal());
   const [academic, setAcademic] = useState<AcademicData>(emptyAcademic());
   const [personalStatement, setPersonalStatement] = useState('');
@@ -282,13 +321,14 @@ export default function ApplicationWizard() {
   const snapshotKey = useMemo(
     () =>
       JSON.stringify({
+        programme,
         personal,
         academic,
         personalStatement,
         motivation,
         docs: (application?.documents || []).map((d) => d.url),
       }),
-    [personal, academic, personalStatement, motivation, application?.documents],
+    [programme, personal, academic, personalStatement, motivation, application?.documents],
   );
 
   const dirty = Boolean(baselineKey) && snapshotKey !== baselineKey;
@@ -326,23 +366,67 @@ export default function ApplicationWizard() {
         setApplication(app);
         const lockedStatuses = ['submitted', 'under_review', 'accepted', 'rejected'];
         const isLocked = lockedStatuses.includes(app.status);
-        setStep(isLocked ? 5 : Math.min(5, Math.max(1, app.currentStep || 1)));
+        setStep(isLocked ? TOTAL_STEPS : Math.min(TOTAL_STEPS, Math.max(1, app.currentStep || 1)));
         setPersonalStatement(app.personalStatement || '');
         setMotivation(app.motivation || '');
         setLastSavedAt(app.lastSavedAt || app.updatedAt || null);
 
-        const p = (app.steps?.find((s) => s.stepNumber === 1)?.data || {}) as Partial<PersonalData>;
-        const a = (app.steps?.find((s) => s.stepNumber === 2)?.data || {}) as Partial<AcademicData>;
-        const statements = (app.steps?.find((s) => s.stepNumber === 3)?.data || {}) as {
-          personalStatement?: string;
-          motivation?: string;
-        };
+        const step1 = (app.steps?.find((s) => s.stepNumber === 1)?.data || {}) as Record<
+          string,
+          unknown
+        >;
+        const legacy = looksLikePersonalData(step1);
 
-        const nextPersonal = { ...emptyPersonal(), ...p };
-        const nextAcademic = { ...emptyAcademic(), ...a };
+        let nextProgramme = emptyProgramme();
+        let nextPersonal = emptyPersonal();
+        let nextAcademic = emptyAcademic();
+        let statements: { personalStatement?: string; motivation?: string } = {};
+
+        if (legacy) {
+          const sch =
+            app.scholarshipId && typeof app.scholarshipId === 'object'
+              ? (app.scholarshipId as Scholarship)
+              : null;
+          nextProgramme = programmeFromScholarship(sch);
+          nextPersonal = { ...emptyPersonal(), ...(step1 as Partial<PersonalData>) };
+          nextAcademic = {
+            ...emptyAcademic(),
+            ...((app.steps?.find((s) => s.stepNumber === 2)?.data || {}) as Partial<AcademicData>),
+          };
+          statements = (app.steps?.find((s) => s.stepNumber === 3)?.data || {}) as {
+            personalStatement?: string;
+            motivation?: string;
+          };
+        } else {
+          nextProgramme = {
+            ...emptyProgramme(),
+            ...(step1 as Partial<ProgrammeData>),
+          };
+          nextPersonal = {
+            ...emptyPersonal(),
+            ...((app.steps?.find((s) => s.stepNumber === 2)?.data || {}) as Partial<PersonalData>),
+          };
+          nextAcademic = {
+            ...emptyAcademic(),
+            ...((app.steps?.find((s) => s.stepNumber === 3)?.data || {}) as Partial<AcademicData>),
+          };
+          statements = (app.steps?.find((s) => s.stepNumber === 4)?.data || {}) as {
+            personalStatement?: string;
+            motivation?: string;
+          };
+        }
+
         const nextStatement = app.personalStatement || statements.personalStatement || '';
         const nextMotivation = app.motivation || statements.motivation || '';
 
+        setProgramme(nextProgramme);
+        if (nextProgramme.intendedField && isListedStudyField(nextProgramme.intendedField)) {
+          setFieldChoice(nextProgramme.intendedField);
+        } else if (nextProgramme.intendedField) {
+          setFieldChoice(STUDY_FIELD_OTHER);
+        } else {
+          setFieldChoice('');
+        }
         setPersonal(nextPersonal);
         setAcademic(nextAcademic);
         setPersonalStatement(nextStatement);
@@ -350,6 +434,7 @@ export default function ApplicationWizard() {
 
         setBaselineKey(
           JSON.stringify({
+            programme: nextProgramme,
             personal: nextPersonal,
             academic: nextAcademic,
             personalStatement: nextStatement,
@@ -367,6 +452,32 @@ export default function ApplicationWizard() {
     };
     load();
   }, [id]);
+
+  // Prefill programme from scholarship when draft still has empty programme fields
+  useEffect(() => {
+    if (!scholarship || locked) return;
+    setProgramme((prev) => {
+      const fromSch = programmeFromScholarship(scholarship);
+      const next = {
+        intendedLevel: prev.intendedLevel || fromSch.intendedLevel,
+        intendedField: prev.intendedField || fromSch.intendedField,
+        specialization: prev.specialization || '',
+      };
+      if (
+        next.intendedLevel === prev.intendedLevel &&
+        next.intendedField === prev.intendedField &&
+        next.specialization === prev.specialization
+      ) {
+        return prev;
+      }
+      if (next.intendedField && isListedStudyField(next.intendedField)) {
+        setFieldChoice(next.intendedField);
+      } else if (next.intendedField) {
+        setFieldChoice(STUDY_FIELD_OTHER);
+      }
+      return next;
+    });
+  }, [scholarship, locked]);
 
   useEffect(() => {
     if (!dirty || locked) return;
@@ -410,31 +521,37 @@ export default function ApplicationWizard() {
     const steps = [
       {
         stepNumber: 1,
-        title: STEPS[0].title,
-        data: personal,
+        title: 'Programme of study',
+        data: programme,
         completed: step > 1,
       },
       {
         stepNumber: 2,
-        title: STEPS[1].title,
-        data: academic,
+        title: 'Personal Information',
+        data: personal,
         completed: step > 2,
       },
       {
         stepNumber: 3,
-        title: STEPS[2].title,
-        data: { personalStatement, motivation },
+        title: 'Academic Background',
+        data: academic,
         completed: step > 3,
       },
       {
         stepNumber: 4,
-        title: STEPS[3].title,
+        title: 'Statement & Motivation',
+        data: { personalStatement, motivation },
+        completed: step > 4,
+      },
+      {
+        stepNumber: 5,
+        title: 'Documents',
         data: { documentCount: application?.documents?.length || 0 },
         completed: (application?.documents?.length || 0) > 0,
       },
       {
-        stepNumber: 5,
-        title: STEPS[4].title,
+        stepNumber: 6,
+        title: 'Review & Submit',
         data: {},
         completed: false,
       },
@@ -448,20 +565,28 @@ export default function ApplicationWizard() {
     return steps;
   };
 
+  const levelLocked = Boolean(scholarship?.level && scholarship.level !== 'any');
+
   const validateStep = useCallback(() => {
     if (step === 1) {
+      if (!programme.intendedLevel || !programme.intendedField.trim()) {
+        toast.error('Select the degree level and field you are applying for.');
+        return false;
+      }
+    }
+    if (step === 2) {
       if (!personal.fullName.trim() || !personal.phone.trim() || !personal.country.trim() || !personal.nationality.trim()) {
         toast.error('Complete the required personal fields.');
         return false;
       }
     }
-    if (step === 2) {
+    if (step === 3) {
       if (!academic.educationLevel || !academic.institution.trim() || !academic.fieldOfStudy.trim()) {
-        toast.error('Complete the required academic fields.');
+        toast.error('Complete the required academic background fields.');
         return false;
       }
     }
-    if (step === 3) {
+    if (step === 4) {
       if (personalStatement.trim().length < 100) {
         toast.error('Personal statement needs at least 100 characters.');
         return false;
@@ -471,12 +596,12 @@ export default function ApplicationWizard() {
         return false;
       }
     }
-    if (step === 4 && (!application?.documents || application.documents.length === 0)) {
+    if (step === 5 && (!application?.documents || application.documents.length === 0)) {
       toast.error('Upload at least one supporting document.');
       return false;
     }
     return true;
-  }, [step, personal, academic, personalStatement, motivation, application?.documents]);
+  }, [step, programme, personal, academic, personalStatement, motivation, application?.documents]);
 
   const saveProgress = async (nextStep?: number, markComplete = true, silent = false) => {
     if (!application || locked) return application;
@@ -493,6 +618,7 @@ export default function ApplicationWizard() {
       setLastSavedAt(saved.lastSavedAt || saved.updatedAt || new Date().toISOString());
       setBaselineKey(
         JSON.stringify({
+          programme,
           personal,
           academic,
           personalStatement,
@@ -515,7 +641,7 @@ export default function ApplicationWizard() {
 
   const goNext = async () => {
     if (locked || !validateStep()) return;
-    const next = Math.min(step + 1, 5);
+    const next = Math.min(step + 1, TOTAL_STEPS);
     await saveProgress(next, true, true);
     setStep(next);
   };
@@ -534,11 +660,20 @@ export default function ApplicationWizard() {
     if (!baselineKey) return;
     try {
       const parsed = JSON.parse(baselineKey) as {
+        programme: ProgrammeData;
         personal: PersonalData;
         academic: AcademicData;
         personalStatement: string;
         motivation: string;
       };
+      setProgramme(parsed.programme);
+      if (parsed.programme.intendedField && isListedStudyField(parsed.programme.intendedField)) {
+        setFieldChoice(parsed.programme.intendedField);
+      } else if (parsed.programme.intendedField) {
+        setFieldChoice(STUDY_FIELD_OTHER);
+      } else {
+        setFieldChoice('');
+      }
       setPersonal(parsed.personal);
       setAcademic(parsed.academic);
       setPersonalStatement(parsed.personalStatement);
@@ -610,6 +745,7 @@ export default function ApplicationWizard() {
       setApplication(saved);
       setBaselineKey(
         JSON.stringify({
+          programme,
           personal,
           academic,
           personalStatement,
@@ -631,31 +767,36 @@ export default function ApplicationWizard() {
   const submitApplication = async () => {
     if (!application || locked) return;
 
+    if (!programme.intendedLevel || !programme.intendedField.trim()) {
+      toast.error('Select the degree level and field you are applying for.');
+      setStep(1);
+      return;
+    }
     if (!personal.fullName.trim() || !personal.phone.trim() || !personal.country.trim() || !personal.nationality.trim()) {
       toast.error('Personal details are incomplete.');
-      setStep(1);
+      setStep(2);
       return;
     }
     if (!academic.educationLevel || !academic.institution.trim() || !academic.fieldOfStudy.trim()) {
       toast.error('Academic details are incomplete.');
-      setStep(2);
+      setStep(3);
       return;
     }
     if (personalStatement.trim().length < 100 || motivation.trim().length < 50) {
       toast.error('Statements are incomplete.');
-      setStep(3);
+      setStep(4);
       return;
     }
     if (!application.documents?.length) {
       toast.error('Upload at least one document before submitting.');
-      setStep(4);
+      setStep(5);
       return;
     }
 
-    setStep(5);
+    setStep(TOTAL_STEPS);
     setSubmitting(true);
     try {
-      await saveProgress(5, true, true);
+      await saveProgress(TOTAL_STEPS, true, true);
       const { data } = await api.post(`/applications/${application._id}/submit`);
       setApplication(data.data.application);
       setBaselineKey(snapshotKey);
@@ -1202,13 +1343,29 @@ export default function ApplicationWizard() {
 
             {scholarship ? (
               <div className="mt-5 border-t border-[var(--color-sr-border)] pt-4 text-[12px] text-[var(--color-sr-muted)]">
-                <p className="font-semibold uppercase tracking-[0.12em] text-[var(--color-sr-navy)]">Programme</p>
+                <p className="font-semibold uppercase tracking-[0.12em] text-[var(--color-sr-navy)]">Listing</p>
                 <p className="mt-2 leading-relaxed">
                   {scholarship.country}
                   {scholarship.level ? ` · ${getLevelLabel(scholarship.level)}` : ''}
                 </p>
+                {scholarship.field ? <p className="mt-1">{scholarship.field}</p> : null}
                 {scholarship.fundingType ? (
                   <p className="mt-1">{getFundingTypeLabel(scholarship.fundingType)}</p>
+                ) : null}
+                {programme.intendedLevel || programme.intendedField ? (
+                  <div className="mt-3 border-t border-[var(--color-sr-border)] pt-3">
+                    <p className="font-semibold uppercase tracking-[0.12em] text-[var(--color-sr-navy)]">
+                      Applying for
+                    </p>
+                    <p className="mt-2 font-semibold text-[var(--color-sr-navy-deeper)]">
+                      {[getLevelLabel(programme.intendedLevel), programme.intendedField]
+                        .filter(Boolean)
+                        .join(' · ') || '—'}
+                    </p>
+                    {programme.specialization ? (
+                      <p className="mt-1">{programme.specialization}</p>
+                    ) : null}
+                  </div>
                 ) : null}
                 {scholarship.slug || scholarship._id ? (
                   <Link
@@ -1231,6 +1388,128 @@ export default function ApplicationWizard() {
             </header>
 
             {step === 1 && (
+              <div className="space-y-5">
+                <div className="border border-[var(--color-sr-border)] bg-[var(--color-sr-bg)] p-4">
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--color-sr-muted)]">
+                    Scholarship
+                  </p>
+                  <p className="mt-1 text-[15px] font-bold text-[var(--color-sr-navy-deeper)]">
+                    {scholarship?.title || 'Selected programme'}
+                  </p>
+                  <p className="mt-1 text-[13px] text-[var(--color-sr-muted)]">
+                    Tell us the exact degree level and field you want this award to support.
+                    This is separate from your past education background.
+                  </p>
+                </div>
+
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <Field
+                    id="app-intended-level"
+                    label="Degree level you are applying for *"
+                    hint={
+                      levelLocked
+                        ? 'This listing is limited to one degree level.'
+                        : 'Choose Bachelor’s, Master’s, PhD, or another level this scholarship allows.'
+                    }
+                  >
+                    <select
+                      id="app-intended-level"
+                      disabled={locked || levelLocked}
+                      value={programme.intendedLevel}
+                      onChange={(e) =>
+                        setProgramme({ ...programme, intendedLevel: e.target.value })
+                      }
+                      className={inputClass}
+                    >
+                      <option value="">Select degree level…</option>
+                      {INTENDED_DEGREE_LEVELS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+
+                  <Field
+                    id="app-intended-field"
+                    label="Field of study *"
+                    hint="Pick the subject area for this application (e.g. Information Technology, Civil Engineering)."
+                  >
+                    <select
+                      id="app-intended-field"
+                      disabled={locked}
+                      value={fieldChoice}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFieldChoice(value);
+                        if (value === STUDY_FIELD_OTHER) {
+                          setProgramme({
+                            ...programme,
+                            intendedField: isListedStudyField(programme.intendedField)
+                              ? ''
+                              : programme.intendedField,
+                          });
+                        } else {
+                          setProgramme({ ...programme, intendedField: value });
+                        }
+                      }}
+                      className={inputClass}
+                    >
+                      <option value="">Select field of study…</option>
+                      {STUDY_FIELD_CATEGORIES.map((group) => (
+                        <optgroup key={group.category} label={group.category}>
+                          {group.fields.map((field) => (
+                            <option key={field} value={field}>
+                              {field}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                      <option value={STUDY_FIELD_OTHER}>{STUDY_FIELD_OTHER}</option>
+                    </select>
+                  </Field>
+
+                  {fieldChoice === STUDY_FIELD_OTHER ? (
+                    <Field
+                      id="app-intended-field-custom"
+                      label="Specify your field *"
+                      className="sm:col-span-2"
+                    >
+                      <input
+                        id="app-intended-field-custom"
+                        disabled={locked}
+                        value={programme.intendedField}
+                        onChange={(e) =>
+                          setProgramme({ ...programme, intendedField: e.target.value })
+                        }
+                        className={inputClass}
+                        placeholder="e.g. Marine Biotechnology"
+                      />
+                    </Field>
+                  ) : null}
+
+                  <Field
+                    id="app-specialization"
+                    label="Specialization / concentration"
+                    className="sm:col-span-2"
+                    hint="Optional. Example: Artificial Intelligence within Computer Science, or Structural Engineering within Civil Engineering."
+                  >
+                    <input
+                      id="app-specialization"
+                      disabled={locked}
+                      value={programme.specialization}
+                      onChange={(e) =>
+                        setProgramme({ ...programme, specialization: e.target.value })
+                      }
+                      className={inputClass}
+                      placeholder="Optional specialization"
+                    />
+                  </Field>
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
               <div className="grid gap-5 sm:grid-cols-2">
                 <Field id="app-fullName" label="Full legal name *" className="sm:col-span-2">
                   <input
@@ -1313,9 +1592,12 @@ export default function ApplicationWizard() {
               </div>
             )}
 
-            {step === 2 && (
+            {step === 3 && (
               <div className="grid gap-5 sm:grid-cols-2">
-                <Field id="app-education" label="Education level *">
+                <p className="sm:col-span-2 text-[14px] text-[var(--color-sr-muted)]">
+                  Your current or most recent education — not the programme you are applying for.
+                </p>
+                <Field id="app-education" label="Highest education completed / in progress *">
                   <select
                     id="app-education"
                     disabled={locked}
@@ -1340,7 +1622,7 @@ export default function ApplicationWizard() {
                     className={inputClass}
                   />
                 </Field>
-                <Field id="app-field" label="Field of study *">
+                <Field id="app-field" label="Major / subject studied *">
                   <input
                     id="app-field"
                     disabled={locked}
@@ -1381,7 +1663,7 @@ export default function ApplicationWizard() {
               </div>
             )}
 
-            {step === 3 && (
+            {step === 4 && (
               <div className="space-y-6">
                 <Field
                   id="app-statement"
@@ -1435,7 +1717,7 @@ export default function ApplicationWizard() {
               </div>
             )}
 
-            {step === 4 && (
+            {step === 5 && (
               <div>
                 <p className="mb-4 text-[14px] text-[var(--color-sr-muted)]">
                   Upload clear scans or PDFs. Accepted: PDF, DOC, DOCX, JPG, PNG (max 5 MB each).
@@ -1531,7 +1813,7 @@ export default function ApplicationWizard() {
               </div>
             )}
 
-            {step === 5 && (
+            {step === 6 && (
               <div className="space-y-4">
                 {locked ? (
                   <div className="border border-[var(--color-sr-navy)]/15 bg-[var(--color-sr-bg)] p-4 md:p-5">
@@ -1556,7 +1838,37 @@ export default function ApplicationWizard() {
                 ) : null}
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <ReviewBlock title="Personal" locked={locked} onEdit={() => setStep(1)}>
+                  <ReviewBlock title="Programme of study" locked={locked} onEdit={() => setStep(1)}>
+                    <p className="font-semibold text-[var(--color-sr-navy-deeper)]">
+                      {[getLevelLabel(programme.intendedLevel), programme.intendedField]
+                        .filter(Boolean)
+                        .join(' · ') || '-'}
+                    </p>
+                    <dl className="mt-3 space-y-1.5 text-[14px]">
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-[var(--color-sr-muted)]">Degree level</dt>
+                        <dd className="text-right text-[var(--color-sr-text)]">
+                          {getLevelLabel(programme.intendedLevel) || '-'}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between gap-3">
+                        <dt className="text-[var(--color-sr-muted)]">Field of study</dt>
+                        <dd className="max-w-[60%] text-right text-[var(--color-sr-text)]">
+                          {programme.intendedField || '-'}
+                        </dd>
+                      </div>
+                      {programme.specialization ? (
+                        <div className="flex justify-between gap-3">
+                          <dt className="text-[var(--color-sr-muted)]">Specialization</dt>
+                          <dd className="max-w-[60%] text-right text-[var(--color-sr-text)]">
+                            {programme.specialization}
+                          </dd>
+                        </div>
+                      ) : null}
+                    </dl>
+                  </ReviewBlock>
+
+                  <ReviewBlock title="Personal" locked={locked} onEdit={() => setStep(2)}>
                     <p className="font-semibold text-[var(--color-sr-navy-deeper)]">
                       {personal.fullName || '-'}
                     </p>
@@ -1588,13 +1900,13 @@ export default function ApplicationWizard() {
                     </dl>
                   </ReviewBlock>
 
-                  <ReviewBlock title="Academic" locked={locked} onEdit={() => setStep(2)}>
+                  <ReviewBlock title="Academic background" locked={locked} onEdit={() => setStep(3)}>
                     <p className="font-semibold text-[var(--color-sr-navy-deeper)]">
                       {academic.fieldOfStudy || '-'}
                     </p>
                     <dl className="mt-3 space-y-1.5 text-[14px]">
                       <div className="flex justify-between gap-3">
-                        <dt className="text-[var(--color-sr-muted)]">Level</dt>
+                        <dt className="text-[var(--color-sr-muted)]">Level completed</dt>
                         <dd className="text-right text-[var(--color-sr-text)]">
                           {getLevelLabel(academic.educationLevel) || '-'}
                         </dd>
@@ -1627,19 +1939,19 @@ export default function ApplicationWizard() {
                   </ReviewBlock>
                 </div>
 
-                <ReviewBlock title="Personal statement" locked={locked} onEdit={() => setStep(3)}>
+                <ReviewBlock title="Personal statement" locked={locked} onEdit={() => setStep(4)}>
                   <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-[var(--color-sr-text)]">
                     {personalStatement.trim() || '-'}
                   </p>
                 </ReviewBlock>
 
-                <ReviewBlock title="Motivation" locked={locked} onEdit={() => setStep(3)}>
+                <ReviewBlock title="Motivation" locked={locked} onEdit={() => setStep(4)}>
                   <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-[var(--color-sr-text)]">
                     {motivation.trim() || '-'}
                   </p>
                 </ReviewBlock>
 
-                <ReviewBlock title="Documents" locked={locked} onEdit={() => setStep(4)}>
+                <ReviewBlock title="Documents" locked={locked} onEdit={() => setStep(5)}>
                   {(application.documents || []).length === 0 ? (
                     <p className="text-[14px] text-[var(--color-sr-muted)]">No documents attached.</p>
                   ) : (
@@ -1698,7 +2010,7 @@ export default function ApplicationWizard() {
                     Save draft
                   </button>
 
-                  {step < 5 ? (
+                  {step < TOTAL_STEPS ? (
                     <button
                       type="button"
                       onClick={goNext}

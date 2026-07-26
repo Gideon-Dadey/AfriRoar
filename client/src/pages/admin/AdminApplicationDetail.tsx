@@ -86,9 +86,20 @@ export default function AdminApplicationDetail() {
   const application = data?.application;
   const student = application ? asUser(application.userId) : null;
   const scholarship = application ? asScholarship(application.scholarshipId) : null;
-  const personal = application ? stepData(application, 1) : {};
-  const academic = application ? stepData(application, 2) : {};
-  const statements = application ? stepData(application, 3) : {};
+  const step1 = application ? stepData(application, 1) : {};
+  const legacyPersonalOnStep1 = Boolean(step1.fullName || step1.phone);
+  const programme = legacyPersonalOnStep1 ? {} : step1;
+  const personal = legacyPersonalOnStep1
+    ? step1
+    : application
+      ? stepData(application, 2)
+      : {};
+  const academic = application
+    ? stepData(application, legacyPersonalOnStep1 ? 2 : 3)
+    : {};
+  const statements = application
+    ? stepData(application, legacyPersonalOnStep1 ? 3 : 4)
+    : {};
   const profile = student?.profile;
 
   const personalStatement =
@@ -134,7 +145,12 @@ export default function AdminApplicationDetail() {
                   {scholarship?.title || 'Scholarship'}
                 </h2>
                 <p className="mt-1 text-[13px] text-[var(--color-sr-muted)]">
-                  {[scholarship?.country, scholarship?.deadline ? `Deadline ${formatDate(scholarship.deadline)}` : null]
+                  {[
+                    scholarship?.country,
+                    scholarship?.level ? getLevelLabel(scholarship.level) : null,
+                    scholarship?.field,
+                    scholarship?.deadline ? `Deadline ${formatDate(scholarship.deadline)}` : null,
+                  ]
                     .filter(Boolean)
                     .join(' · ') || '—'}
                 </p>
@@ -149,6 +165,20 @@ export default function AdminApplicationDetail() {
           </section>
 
           <div className="grid gap-4 lg:grid-cols-2">
+            <Section title="Programme of study (applying for)">
+              <dl>
+                <Field
+                  label="Degree level"
+                  value={
+                    getLevelLabel(text(programme.intendedLevel)) ||
+                    text(programme.intendedLevel)
+                  }
+                />
+                <Field label="Field of study" value={text(programme.intendedField)} />
+                <Field label="Specialization" value={text(programme.specialization)} />
+              </dl>
+            </Section>
+
             <Section title="Student account">
               <dl>
                 <Field label="Name" value={student?.name || text(personal.fullName)} />
@@ -181,10 +211,10 @@ export default function AdminApplicationDetail() {
             <Section title="Submitted academic background">
               <dl>
                 <Field
-                  label="Level"
+                  label="Level completed"
                   value={getLevelLabel(text(academic.educationLevel)) || text(academic.educationLevel)}
                 />
-                <Field label="Field of study" value={text(academic.fieldOfStudy)} />
+                <Field label="Major / subject studied" value={text(academic.fieldOfStudy)} />
                 <Field label="Institution" value={text(academic.institution)} />
                 <Field label="GPA" value={text(academic.gpa)} />
                 <Field label="Graduation year" value={text(academic.graduationYear)} />

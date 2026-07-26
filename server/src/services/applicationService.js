@@ -8,6 +8,15 @@ const { createAuditLog } = require('../utils/auditLog');
 
 const FREE_APPLICATION_LIMIT = 5;
 
+const DEFAULT_APPLICATION_STEPS = (programmeData = {}) => [
+  { stepNumber: 1, title: 'Programme of study', data: programmeData, completed: false },
+  { stepNumber: 2, title: 'Personal Information', data: {}, completed: false },
+  { stepNumber: 3, title: 'Academic Background', data: {}, completed: false },
+  { stepNumber: 4, title: 'Statement & Motivation', data: {}, completed: false },
+  { stepNumber: 5, title: 'Documents', data: {}, completed: false },
+  { stepNumber: 6, title: 'Review & Submit', data: {}, completed: false },
+];
+
 const createApplication = async (data, userId, req) => {
   const { scholarshipId } = data;
 
@@ -42,19 +51,21 @@ const createApplication = async (data, userId, req) => {
     }
   }
 
+  const fieldHint = String(scholarship.field || '').trim();
+  const genericField = !fieldHint || /^(any|any field|n\/?a|general)$/i.test(fieldHint);
+  const programmeData = {
+    intendedLevel: scholarship.level && scholarship.level !== 'any' ? scholarship.level : '',
+    intendedField: genericField ? '' : fieldHint,
+    specialization: '',
+  };
+
   // Create with default steps
   const application = await Application.create({
     userId,
     scholarshipId,
     personalStatement: data.personalStatement,
     motivation: data.motivation,
-    steps: data.steps || [
-      { stepNumber: 1, title: 'Personal Information', data: {}, completed: false },
-      { stepNumber: 2, title: 'Academic Background', data: {}, completed: false },
-      { stepNumber: 3, title: 'Statement & Motivation', data: {}, completed: false },
-      { stepNumber: 4, title: 'Documents', data: {}, completed: false },
-      { stepNumber: 5, title: 'Review & Submit', data: {}, completed: false },
-    ],
+    steps: data.steps || DEFAULT_APPLICATION_STEPS(programmeData),
   });
 
   await createAuditLog({
@@ -166,7 +177,28 @@ const submitApplication = async (id, userId, req) => {
   // Freeze a profile snapshot on the application so admin can always see what was submitted.
   const user = await User.findById(userId);
   const profile = user?.profile || {};
-  const personalStep = application.steps?.find((s) => s.stepNumber === 1);
+
+  const programmeStep = application.steps?.find((s) => s.stepNumber === 1);
+  if (programmeStep) {
+    const existing = programmeStep.data || {};
+    // Legacy apps stored personal details on step 1 — leave those alone.
+    if (!existing.fullName && !existing.phone) {
+      programmeStep.data = {
+        intendedLevel: existing.intendedLevel || '',
+        intendedField: existing.intendedField || '',
+        specialization: existing.specialization || '',
+      };
+      programmeStep.title = programmeStep.title || 'Programme of study';
+      programmeStep.completed = true;
+      programmeStep.completedAt = programmeStep.completedAt || new Date();
+    }
+  }
+
+  const personalStep = application.steps?.find((s) => {
+    if (s.stepNumber === 2) return true;
+    // Legacy: personal was step 1
+    return s.stepNumber === 1 && (s.data?.fullName || s.data?.phone);
+  });
   if (personalStep) {
     const existing = personalStep.data || {};
     personalStep.data = {
@@ -180,7 +212,11 @@ const submitApplication = async (id, userId, req) => {
     personalStep.completed = true;
     personalStep.completedAt = personalStep.completedAt || new Date();
   }
-  const academicStep = application.steps?.find((s) => s.stepNumber === 2);
+
+  const academicStep = application.steps?.find((s) => {
+    if (s.stepNumber === 3) return true;
+    return s.stepNumber === 2 && (s.data?.institution || s.data?.educationLevel);
+  });
   if (academicStep) {
     const existing = academicStep.data || {};
     academicStep.data = {

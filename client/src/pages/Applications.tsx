@@ -42,6 +42,14 @@ function titleOf(app: Application) {
   return scholarshipOf(app)?.title || 'Scholarship application';
 }
 
+function programmeOf(app: Application): { level?: string; field?: string } {
+  const step1 = app.steps?.find((s) => s.stepNumber === 1)?.data as
+    | { intendedLevel?: string; intendedField?: string; fullName?: string }
+    | undefined;
+  if (!step1 || step1.fullName) return {};
+  return { level: step1.intendedLevel, field: step1.intendedField };
+}
+
 function statusMeta(status: string) {
   switch (status) {
     case 'accepted':
@@ -412,8 +420,13 @@ export default function Applications() {
                 const scholarship = scholarshipOf(app);
                 const meta = statusMeta(app.status);
                 const StatusIcon = meta.icon;
-                const step = Math.min(5, Math.max(1, app.currentStep || 1));
-                const progressPct = app.status === 'draft' ? Math.round(((step - 1) / 4) * 100) : 100;
+                const totalSteps = Math.max(5, app.steps?.length || 6);
+                const step = Math.min(totalSteps, Math.max(1, app.currentStep || 1));
+                const progressPct =
+                  app.status === 'draft'
+                    ? Math.round(((step - 1) / Math.max(1, totalSteps - 1)) * 100)
+                    : 100;
+                const programme = programmeOf(app);
 
                 return (
                   <li key={app._id}>
@@ -434,7 +447,7 @@ export default function Applications() {
                           </span>
                           {app.status === 'draft' ? (
                             <span className="text-[12px] font-medium text-[var(--color-sr-muted)]">
-                              Step {step} of 5 · {progressPct}%
+                              Step {step} of {totalSteps} · {progressPct}%
                             </span>
                           ) : null}
                         </div>
@@ -444,6 +457,14 @@ export default function Applications() {
                         </h2>
 
                         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-[var(--color-sr-muted)]">
+                          {programme.level || programme.field ? (
+                            <span className="font-medium text-[var(--color-sr-navy)]">
+                              Applying:{' '}
+                              {[programme.level ? getLevelLabel(programme.level) : null, programme.field]
+                                .filter(Boolean)
+                                .join(' · ')}
+                            </span>
+                          ) : null}
                           {scholarship?.country ? (
                             <span className="inline-flex items-center gap-1">
                               <MapPin className="h-3.5 w-3.5" />
