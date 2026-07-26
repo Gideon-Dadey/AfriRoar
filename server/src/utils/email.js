@@ -1,13 +1,23 @@
 const nodemailer = require('nodemailer');
-const fs = require('fs');
-const path = require('path');
 const config = require('../config');
 const logger = require('./logger');
 
 let transporter;
 
-const LOGO_CID = 'afriroar-logo';
-const LOGO_PATH = path.join(__dirname, '../assets/email-logo.png');
+const BRAND = {
+  navy: '#2f4468',
+  navyDeep: '#1e2f4a',
+  navyDark: '#243652',
+  gold: '#f5c518',
+  goldHover: '#e0b400',
+  text: '#1e1e1e',
+  muted: '#64748b',
+  body: '#334155',
+  border: '#e5e7eb',
+  canvas: '#f3f4f6',
+  white: '#ffffff',
+  soft: '#fafafa',
+};
 
 const createTransporter = () => {
   if (!transporter) {
@@ -28,20 +38,6 @@ const createTransporter = () => {
   return transporter;
 };
 
-const getLogoAttachment = () => {
-  if (!fs.existsSync(LOGO_PATH)) {
-    logger.warn('Email logo missing at server/src/assets/email-logo.png');
-    return null;
-  }
-  return {
-    filename: 'afriroar-logo.png',
-    path: LOGO_PATH,
-    cid: LOGO_CID,
-    contentType: 'image/png',
-    contentDisposition: 'inline',
-  };
-};
-
 const sendEmail = async ({ to, subject, html, text, replyTo, attachments = [] }) => {
   try {
     const transport = createTransporter();
@@ -50,7 +46,6 @@ const sendEmail = async ({ to, subject, html, text, replyTo, attachments = [] })
       return { skipped: true };
     }
 
-    const logo = getLogoAttachment();
     const info = await transport.sendMail({
       from: config.email.from,
       to,
@@ -58,7 +53,7 @@ const sendEmail = async ({ to, subject, html, text, replyTo, attachments = [] })
       html,
       text,
       ...(replyTo ? { replyTo } : {}),
-      attachments: [...(logo ? [logo] : []), ...attachments],
+      ...(attachments.length ? { attachments } : {}),
     });
     logger.info(`Email sent: ${info.messageId} to ${to}`);
     return info;
@@ -80,12 +75,12 @@ const clientUrl = () => String(config.clientUrl || 'https://afriroar.com').repla
 const supportEmail = () => config.email.support || 'afriroar.support@gmail.com';
 const year = () => new Date().getFullYear();
 
-/** Primary CTA — navy, high contrast, email-safe */
+/** Gold primary CTA — matches AfriRoar product UI */
 const ctaButton = (href, label) => `
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0 0;">
     <tr>
-      <td align="left" bgcolor="#2f4468" style="border-radius:4px;">
-        <a href="${href}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;font-weight:700;line-height:1;color:#ffffff;text-decoration:none;border-radius:4px;">
+      <td align="left" bgcolor="${BRAND.gold}" style="border-radius:4px;">
+        <a href="${href}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;font-weight:700;line-height:1;color:${BRAND.navyDeep};text-decoration:none;border-radius:4px;">
           ${label}
         </a>
       </td>
@@ -93,15 +88,15 @@ const ctaButton = (href, label) => `
   </table>
 `;
 
-/** Large mono code block for OTP / reset codes */
+/** OTP / reset code — gold accent, easy to read on mobile */
 const codeBlock = (label, code) => `
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;">
     <tr>
-      <td align="center" style="background:#f8fafc;border:1px solid #e2e8f0;padding:22px 16px;">
-        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#64748b;margin:0 0 10px;">
+      <td bgcolor="${BRAND.soft}" style="background:${BRAND.soft};border:1px solid ${BRAND.border};border-left:4px solid ${BRAND.gold};padding:22px 20px;text-align:center;">
+        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:${BRAND.muted};margin:0 0 12px;">
           ${label}
         </div>
-        <div style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:32px;font-weight:700;letter-spacing:0.32em;color:#1e2f4a;line-height:1.2;">
+        <div style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:34px;font-weight:700;letter-spacing:0.28em;color:${BRAND.navyDeep};line-height:1.15;">
           ${escapeHtml(code)}
         </div>
       </td>
@@ -110,14 +105,12 @@ const codeBlock = (label, code) => `
 `;
 
 /**
- * Shared shell: logo-only header (CID-embedded so it works even when CLIENT_URL is localhost).
- * Table-based for Outlook / Gmail compatibility.
+ * Shared shell — text wordmark (no image), navy + gold brand system.
+ * Table layout for Gmail / Outlook / Apple Mail.
  */
 const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
   const site = clientUrl();
   const safePreheader = escapeHtml(preheader);
-  // Always use CID so Gmail/mobile clients render the logo without fetching a public URL.
-  const logo = `cid:${LOGO_CID}`;
 
   return `
 <!DOCTYPE html>
@@ -126,60 +119,63 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light only">
   <meta name="supported-color-schemes" content="light">
   <title>${escapeHtml(title)}</title>
   <!--[if mso]><style>table,td{font-family:Arial,Helvetica,sans-serif!important;}</style><![endif]-->
 </head>
-<body style="margin:0;padding:0;background:#f4f6f8;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
-  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">
-    ${safePreheader}
+<body style="margin:0;padding:0;background:${BRAND.canvas};-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;opacity:0;">
+    ${safePreheader}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
   </div>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f6f8;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.canvas};">
     <tr>
-      <td align="center" style="padding:28px 12px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#ffffff;">
-          <!-- Logo header -->
+      <td align="center" style="padding:32px 12px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:${BRAND.white};">
+
+          <!-- Brand header: AfriRoar text on navy -->
           <tr>
-            <td align="left" bgcolor="#ffffff" style="padding:28px 28px 20px;background:#ffffff;">
-              <a href="${site}" target="_blank" style="text-decoration:none;border:0;">
-                <img
-                  src="${logo}"
-                  alt="AfriRoar"
-                  width="140"
-                  height="44"
-                  style="display:block;width:140px;max-width:140px;height:auto;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;"
-                />
+            <td bgcolor="${BRAND.navyDeep}" style="background:${BRAND.navyDeep};padding:28px 32px;text-align:left;">
+              <a href="${site}" target="_blank" style="text-decoration:none;">
+                <span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:22px;font-weight:800;letter-spacing:0.06em;color:${BRAND.gold};line-height:1;">
+                  AfriRoar
+                </span>
               </a>
+              <div style="margin-top:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:1.4;color:rgba(255,255,255,0.72);">
+                Scholarships for African ambition
+              </div>
             </td>
           </tr>
+
+          <!-- Gold brand rule -->
           <tr>
-            <td bgcolor="#f5c518" style="height:3px;line-height:3px;font-size:0;background:#f5c518;">&nbsp;</td>
+            <td bgcolor="${BRAND.gold}" style="height:4px;line-height:4px;font-size:0;background:${BRAND.gold};">&nbsp;</td>
           </tr>
+
           <!-- Body -->
           <tr>
-            <td bgcolor="#ffffff" style="padding:28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1e1e1e;background:#ffffff;">
+            <td bgcolor="${BRAND.white}" style="padding:32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${BRAND.text};background:${BRAND.white};">
               ${bodyHtml}
             </td>
           </tr>
+
           <!-- Footer -->
           <tr>
-            <td bgcolor="#ffffff" style="padding:18px 28px 26px;border-top:1px solid #eef1f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:1.65;color:#94a3b8;background:#ffffff;">
-              <p style="margin:0 0 8px;">
-                Sent by AfriRoar ·
-                <a href="${site}" target="_blank" style="color:#64748b;text-decoration:underline;">Visit AfriRoar</a>
-              </p>
-              <p style="margin:0 0 8px;">
-                Need help?
-                <a href="mailto:${supportEmail()}" style="color:#64748b;text-decoration:underline;">${supportEmail()}</a>
+            <td bgcolor="${BRAND.soft}" style="padding:22px 32px 28px;border-top:1px solid ${BRAND.border};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:1.7;color:${BRAND.muted};background:${BRAND.soft};">
+              <p style="margin:0 0 6px;font-weight:700;color:${BRAND.navy};">AfriRoar</p>
+              <p style="margin:0 0 10px;">
+                <a href="${site}" target="_blank" style="color:${BRAND.navy};text-decoration:underline;">Open AfriRoar</a>
+                &nbsp;·&nbsp;
+                <a href="mailto:${supportEmail()}" style="color:${BRAND.navy};text-decoration:underline;">${supportEmail()}</a>
               </p>
               <p style="margin:0;">© ${year()} AfriRoar. All rights reserved.</p>
             </td>
           </tr>
         </table>
+
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
           <tr>
-            <td align="center" style="padding:14px 8px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5;color:#94a3b8;">
+            <td align="center" style="padding:16px 8px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5;color:#94a3b8;">
               If you did not expect this email, you can safely ignore it.
             </td>
           </tr>
@@ -193,13 +189,13 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
 };
 
 const heading = (text) => `
-  <h1 style="margin:0 0 12px;font-size:22px;font-weight:700;line-height:1.3;color:#1e2f4a;">
+  <h1 style="margin:0 0 14px;font-size:22px;font-weight:700;line-height:1.3;color:${BRAND.navyDeep};">
     ${text}
   </h1>
 `;
 
 const paragraph = (text, { muted = false, bottom = 16 } = {}) => `
-  <p style="margin:0 0 ${bottom}px;font-size:${muted ? '14' : '16'}px;line-height:1.65;color:${muted ? '#64748b' : '#334155'};">
+  <p style="margin:0 0 ${bottom}px;font-size:${muted ? '14' : '16'}px;line-height:1.65;color:${muted ? BRAND.muted : BRAND.body};">
     ${text}
   </p>
 `;
@@ -345,23 +341,23 @@ const templates = {
         preheader: `${topic} from ${name}`,
         bodyHtml: `
           ${heading('New contact message')}
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;font-size:14px;line-height:1.5;color:#334155;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;font-size:14px;line-height:1.5;color:${BRAND.body};">
             <tr>
-              <td style="padding:8px 0;width:72px;color:#64748b;vertical-align:top;">Name</td>
+              <td style="padding:8px 0;width:72px;color:${BRAND.muted};vertical-align:top;">Name</td>
               <td style="padding:8px 0;font-weight:600;">${safeName}</td>
             </tr>
             <tr>
-              <td style="padding:8px 0;color:#64748b;vertical-align:top;">Email</td>
-              <td style="padding:8px 0;"><a href="mailto:${safeEmail}" style="color:#2f4468;text-decoration:underline;">${safeEmail}</a></td>
+              <td style="padding:8px 0;color:${BRAND.muted};vertical-align:top;">Email</td>
+              <td style="padding:8px 0;"><a href="mailto:${safeEmail}" style="color:${BRAND.navy};text-decoration:underline;">${safeEmail}</a></td>
             </tr>
             <tr>
-              <td style="padding:8px 0;color:#64748b;vertical-align:top;">Topic</td>
+              <td style="padding:8px 0;color:${BRAND.muted};vertical-align:top;">Topic</td>
               <td style="padding:8px 0;">${safeTopic}</td>
             </tr>
           </table>
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
-              <td style="padding:16px;background:#f8fafc;border:1px solid #e2e8f0;font-size:15px;line-height:1.65;color:#334155;">
+              <td style="padding:16px;background:${BRAND.soft};border:1px solid ${BRAND.border};border-left:4px solid ${BRAND.gold};font-size:15px;line-height:1.65;color:${BRAND.body};">
                 ${safeMessage}
               </td>
             </tr>
