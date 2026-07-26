@@ -102,6 +102,15 @@
     margin: 0;
   }
 
+  /* iOS standalone / PWA: keep chrome under translucent status bar, content clear of it */
+  .sr-safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .sr-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   .sr-container {
     width: 100%;
     max-width: 1180px;

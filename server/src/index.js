@@ -142,11 +142,39 @@ const clientDist = path.join(__dirname, '../../client/dist');
 const serveClient = fs.existsSync(path.join(clientDist, 'index.html'));
 
 if (serveClient) {
-  app.use(express.static(clientDist, { index: false, maxAge: '1d' }));
+  app.use(
+    express.static(clientDist, {
+      index: false,
+      // Default short; setHeaders overrides critical files so deploys are picked up quickly
+      maxAge: '1h',
+      setHeaders(res, filePath) {
+        const rel = path.relative(clientDist, filePath).split(path.sep).join('/');
+        if (
+          rel === 'index.html' ||
+          rel === 'sw.js' ||
+          rel === 'manifest.webmanifest' ||
+          rel.endsWith('.html')
+        ) {
+          // Always revalidate entry + SW so PWA/browser clients detect new builds
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
+        } else if (rel.startsWith('assets/')) {
+          // Vite content-hashed bundles are immutable
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        } else {
+          res.setHeader('Cache-Control', 'public, max-age=86400');
+        }
+      },
+    })
+  );
   app.get('/{*splat}', (req, res, next) => {
     if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
       return next(new NotFoundError(`Cannot find ${req.originalUrl} on this server.`));
     }
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.join(clientDist, 'index.html'));
   });
 } else {

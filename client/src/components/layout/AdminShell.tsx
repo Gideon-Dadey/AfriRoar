@@ -128,23 +128,25 @@ export default function AdminShell() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
-        <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-3 border-b border-[var(--color-sr-border)] bg-[var(--color-sr-navy)] px-3 text-white sm:px-4 lg:hidden">
-          <div className="flex min-w-0 items-center gap-2">
-            <Link to="/dashboard/admin" className="min-w-0 shrink">
-              <img src="/sr/logo.png" alt="AfriRoar" className="h-6 w-auto max-w-[140px] object-contain object-left" />
-            </Link>
-            <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-[var(--color-sr-yellow)]">
-              Admin
-            </span>
+        <header className="sr-safe-top sticky top-0 z-40 border-b border-[var(--color-sr-border)] bg-[var(--color-sr-navy)] text-white lg:hidden">
+          <div className="flex h-14 items-center justify-between gap-3 px-3 sm:px-4">
+            <div className="flex min-w-0 items-center gap-2">
+              <Link to="/dashboard/admin" className="min-w-0 shrink">
+                <img src="/sr/logo.png" alt="AfriRoar" className="h-6 w-auto max-w-[140px] object-contain object-left" />
+              </Link>
+              <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-[var(--color-sr-yellow)]">
+                Admin
+              </span>
+            </div>
+            <button
+              type="button"
+              className="inline-flex shrink-0 p-2"
+              aria-label={drawerOpen ? 'Close menu' : 'Open menu'}
+              onClick={() => setDrawerOpen((v) => !v)}
+            >
+              {drawerOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
-          <button
-            type="button"
-            className="inline-flex shrink-0 p-2"
-            aria-label={drawerOpen ? 'Close menu' : 'Open menu'}
-            onClick={() => setDrawerOpen((v) => !v)}
-          >
-            {drawerOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
         </header>
 
         {drawerOpen ? (
@@ -155,7 +157,7 @@ export default function AdminShell() {
               aria-label="Close drawer"
               onClick={closeDrawer}
             />
-            <aside className="absolute inset-y-0 left-0 flex w-[min(300px,88vw)] flex-col bg-[var(--color-sr-navy)] text-white shadow-xl">
+            <aside className="sr-safe-top absolute inset-y-0 left-0 flex w-[min(300px,88vw)] flex-col bg-[var(--color-sr-navy)] text-white shadow-xl">
               {sidebar}
             </aside>
           </div>

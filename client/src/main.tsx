@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
+import { registerServiceWorker } from './registerServiceWorker'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -9,10 +10,4 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-      // Installability still works via manifest on supported browsers.
-    })
-  })
-}
+registerServiceWorker()

@@ -65,7 +65,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-[var(--color-sr-navy)] text-white sticky top-0 z-50 shadow-sm">
+    <header className="sr-safe-top bg-[var(--color-sr-navy)] text-white sticky top-0 z-50 shadow-sm">
       <div className="sr-container flex items-center justify-between gap-3 h-14 md:h-16">
         <Link to="/" className="shrink-0 flex items-center h-full" onClick={closeAll}>
           <img
@@ -249,7 +249,7 @@ export default function Navbar() {
             aria-label="Close menu overlay"
             onClick={() => setMenuOpen(false)}
           />
-          <aside className="absolute right-0 top-0 h-full w-[min(100%,340px)] bg-[var(--color-sr-navy)] shadow-2xl overflow-y-auto">
+          <aside className="sr-safe-top absolute right-0 top-0 h-full w-[min(100%,340px)] bg-[var(--color-sr-navy)] shadow-2xl overflow-y-auto">
             <div className="flex items-center justify-between px-4 py-4 border-b border-white/15">
               <span className="font-bold text-lg">Menu</span>
               <button type="button" aria-label="Close menu" onClick={() => setMenuOpen(false)}>
