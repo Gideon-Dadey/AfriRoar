@@ -210,7 +210,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/register"
-                  className="px-3 py-1.5 text-sm font-bold bg-[var(--color-sr-yellow)] text-[var(--color-sr-navy-deeper)] hover:bg-[#e0b400]"
+                  className="inline-flex items-center bg-[var(--color-sr-yellow)] px-3.5 py-2 text-sm font-bold leading-none text-[var(--color-sr-navy-deeper)] hover:bg-[#e0b400]"
                 >
                   Register
                 </Link>
