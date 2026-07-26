@@ -3,10 +3,12 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft,
+  faBriefcase,
   faFileLines,
   faGaugeHigh,
   faGraduationCap,
   faHouse,
+  faIdCard,
   faNewspaper,
   faRightFromBracket,
   faUserShield,
@@ -27,6 +29,8 @@ const navItems: { to: string; label: string; icon: IconDefinition; end?: boolean
   { to: '/dashboard/admin/users', label: 'Students & users', icon: faUsers },
   { to: '/dashboard/admin/scholarships', label: 'Scholarships', icon: faGraduationCap },
   { to: '/dashboard/admin/applications', label: 'Applications', icon: faFileLines },
+  { to: '/dashboard/admin/jobs', label: 'Jobs', icon: faBriefcase },
+  { to: '/dashboard/admin/job-applications', label: 'Job apps', icon: faIdCard },
   { to: '/dashboard/admin/content', label: 'Content', icon: faNewspaper },
   { to: '/dashboard/admin/activity', label: 'Activity', icon: faClockRotateLeft },
 ];

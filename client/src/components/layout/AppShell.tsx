@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBookmark,
   faBell,
+  faBriefcase,
   faFileLines,
   faGaugeHigh,
   faMagnifyingGlass,
@@ -26,6 +27,7 @@ const baseLinks: {
 }[] = [
   { to: '/dashboard', label: 'Overview', icon: faGaugeHigh, end: true },
   { to: '/dashboard/applications', label: 'Applications', icon: faFileLines, end: false },
+  { to: '/dashboard/job-applications', label: 'Jobs', icon: faBriefcase, end: false },
   { to: '/dashboard/saved', label: 'Saved', icon: faBookmark, end: false },
   { to: '/dashboard/notifications', label: 'Alerts', icon: faBell, end: false },
   { to: '/dashboard/profile', label: 'Profile', icon: faUser, end: false },
@@ -105,11 +107,18 @@ export default function AppShell() {
         <div className="hidden items-center gap-2 md:flex">
           <NotificationBell />
           <Link
+            to="/jobs"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-[13px] font-semibold text-white/80 transition hover:text-[var(--color-sr-yellow)]"
+          >
+            <FontAwesomeIcon icon={faBriefcase} className="text-[13px]" />
+            Browse jobs
+          </Link>
+          <Link
             to="/scholarships"
             className="inline-flex items-center gap-1.5 px-3 py-2 text-[13px] font-semibold text-white/80 transition hover:text-[var(--color-sr-yellow)]"
           >
             <FontAwesomeIcon icon={faMagnifyingGlass} className="text-[13px]" />
-            Browse scholarships
+            Scholarships
           </Link>
           <span className="mx-1 hidden h-5 w-px bg-white/20 lg:block" aria-hidden />
           <span className="hidden max-w-[140px] truncate text-[13px] text-white/70 lg:inline">
@@ -158,6 +167,14 @@ export default function AppShell() {
                 {label}
               </NavLink>
             ))}
+            <Link
+              to="/jobs"
+              onClick={closeMenu}
+              className="flex items-center gap-2.5 px-1 py-3 text-[15px] font-semibold text-white/90"
+            >
+              <FontAwesomeIcon icon={faBriefcase} className="w-4 text-[14px] opacity-90" />
+              Browse jobs
+            </Link>
             <Link
               to="/scholarships"
               onClick={closeMenu}

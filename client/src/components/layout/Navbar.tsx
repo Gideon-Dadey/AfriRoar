@@ -149,6 +149,14 @@ export default function Navbar() {
             Internships
           </NavLink>
           <NavLink
+            to="/jobs"
+            className={({ isActive }) =>
+              `sr-nav-link px-3 py-2 hover:text-[var(--color-sr-yellow)] transition-colors ${isActive ? 'text-[var(--color-sr-yellow)]' : ''}`
+            }
+          >
+            Jobs
+          </NavLink>
+          <NavLink
             to="/guides"
             className={({ isActive }) =>
               `sr-nav-link px-3 py-2 hover:text-[var(--color-sr-yellow)] transition-colors ${isActive ? 'text-[var(--color-sr-yellow)]' : ''}`
@@ -291,6 +299,9 @@ export default function Navbar() {
               )}
               <Link to="/internships" className="block px-3 py-3 hover:bg-white/10" onClick={closeAll}>
                 Internships
+              </Link>
+              <Link to="/jobs" className="block px-3 py-3 hover:bg-white/10" onClick={closeAll}>
+                Jobs
               </Link>
               <Link to="/guides" className="block px-3 py-3 hover:bg-white/10" onClick={closeAll}>
                 Scholarship Guides

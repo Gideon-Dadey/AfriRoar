@@ -6,10 +6,14 @@ const {
   validate,
   adminScholarshipSchema,
   updateScholarshipSchema,
+  adminJobSchema,
+  updateJobSchema,
   contentSchema,
   updateContentSchema,
 } = require('../middlewares/validate');
 const upload = require('../middlewares/upload');
+const jobController = require('../controllers/jobController');
+const jobApplicationController = require('../controllers/jobApplicationController');
 
 router.use(protect, restrictTo('admin'));
 
@@ -32,6 +36,20 @@ router.post(
 router.patch('/scholarships/:id/approve', adminController.approveScholarship);
 router.patch('/scholarships/:id/reject', adminController.rejectScholarship);
 router.patch('/scholarships/:id/feature', adminController.featureScholarship);
+
+// Jobs
+router.get('/jobs', jobController.adminList);
+router.get('/jobs/:id', jobController.adminGet);
+router.post('/jobs', validate(adminJobSchema), jobController.adminCreate);
+router.put('/jobs/:id', validate(updateJobSchema), jobController.adminUpdate);
+router.delete('/jobs/:id', jobController.adminDelete);
+router.patch('/jobs/:id/feature', jobController.adminFeature);
+router.post('/jobs/:id/cover', upload.single('cover'), jobController.adminUploadCover);
+
+// Job applications
+router.get('/job-applications', jobApplicationController.adminList);
+router.get('/job-applications/:id', jobApplicationController.adminGet);
+router.patch('/job-applications/:id/status', jobApplicationController.adminUpdateStatus);
 
 // Applications
 router.get('/applications', adminController.getApplications);

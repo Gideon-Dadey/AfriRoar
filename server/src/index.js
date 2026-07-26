@@ -151,6 +151,8 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/scholarships', scholarshipRoutes);
 app.use('/api/applications', applicationRoutes);
+app.use('/api/jobs', require('./routes/jobs'));
+app.use('/api/job-applications', require('./routes/jobApplications'));
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);

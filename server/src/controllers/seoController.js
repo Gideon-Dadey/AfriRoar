@@ -1,5 +1,6 @@
 const Scholarship = require('../models/Scholarship');
 const Content = require('../models/Content');
+const Job = require('../models/Job');
 const config = require('../config');
 const catchAsync = require('../utils/catchAsync');
 
@@ -20,14 +21,16 @@ const robotsTxt = (_req, res) => {
 };
 
 const sitemapXml = catchAsync(async (_req, res) => {
-  const [scholarships, contents] = await Promise.all([
+  const [scholarships, contents, jobs] = await Promise.all([
     Scholarship.find({ status: 'approved' }).select('slug updatedAt').lean(),
     Content.find({ status: 'published' }).select('slug category updatedAt publishedAt').lean().catch(() => []),
+    Job.find({ status: 'published' }).select('slug updatedAt').lean().catch(() => []),
   ]);
 
   const staticPaths = [
     '',
     '/scholarships',
+    '/jobs',
     '/internships',
     '/guides',
     '/lists',
@@ -56,6 +59,15 @@ const sitemapXml = catchAsync(async (_req, res) => {
       lastmod: (s.updatedAt || new Date()).toISOString().slice(0, 10),
       changefreq: 'weekly',
       priority: '0.8',
+    });
+  }
+
+  for (const j of jobs || []) {
+    urls.push({
+      loc: `${SITE}/jobs/${j.slug}`,
+      lastmod: (j.updatedAt || new Date()).toISOString().slice(0, 10),
+      changefreq: 'weekly',
+      priority: '0.75',
     });
   }
 

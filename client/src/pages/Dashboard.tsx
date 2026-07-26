@@ -310,7 +310,7 @@ export default function Dashboard() {
               <Metric
                 label="Applications"
                 value={appsLoading ? '-' : totalApplications}
-                hint="View all"
+                hint="Scholarships"
                 to="/dashboard/applications"
               />
               <Metric
@@ -325,7 +325,12 @@ export default function Dashboard() {
                 hint="In recent list"
                 to="/dashboard/applications?status=accepted"
               />
-              <Metric label="Saved" value={savedCount} hint="Your shortlist" to="/dashboard/saved" />
+              <Metric
+                label="Job apps"
+                value="Open"
+                hint="Career tracker"
+                to="/dashboard/job-applications"
+              />
             </section>
           ) : null}
 
@@ -469,6 +474,13 @@ export default function Dashboard() {
                     Browse all scholarships
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
+                  <Link
+                    to="/jobs"
+                    className="ml-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--color-sr-navy)] underline-offset-2 hover:underline"
+                  >
+                    Browse jobs
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
                 </div>
               </section>
             </div>
@@ -513,6 +525,15 @@ export default function Dashboard() {
                       <p className="font-bold text-[var(--color-sr-navy-deeper)]">Scholarships</p>
                       <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">
                         Moderate listings before publish.
+                      </p>
+                    </Link>
+                    <Link
+                      to="/dashboard/admin/jobs"
+                      className="border border-[var(--color-sr-border)] bg-white p-4 transition hover:border-[var(--color-sr-navy)] sm:p-5"
+                    >
+                      <p className="font-bold text-[var(--color-sr-navy-deeper)]">Jobs</p>
+                      <p className="mt-1 text-[14px] text-[var(--color-sr-muted)]">
+                        Publish roles and review applicants.
                       </p>
                     </Link>
                     <Link

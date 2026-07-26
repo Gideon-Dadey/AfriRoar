@@ -31,6 +31,10 @@ import Applications from '@/pages/Applications';
 import VerifyEmail from '@/pages/VerifyEmail';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ApplicationWizard from '@/pages/ApplicationWizard';
+import Jobs from '@/pages/Jobs';
+import JobDetail from '@/pages/JobDetail';
+import JobApplications from '@/pages/JobApplications';
+import JobApplicationWizard from '@/pages/JobApplicationWizard';
 import SavedScholarships from '@/pages/SavedScholarships';
 import Notifications from '@/pages/Notifications';
 import AdminOverview from '@/pages/admin/AdminOverview';
@@ -40,6 +44,10 @@ import AdminScholarships from '@/pages/admin/AdminScholarships';
 import AdminScholarshipForm from '@/pages/admin/AdminScholarshipForm';
 import AdminApplications from '@/pages/admin/AdminApplications';
 import AdminApplicationDetail from '@/pages/admin/AdminApplicationDetail';
+import AdminJobs from '@/pages/admin/AdminJobs';
+import AdminJobForm from '@/pages/admin/AdminJobForm';
+import AdminJobApplications from '@/pages/admin/AdminJobApplications';
+import AdminJobApplicationDetail from '@/pages/admin/AdminJobApplicationDetail';
 import AdminContent from '@/pages/admin/AdminContent';
 import AdminContentForm from '@/pages/admin/AdminContentForm';
 import AdminActivity from '@/pages/admin/AdminActivity';
@@ -67,6 +75,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/scholarships" element={<ScholarshipsPage />} />
               <Route path="/scholarships/:slug" element={<PostDetail />} />
+              <Route path="/jobs" element={<Jobs />} />
+              <Route path="/jobs/:slug" element={<JobDetail />} />
               <Route path="/internships" element={<InternshipsPage />} />
               <Route path="/guides" element={<GuidesPage />} />
               <Route path="/lists" element={<ListsPage />} />
@@ -91,6 +101,9 @@ function App() {
                 <Route path="/dashboard/applications" element={<Applications />} />
                 <Route path="/dashboard/applications/new" element={<ApplicationWizard />} />
                 <Route path="/dashboard/applications/:id" element={<ApplicationWizard />} />
+                <Route path="/dashboard/job-applications" element={<JobApplications />} />
+                <Route path="/dashboard/job-applications/new" element={<JobApplicationWizard />} />
+                <Route path="/dashboard/job-applications/:id" element={<JobApplicationWizard />} />
                 <Route path="/dashboard/saved" element={<SavedScholarships />} />
                 <Route path="/dashboard/notifications" element={<Notifications />} />
               </Route>
@@ -109,6 +122,14 @@ function App() {
                 <Route
                   path="/dashboard/admin/applications/:id"
                   element={<AdminApplicationDetail />}
+                />
+                <Route path="/dashboard/admin/jobs" element={<AdminJobs />} />
+                <Route path="/dashboard/admin/jobs/new" element={<AdminJobForm />} />
+                <Route path="/dashboard/admin/jobs/:id/edit" element={<AdminJobForm />} />
+                <Route path="/dashboard/admin/job-applications" element={<AdminJobApplications />} />
+                <Route
+                  path="/dashboard/admin/job-applications/:id"
+                  element={<AdminJobApplicationDetail />}
                 />
                 <Route path="/dashboard/admin/content" element={<AdminContent />} />
                 <Route path="/dashboard/admin/content/new" element={<AdminContentForm />} />

@@ -166,6 +166,7 @@ export function StatusBadge({ status }: { status: string }) {
     under_review: 'bg-sky-50 text-sky-900 border-sky-200',
     rejected: 'bg-red-50 text-red-800 border-red-200',
     suspended: 'bg-red-50 text-red-800 border-red-200',
+    closed: 'bg-gray-50 text-gray-700 border-gray-200',
     withdrawn: 'bg-gray-50 text-gray-700 border-gray-200',
   };
 

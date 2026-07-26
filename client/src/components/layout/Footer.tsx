@@ -9,12 +9,14 @@ const categories = [
   { label: 'PhD & Doctoral Scholarships', to: '/scholarships?level=phd' },
   { label: 'Postdoctoral Fellowships', to: '/scholarships?level=postdoctoral' },
   { label: 'Internships & Work-Study Programs', to: '/internships' },
+  { label: 'Jobs & Career Roles', to: '/jobs' },
   { label: 'Application Guides & Documents', to: '/guides' },
   { label: 'Scholarship Advisory Desk', to: '/guides' },
 ];
 
 const forStudents = [
   { label: 'Browse scholarships', to: '/scholarships' },
+  { label: 'Browse jobs', to: '/jobs' },
   { label: 'Browse internships', to: '/internships' },
   { label: 'Scholarship guides', to: '/guides' },
   { label: 'Curated scholarship lists', to: '/lists' },

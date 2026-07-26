@@ -371,6 +371,94 @@ const bootstrapDemoData = async () => {
         `AfriRoar scholarship catalogue synced: ${created} created, ${refreshed} refreshed (${catalog.length} total in catalogue)`,
       );
     }
+
+    // Seed a few published jobs for the careers board
+    const Job = require('../models/Job');
+    const jobDeadline = monthsFromNow(3);
+    const sampleJobs = [
+      {
+        title: 'Graduate Analyst — Development Finance',
+        slug: 'graduate-analyst-development-finance',
+        company: 'AfriRoar Partners',
+        shortDescription: 'Entry-level analyst role supporting scholarship and education finance research across Africa.',
+        description:
+          'Join a small research team tracking scholarship pipelines, donor programmes, and graduate outcomes.\n\nYou will prepare briefing notes, maintain opportunity databases, and support outreach to universities and employers.\n\nThis is a strong fit for recent graduates who care about education access and can write clearly under deadlines.',
+        requirements:
+          'Bachelor’s degree in economics, public policy, international relations, or related field.\nStrong written English.\nComfortable with spreadsheets and remote collaboration tools.\nAfrica-focused interest is a plus.',
+        responsibilities:
+          'Research and summarise funding programmes.\nUpdate opportunity listings and quality checks.\nDraft short reports for partners.\nSupport virtual information sessions.',
+        country: 'Ghana',
+        location: 'Accra (hybrid)',
+        employmentType: 'full-time',
+        workplaceType: 'hybrid',
+        field: 'Research & Policy',
+        deadline: jobDeadline,
+        allowInternalApply: true,
+        tags: ['graduate', 'research', 'africa'],
+        status: 'published',
+        isFeatured: true,
+      },
+      {
+        title: 'Remote Content Intern — Scholarships Desk',
+        slug: 'remote-content-intern-scholarships-desk',
+        company: 'AfriRoar Editorial',
+        shortDescription: 'Paid internship writing clear guides and listing summaries for African applicants.',
+        description:
+          'Help the editorial team turn dense programme pages into practical applicant guides.\n\nYou will draft short explainers, fact-check deadlines, and keep country pages accurate.\n\nRemote-friendly with weekly check-ins.',
+        requirements:
+          'Enrolled student or recent graduate.\nExcellent English writing.\nReliable internet and attention to detail.\nInterest in higher education and careers.',
+        responsibilities:
+          'Draft and edit guide sections.\nVerify official links and deadlines.\nSuggest topics based on applicant questions.',
+        country: 'Remote',
+        location: 'Remote — Africa timezone preferred',
+        employmentType: 'internship',
+        workplaceType: 'remote',
+        field: 'Media & Communications',
+        deadline: jobDeadline,
+        allowInternalApply: true,
+        tags: ['internship', 'remote', 'writing'],
+        status: 'published',
+        isFeatured: true,
+      },
+      {
+        title: 'Programme Coordinator — University Partnerships',
+        slug: 'programme-coordinator-university-partnerships',
+        company: 'AfriRoar Partners',
+        shortDescription: 'Coordinate university partnerships and applicant support workflows.',
+        description:
+          'Own day-to-day coordination with partner universities and scholarship desks.\n\nYou will track application cycles, prepare briefing packs, and keep stakeholders updated.\n\nIdeal for organisers who enjoy cross-border education work.',
+        requirements:
+          '2+ years in programme coordination, admissions, or NGO operations.\nStrong written and verbal communication.\nAbility to manage multiple deadlines.',
+        responsibilities:
+          'Maintain partner calendars and SLAs.\nPrepare weekly status reports.\nSupport applicant escalations with the ops team.',
+        country: 'Kenya',
+        location: 'Nairobi',
+        employmentType: 'full-time',
+        workplaceType: 'onsite',
+        field: 'Operations',
+        deadline: jobDeadline,
+        allowInternalApply: true,
+        tags: ['coordinator', 'partnerships'],
+        status: 'published',
+        isFeatured: false,
+      },
+    ];
+
+    let jobsCreated = 0;
+    for (const item of sampleJobs) {
+      const existingJob = await Job.findOne({ slug: item.slug });
+      if (!existingJob) {
+        await Job.create({ ...item, createdBy: provider._id });
+        jobsCreated += 1;
+      } else if (!existingJob.deadline || existingJob.deadline < new Date()) {
+        existingJob.deadline = item.deadline;
+        existingJob.status = 'published';
+        await existingJob.save();
+      }
+    }
+    if (jobsCreated) {
+      logger.info(`AfriRoar jobs catalogue: ${jobsCreated} sample job(s) created`);
+    }
   } catch (error) {
     logger.warn(`Demo data bootstrap skipped: ${error.message}`);
   }

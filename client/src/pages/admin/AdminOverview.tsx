@@ -45,12 +45,15 @@ export default function AdminOverview() {
               <Plus className="h-3.5 w-3.5" />
               Add scholarship
             </Link>
-            <Link to="/dashboard/admin/content/new" className={btnSecondary}>
+            <Link to="/dashboard/admin/jobs/new" className={btnSecondary}>
               <Plus className="h-3.5 w-3.5" />
-              Add content
+              Add job
+            </Link>
+            <Link to="/dashboard/admin/job-applications" className={btnSecondary}>
+              Job apps
             </Link>
             <Link to="/dashboard/admin/applications" className={btnSecondary}>
-              View applications
+              Scholarship apps
             </Link>
           </>
         }

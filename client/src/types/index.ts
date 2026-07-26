@@ -63,6 +63,64 @@ export interface Scholarship {
   updatedAt: string;
 }
 
+export interface Job {
+  _id: string;
+  title: string;
+  slug: string;
+  company: string;
+  companyWebsite?: string;
+  shortDescription: string;
+  description: string;
+  requirements?: string;
+  responsibilities?: string;
+  country: string;
+  location?: string;
+  employmentType: 'full-time' | 'part-time' | 'contract' | 'internship' | 'temporary';
+  workplaceType: 'onsite' | 'hybrid' | 'remote';
+  field?: string;
+  salary?: { min?: number; max?: number; currency?: string; period?: string };
+  deadline: string;
+  applicationUrl?: string;
+  allowInternalApply: boolean;
+  tags: string[];
+  coverImage?: string;
+  status: 'draft' | 'published' | 'closed';
+  isFeatured: boolean;
+  isExpired?: boolean;
+  viewCount: number;
+  applicationCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface JobApplicationPersonal {
+  firstName: string;
+  lastName: string;
+  otherName?: string;
+  email: string;
+  phone: string;
+  country: string;
+  linkedIn?: string;
+}
+
+export interface JobApplication {
+  _id: string;
+  userId: Partial<User> | string;
+  jobId: Partial<Job> | string;
+  status: 'draft' | 'submitted' | 'under_review' | 'accepted' | 'rejected' | 'withdrawn';
+  currentStep: number;
+  personal: JobApplicationPersonal;
+  coverLetter: string;
+  documents: Document[];
+  feedback?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  submittedAt?: string;
+  lastSavedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Application {
   _id: string;
   userId: Partial<User> | string;

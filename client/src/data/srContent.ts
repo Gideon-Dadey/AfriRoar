@@ -18,6 +18,11 @@ export const heroCards = [
     icon: 'scholarship' as const,
   },
   {
+    title: 'Jobs',
+    to: '/jobs',
+    icon: 'internship' as const,
+  },
+  {
     title: 'Internships',
     to: '/internships',
     icon: 'internship' as const,
@@ -44,6 +49,8 @@ export const lookingFor = [
   { label: 'Postdoctoral Fellowships', to: '/scholarships?level=postdoctoral' },
   { label: 'Training Scholarships', to: '/scholarships?level=training' },
   { label: 'Closing soon', to: '/scholarships?deadline=soon' },
+  { label: 'Jobs & careers', to: '/jobs' },
+  { label: 'Jobs closing soon', to: '/jobs?closing=soon' },
   { label: 'Scholarships by Countries', to: '/countries' },
   { label: 'Scholarship Lists', to: '/lists' },
   { label: 'Internships', to: '/internships' },

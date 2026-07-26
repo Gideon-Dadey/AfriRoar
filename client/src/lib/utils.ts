@@ -78,6 +78,26 @@ export function getLevelLabel(level: string): string {
   return labels[level] || level;
 }
 
+export function getEmploymentTypeLabel(type: string): string {
+  const labels: Record<string, string> = {
+    'full-time': 'Full-time',
+    'part-time': 'Part-time',
+    contract: 'Contract',
+    internship: 'Internship',
+    temporary: 'Temporary',
+  };
+  return labels[type] || type;
+}
+
+export function getWorkplaceTypeLabel(type: string): string {
+  const labels: Record<string, string> = {
+    onsite: 'On-site',
+    hybrid: 'Hybrid',
+    remote: 'Remote',
+  };
+  return labels[type] || type;
+}
+
 export function truncate(str: string, length: number): string {
   if (str.length <= length) return str;
   return str.substring(0, length) + '...';

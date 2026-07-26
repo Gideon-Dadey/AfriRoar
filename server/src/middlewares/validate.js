@@ -158,6 +158,42 @@ const adminScholarshipSchema = z.object({
   }),
 });
 
+const adminJobSchema = z.object({
+  body: z.object({
+    title: z.string().min(3).max(200),
+    company: z.string().min(2).max(120),
+    companyWebsite: z.string().url().optional().or(z.literal('')),
+    shortDescription: z.string().max(300).optional(),
+    description: z.string().min(20).max(15000),
+    requirements: z.string().max(10000).optional(),
+    responsibilities: z.string().max(10000).optional(),
+    country: z.string().min(1),
+    location: z.string().max(120).optional(),
+    employmentType: z.enum(['full-time', 'part-time', 'contract', 'internship', 'temporary']),
+    workplaceType: z.enum(['onsite', 'hybrid', 'remote']),
+    field: z.string().max(120).optional(),
+    salary: z
+      .object({
+        min: z.number().optional(),
+        max: z.number().optional(),
+        currency: z.string().optional(),
+        period: z.enum(['hour', 'month', 'year', '']).optional(),
+      })
+      .optional(),
+    deadline: z.string().min(1, 'Deadline is required'),
+    applicationUrl: z.string().url().optional().or(z.literal('')),
+    allowInternalApply: z.boolean().optional(),
+    tags: z.array(z.string()).optional(),
+    coverImage: z.string().optional().or(z.literal('')),
+    status: z.enum(['draft', 'published', 'closed']).optional(),
+    isFeatured: z.boolean().optional(),
+  }),
+});
+
+const updateJobSchema = z.object({
+  body: adminJobSchema.shape.body.partial(),
+});
+
 const contentSchema = z.object({
   body: z.object({
     title: z.string().min(3).max(200),
@@ -265,6 +301,8 @@ module.exports = {
   contactSchema,
   newsletterSchema,
   adminScholarshipSchema,
+  adminJobSchema,
+  updateJobSchema,
   contentSchema,
   updateContentSchema,
 };
