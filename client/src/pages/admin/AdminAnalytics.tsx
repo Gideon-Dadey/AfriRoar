@@ -117,33 +117,35 @@ export default function AdminAnalytics() {
     },
   });
 
-  const attention: { label: string; value: number; to: string; tone: 'warn' | 'info' }[] = data
-    ? [
-        {
-          label: 'Pending scholarship reviews',
-          value: data.scholarships.pending,
-          to: '/dashboard/admin/scholarships?status=pending',
-          tone: 'warn',
-        },
-        {
-          label: 'Suspended accounts',
-          value: data.users.suspended ?? 0,
-          to: '/dashboard/admin/users?suspended=true',
-          tone: 'warn',
-        },
-        {
-          label: 'Submitted applications awaiting review',
-          value: data.applications.byStatus.submitted ?? 0,
-          to: '/dashboard/admin/applications?status=submitted',
-          tone: 'info',
-        },
-        {
-          label: 'Draft content not published',
-          value: data.content?.draft ?? 0,
-          to: '/dashboard/admin/content?status=draft',
-          tone: 'info',
-        },
-      ].filter((item) => item.value > 0)
+  const attention = data
+    ? (
+        [
+          {
+            label: 'Pending scholarship reviews',
+            value: data.scholarships.pending,
+            to: '/dashboard/admin/scholarships?status=pending',
+            tone: 'warn' as const,
+          },
+          {
+            label: 'Suspended accounts',
+            value: data.users.suspended ?? 0,
+            to: '/dashboard/admin/users?suspended=true',
+            tone: 'warn' as const,
+          },
+          {
+            label: 'Submitted applications awaiting review',
+            value: data.applications.byStatus.submitted ?? 0,
+            to: '/dashboard/admin/applications?status=submitted',
+            tone: 'info' as const,
+          },
+          {
+            label: 'Draft content not published',
+            value: data.content?.draft ?? 0,
+            to: '/dashboard/admin/content?status=draft',
+            tone: 'info' as const,
+          },
+        ] as const
+      ).filter((item) => item.value > 0)
     : [];
 
   return (
