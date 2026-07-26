@@ -133,8 +133,22 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
     @media only screen and (max-width: 620px) {
       .ar-pad { padding-left: 20px !important; padding-right: 20px !important; }
     }
+    /* Force header to match light mode in every dark-mode client */
+    .ar-header {
+      background-color: #1e2f4a !important;
+      background-image: linear-gradient(#1e2f4a, #1e2f4a) !important;
+    }
+    .ar-brand {
+      color: #f5c518 !important;
+    }
     @media (prefers-color-scheme: dark) {
-      /* Header stays navy + gold (same as light) */
+      .ar-header {
+        background-color: #1e2f4a !important;
+        background-image: linear-gradient(#1e2f4a, #1e2f4a) !important;
+      }
+      .ar-brand {
+        color: #f5c518 !important;
+      }
       .ar-shell { background-color: #121212 !important; }
       .ar-body { background-color: #121212 !important; color: #ffffff !important; }
       .ar-footer { background-color: #0e0e0e !important; border-top-color: #2a2a2a !important; color: #a1a1aa !important; }
@@ -147,6 +161,18 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
       .ar-code-value { color: #ffffff !important; }
       .ar-panel { background-color: #1a1a1b !important; border-color: #2a2a2a !important; color: #e4e4e7 !important; }
       .ar-link { color: #f5c518 !important; }
+      .ar-btn { background-color: #f5c518 !important; background-image: linear-gradient(#f5c518, #f5c518) !important; }
+      .ar-btn-label { color: #1e2f4a !important; }
+    }
+    /* Outlook.com / Office 365 dark mode */
+    [data-ogsc] .ar-header,
+    [data-ogsb] .ar-header {
+      background-color: #1e2f4a !important;
+      background-image: linear-gradient(#1e2f4a, #1e2f4a) !important;
+    }
+    [data-ogsc] .ar-brand,
+    [data-ogsb] .ar-brand {
+      color: #f5c518 !important;
     }
   </style>
   <!--[if mso]><style>table,td{font-family:Arial,Helvetica,sans-serif!important;}</style><![endif]-->
@@ -160,11 +186,11 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
       <td align="center" style="padding:0;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:${BRAND.white};">
 
-          <!-- Brand header — full width, fixed navy + gold -->
+          <!-- Brand header — navy + gold (locked for light and dark) -->
           <tr>
-            <td bgcolor="${BRAND.navyDeep}" style="background:${BRAND.navyDeep};padding:18px 24px;text-align:left;">
+            <td class="ar-header" bgcolor="#1e2f4a" style="background-color:#1e2f4a;background-image:linear-gradient(#1e2f4a,#1e2f4a);padding:18px 24px;text-align:left;">
               <a href="${site}" target="_blank" style="text-decoration:none;">
-                <span style="font-family:Helvetica,Arial,sans-serif;font-size:18px;font-weight:800;letter-spacing:0.04em;color:${BRAND.gold};line-height:1;">
+                <span class="ar-brand" style="font-family:Helvetica,Arial,sans-serif;font-size:18px;font-weight:800;letter-spacing:0.04em;color:#f5c518;line-height:1;">
                   AfriRoar
                 </span>
               </a>
