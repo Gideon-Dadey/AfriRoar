@@ -27,7 +27,19 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Security middleware
-app.use(helmet());
+// Allow same-origin images (local flags/covers) plus https CDNs if used later.
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        'img-src': ["'self'", 'data:', 'blob:', 'https:'],
+        'upgrade-insecure-requests': null,
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  })
+);
 app.use(cors({
   origin: config.clientUrl,
   credentials: true,

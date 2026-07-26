@@ -30,11 +30,11 @@ export const heroCards = [
 ];
 
 export const popularCountries = [
-  { name: 'USA', slug: 'usa', flag: 'https://flagcdn.com/w320/us.png' },
-  { name: 'UK', slug: 'uk', flag: 'https://flagcdn.com/w320/gb.png' },
-  { name: 'Australia', slug: 'australia', flag: 'https://flagcdn.com/w320/au.png' },
-  { name: 'Germany', slug: 'germany', flag: 'https://flagcdn.com/w320/de.png' },
-  { name: 'Canada', slug: 'canada', flag: 'https://flagcdn.com/w320/ca.png' },
+  { name: 'USA', slug: 'usa', flag: '/sr/flags/us.png' },
+  { name: 'UK', slug: 'uk', flag: '/sr/flags/gb.png' },
+  { name: 'Australia', slug: 'australia', flag: '/sr/flags/au.png' },
+  { name: 'Germany', slug: 'germany', flag: '/sr/flags/de.png' },
+  { name: 'Canada', slug: 'canada', flag: '/sr/flags/ca.png' },
 ];
 
 export const lookingFor = [
