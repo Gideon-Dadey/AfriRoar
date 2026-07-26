@@ -23,28 +23,25 @@
 
 /*
  * Shared page shell: nav, hero, sections, and footer all use these tokens
- * so left/right edges stay locked to one industry-standard rhythm.
+ * so left/right edges stay locked to one rhythm.
+ *
+ * Gutters stay modest (16–24px). On wide screens, empty side space comes from
+ * centering within --sr-container-max — not oversized padding.
  */
 :root {
-  --sr-container-max: 72.5rem; /* 1160px content shell */
-  --sr-gutter: 1.25rem; /* 20px mobile */
+  --sr-container-max: 80rem; /* 1280px — common product/marketing shell */
+  --sr-gutter: 1rem; /* 16px */
 }
 
 @media (min-width: 640px) {
   :root {
-    --sr-gutter: 1.5rem; /* 24px */
-  }
-}
-
-@media (min-width: 768px) {
-  :root {
-    --sr-gutter: 2rem; /* 32px */
+    --sr-gutter: 1.25rem; /* 20px */
   }
 }
 
 @media (min-width: 1024px) {
   :root {
-    --sr-gutter: 2.5rem; /* 40px */
+    --sr-gutter: 1.5rem; /* 24px */
   }
 }
 
