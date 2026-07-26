@@ -111,8 +111,8 @@ const codeBlock = (label, code) => `
 `;
 
 /**
- * Omnisend-inspired shell: single column, clear hierarchy, one CTA, mobile-first.
- * Header brand colors stay identical in light and dark mode.
+ * OmniH-style shell: full-bleed (no floating card / outer canvas),
+ * brand header, body, footer. Header colors fixed in light + dark.
  */
 const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
   const site = clientUrl();
@@ -132,76 +132,64 @@ const wrapEmail = ({ preheader = '', title, bodyHtml }) => {
     :root { color-scheme: light dark; }
     @media only screen and (max-width: 620px) {
       .ar-pad { padding-left: 20px !important; padding-right: 20px !important; }
-      .ar-outer { padding: 16px 8px !important; }
     }
     @media (prefers-color-scheme: dark) {
-      /* Header intentionally NOT overridden — same navy + gold as light mode */
-      .ar-canvas { background-color: #0b1220 !important; }
-      .ar-card { background-color: #121a2b !important; }
-      .ar-body { background-color: #121a2b !important; color: #e8edf5 !important; }
-      .ar-footer { background-color: #0f1624 !important; border-top-color: #243044 !important; color: #94a3b8 !important; }
-      .ar-footer-brand { color: #e2e8f0 !important; }
+      /* Header stays navy + gold (same as light) */
+      .ar-shell { background-color: #121212 !important; }
+      .ar-body { background-color: #121212 !important; color: #ffffff !important; }
+      .ar-footer { background-color: #0e0e0e !important; border-top-color: #2a2a2a !important; color: #a1a1aa !important; }
       .ar-footer a { color: #cbd5e1 !important; }
-      .ar-heading { color: #f8fafc !important; }
-      .ar-text { color: #cbd5e1 !important; }
-      .ar-text-muted { color: #94a3b8 !important; }
-      .ar-code { background-color: #0f1624 !important; border-color: #2a3a52 !important; }
-      .ar-code-label { color: #94a3b8 !important; }
-      .ar-code-value { color: #f8fafc !important; }
-      .ar-panel { background-color: #0f1624 !important; border-color: #2a3a52 !important; color: #cbd5e1 !important; }
-      .ar-ignore { color: #64748b !important; }
+      .ar-heading { color: #ffffff !important; }
+      .ar-text { color: #ffffff !important; }
+      .ar-text-muted { color: #a1a1aa !important; }
+      .ar-code { background-color: #1a1a1b !important; border-color: #2a2a2a !important; }
+      .ar-code-label { color: #a1a1aa !important; }
+      .ar-code-value { color: #ffffff !important; }
+      .ar-panel { background-color: #1a1a1b !important; border-color: #2a2a2a !important; color: #e4e4e7 !important; }
+      .ar-link { color: #f5c518 !important; }
     }
   </style>
   <!--[if mso]><style>table,td{font-family:Arial,Helvetica,sans-serif!important;}</style><![endif]-->
 </head>
-<body class="ar-canvas" style="margin:0;padding:0;background:${BRAND.canvas};-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+<body class="ar-shell" style="margin:0;padding:0;background:${BRAND.white};-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;opacity:0;">
     ${safePreheader}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
   </div>
-  <table role="presentation" class="ar-canvas" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.canvas};">
+  <table role="presentation" class="ar-shell" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.white};">
     <tr>
-      <td class="ar-outer" align="center" style="padding:40px 16px;">
-        <table role="presentation" class="ar-card" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:${BRAND.white};overflow:hidden;">
+      <td align="center" style="padding:0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:${BRAND.white};">
 
-          <!-- Simple brand header (fixed colors in light + dark) -->
+          <!-- Brand header — full width, fixed navy + gold -->
           <tr>
-            <td bgcolor="${BRAND.navyDeep}" style="background:${BRAND.navyDeep};padding:24px 40px;text-align:center;">
+            <td bgcolor="${BRAND.navyDeep}" style="background:${BRAND.navyDeep};padding:18px 24px;text-align:left;">
               <a href="${site}" target="_blank" style="text-decoration:none;">
-                <span style="font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:800;letter-spacing:0.08em;color:${BRAND.gold};line-height:1;">
+                <span style="font-family:Helvetica,Arial,sans-serif;font-size:18px;font-weight:800;letter-spacing:0.04em;color:${BRAND.gold};line-height:1;">
                   AfriRoar
                 </span>
               </a>
             </td>
           </tr>
-          <tr>
-            <td bgcolor="${BRAND.gold}" style="height:3px;line-height:3px;font-size:0;background:${BRAND.gold};">&nbsp;</td>
-          </tr>
 
           <!-- Body -->
           <tr>
-            <td class="ar-body ar-pad" bgcolor="${BRAND.white}" style="padding:40px;font-family:Helvetica,Arial,sans-serif;color:${BRAND.text};background:${BRAND.white};">
+            <td class="ar-body ar-pad" bgcolor="${BRAND.white}" style="padding:32px 24px 28px;font-family:Helvetica,Arial,sans-serif;color:${BRAND.text};background:${BRAND.white};">
               ${bodyHtml}
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td class="ar-footer ar-pad" bgcolor="${BRAND.soft}" style="padding:28px 40px;border-top:1px solid ${BRAND.border};font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:1.7;color:${BRAND.muted};background:${BRAND.soft};text-align:center;">
-              <p class="ar-footer-brand" style="margin:0 0 8px;font-weight:700;font-size:13px;color:${BRAND.navy};">AfriRoar</p>
-              <p style="margin:0 0 8px;">
-                <a href="${site}" target="_blank" style="color:${BRAND.navy};text-decoration:underline;">Open AfriRoar</a>
-                &nbsp;·&nbsp;
-                <a href="mailto:${supportEmail()}" style="color:${BRAND.navy};text-decoration:underline;">Support</a>
+            <td class="ar-footer ar-pad" bgcolor="${BRAND.white}" style="padding:24px;border-top:1px solid ${BRAND.border};font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:1.7;color:${BRAND.muted};background:${BRAND.white};text-align:center;">
+              <p style="margin:0 0 10px;">
+                <a href="${site}/privacy" target="_blank" style="color:${BRAND.navy};text-decoration:underline;">Privacy Policy</a>
+                &nbsp;|&nbsp;
+                <a href="mailto:${supportEmail()}" style="color:${BRAND.navy};text-decoration:underline;">Contact Support</a>
               </p>
-              <p style="margin:0;">© ${year()} AfriRoar. All rights reserved.</p>
-            </td>
-          </tr>
-        </table>
-
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
-          <tr>
-            <td class="ar-ignore" align="center" style="padding:20px 12px 0;font-family:Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5;color:#94a3b8;">
-              If you did not expect this email, you can safely ignore it.
+              <p style="margin:0;">
+                <a href="mailto:${supportEmail()}" style="color:${BRAND.muted};text-decoration:underline;">${supportEmail()}</a>
+              </p>
+              <p style="margin:12px 0 0;">© ${year()} AfriRoar. All rights reserved.</p>
             </td>
           </tr>
         </table>
@@ -329,25 +317,28 @@ const templates = {
 
   passwordReset: (userName, code) => {
     const name = escapeHtml(userName || 'there');
-    const site = clientUrl();
+    const actionUrl = `${clientUrl()}/forgot-password`;
     return {
-      subject: 'Reset your AfriRoar password',
-      text: `Hi ${userName},\n\nYour AfriRoar password reset code is ${code}. It expires in 15 minutes.\n\nReset: ${site}/forgot-password\n\nIf you did not request this, ignore this email.`,
+      subject: 'Password reset request',
+      text: `Hi ${userName},\n\nWe received a request to reset the password for your account. Your reset code is ${code}. It expires in 15 minutes.\n\nReset: ${actionUrl}\n\nIf you did not request this, ignore this email.`,
       html: wrapEmail({
-        title: 'Reset your password',
+        title: 'Password reset request',
         preheader: `Your password reset code is ${code}. It expires in 15 minutes.`,
         bodyHtml: `
-          ${heading('Reset your password')}
+          ${heading('Password reset request')}
           ${paragraph(`Hi ${name},`)}
           ${paragraph(
-            'We received a request to reset your AfriRoar password. Enter this code to choose a new one.',
+            'We received a request to reset the password for your account. Enter the code below, then choose a new password.',
           )}
+          ${paragraph('<strong>Please note:</strong> This request will expire in 15 minutes.')}
           ${codeBlock('Reset code', code)}
-          ${paragraph('This code expires in <strong>15 minutes</strong>. Do not share it with anyone.', {
-            muted: true,
-            bottom: 0,
-          })}
-          ${ctaButton(`${site}/forgot-password`, 'Reset password')}
+          ${ctaButton(actionUrl, 'Reset your password')}
+          <p class="ar-text-muted" style="margin:24px 0 0;font-size:13px;line-height:1.6;color:${BRAND.muted};font-family:Helvetica,Arial,sans-serif;">
+            If you&apos;re having trouble with the button above, copy and paste this URL into your browser:
+          </p>
+          <p style="margin:8px 0 0;font-size:13px;line-height:1.5;word-break:break-all;font-family:Helvetica,Arial,sans-serif;">
+            <a class="ar-link" href="${actionUrl}" target="_blank" style="color:${BRAND.navy};text-decoration:underline;">${actionUrl}</a>
+          </p>
         `,
       }),
     };
