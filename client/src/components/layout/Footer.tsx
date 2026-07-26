@@ -70,7 +70,7 @@ export default function Footer() {
           <form onSubmit={subscribe} className="mt-6">
             <p className="sr-footer-label mb-2 text-[var(--color-sr-muted)]">NEWSLETTER</p>
             <p className="mb-3 text-[14px] text-[var(--color-sr-muted)]">
-              New scholarships and closing deadlines — one email when we publish.
+              New scholarships and closing deadlines. One email when we publish.
             </p>
             <div className="flex flex-col gap-2 sm:flex-row">
               <input
@@ -78,7 +78,6 @@ export default function Footer() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@email.com"
                 className="min-w-0 flex-1 border border-[var(--color-sr-border)] bg-white px-3 py-2.5 text-[16px] outline-none focus:border-[var(--color-sr-navy)]"
               />
               <input
