@@ -866,16 +866,17 @@ export default function JobApplicationWizard() {
 
           <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
             <div className="border border-[var(--color-sr-border)] bg-white p-4 text-[13px]">
-              <p className="font-semibold text-[var(--color-sr-navy)]">Tips</p>
+              <p className="font-semibold text-[var(--color-sr-navy)]">Required to submit</p>
               <ul className="mt-2 list-disc space-y-1.5 pl-4 text-[var(--color-sr-muted)]">
-                <li>Match your cover letter to the role and company.</li>
-                <li>Use a current PDF CV with clear contact details.</li>
-                <li>Save often — drafts stay editable until you submit.</li>
+                <li>Personal details (name, email, phone, country)</li>
+                <li>Cover letter (minimum 80 characters)</li>
+                <li>At least one document — CV / resume (PDF preferred)</li>
               </ul>
+              <p className="mt-3 border-t border-[var(--color-sr-border)] pt-3 text-[var(--color-sr-muted)]">
+                Save often — drafts stay editable until you submit.
+              </p>
               {user?.email ? (
-                <p className="mt-3 border-t border-[var(--color-sr-border)] pt-3 text-[var(--color-sr-muted)]">
-                  Signed in as {user.email}
-                </p>
+                <p className="mt-2 text-[var(--color-sr-muted)]">Signed in as {user.email}</p>
               ) : null}
             </div>
           </aside>

@@ -26,6 +26,17 @@ const WORKPLACE = [
   { value: 'remote', label: 'Remote' },
 ];
 
+const COUNTRY_CHIPS = [
+  { value: '', label: 'All countries' },
+  { value: 'United States', label: 'United States' },
+  { value: 'Canada', label: 'Canada' },
+  { value: 'New Zealand', label: 'New Zealand' },
+  { value: 'United Kingdom', label: 'United Kingdom' },
+  { value: 'Ghana', label: 'Ghana' },
+  { value: 'Nigeria', label: 'Nigeria' },
+  { value: 'Remote', label: 'Remote' },
+];
+
 export default function Jobs() {
   const [params, setParams] = useSearchParams();
   const q = params.get('q') || '';
@@ -82,13 +93,34 @@ export default function Jobs() {
           </p>
           <h1 className="text-2xl font-bold md:text-3xl">Jobs & careers</h1>
           <p className="mt-2 max-w-3xl text-white/85">
-            Professional roles and internships curated for African talent — apply on AfriRoar or
-            continue on the employer site when listed.
+            Competitive roles across the United States, Canada, New Zealand, Africa, and remote —
+            many open to diploma, HND, and experience-based applicants, not only bachelor’s degrees.
           </p>
         </div>
       </div>
 
       <section className="sr-container py-6 md:py-8">
+        <div className="mb-4 flex flex-wrap gap-2">
+          {COUNTRY_CHIPS.map((chip) => {
+            const active = country === chip.value;
+            return (
+              <button
+                key={chip.label}
+                type="button"
+                onClick={() => setFilter('country', chip.value)}
+                className={[
+                  'border px-3 py-1.5 text-[13px] font-semibold transition',
+                  active
+                    ? 'border-[var(--color-sr-navy)] bg-[var(--color-sr-navy)] text-white'
+                    : 'border-[var(--color-sr-border)] bg-white text-[var(--color-sr-navy)] hover:border-[var(--color-sr-navy)]',
+                ].join(' ')}
+              >
+                {chip.label}
+              </button>
+            );
+          })}
+        </div>
+
         <form
           className="mb-6 grid grid-cols-1 gap-3 border border-[var(--color-sr-border)] bg-white p-4 sm:grid-cols-2 lg:grid-cols-5"
           onSubmit={(e) => {
@@ -222,6 +254,7 @@ export default function Jobs() {
                         <MapPin className="h-3.5 w-3.5" />
                         {job.location || job.country}
                       </span>
+                      <span className="font-medium text-[var(--color-sr-navy)]">{job.country}</span>
                       <span>{getEmploymentTypeLabel(job.employmentType)}</span>
                       <span>{getWorkplaceTypeLabel(job.workplaceType)}</span>
                       <span className="inline-flex items-center gap-1">
