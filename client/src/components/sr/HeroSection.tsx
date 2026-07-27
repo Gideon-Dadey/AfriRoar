@@ -176,9 +176,6 @@ export default function HeroSection() {
 
       <div className="sr-container relative z-10 flex min-h-[76vh] items-center py-16 md:min-h-[82vh] md:py-20">
         <div className="max-w-xl lg:max-w-2xl">
-          <p className="sr-hero-kicker mb-4 text-[13px] font-semibold uppercase tracking-[0.22em] text-[var(--color-sr-yellow)]">
-            AfriRoar
-          </p>
           <h1 className="sr-hero-headline text-[2.35rem] font-bold leading-[1.12] md:text-[3.4rem] md:leading-[1.08]">
             Scholarships that open Africa to the world
           </h1>
