@@ -155,7 +155,8 @@ app.use(
         if (mime) res.setHeader('Content-Type', mime);
       }
       res.setHeader('Cache-Control', 'public, max-age=86400');
-      res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+      // Allow opening CVs/docs in new tabs and viewers without CORP blocking
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
     },
   })
 );
