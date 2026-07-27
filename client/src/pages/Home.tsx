@@ -48,14 +48,28 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>AfriRoar – Worldwide Scholarships and Internships at One Place</title>
+        <title>AfriRoar – Scholarship and careers platform for African students</title>
         <meta
           name="description"
-          content="Worldwide fully funded scholarships and internships. Browse by country, level, deadlines, and guides."
+          content="AfriRoar helps African students discover verified scholarships and internships, track applications, upload documents, and get guidance to study and work abroad."
         />
       </Helmet>
 
       <HeroSection />
+
+      <section className="border-b border-[var(--color-sr-border)] bg-white">
+        <div className="sr-container py-8 md:py-10">
+          <h2 className="text-[1.25rem] font-bold text-[var(--color-sr-navy-deeper)] md:text-[1.4rem]">
+            What AfriRoar is for
+          </h2>
+          <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-[var(--color-sr-muted)] md:text-[16px]">
+            AfriRoar is an online platform where students create an account to browse scholarships,
+            jobs, and internships, save and submit applications, store supporting documents, and
+            use practical guides. Sign-in (including Google) is used so you can securely manage your
+            AfriRoar profile and application history.
+          </p>
+        </div>
+      </section>
 
       {/* Featured */}
       <section className="sr-container py-8">
