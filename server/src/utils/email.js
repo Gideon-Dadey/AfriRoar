@@ -344,26 +344,94 @@ const templates = {
     };
   },
 
-  jobApplicationStatusUpdate: (userName, jobTitle, company, status) => {
+  jobApplicationStatusUpdate: (userName, jobTitle, company, status, feedback = '') => {
     const name = escapeHtml(userName || 'there');
     const title = escapeHtml(jobTitle || 'the role');
     const companyName = escapeHtml(company || 'the employer');
-    const safeStatus = escapeHtml(String(status || '').replace(/_/g, ' '));
     const site = clientUrl();
+    const dashboardUrl = `${site}/dashboard/job-applications`;
+    const note = String(feedback || '').trim();
+    const safeNote = escapeHtml(note).replace(/\n/g, '<br>');
+    const feedbackHtml = note
+      ? `
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;">
+            <tr>
+              <td class="ar-panel" style="padding:16px;background:${BRAND.soft};border:1px solid ${BRAND.border};font-size:15px;line-height:1.65;color:${BRAND.body};">
+                <div style="font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${BRAND.muted};margin:0 0 10px;">
+                  Message from AfriRoar
+                </div>
+                ${safeNote}
+              </td>
+            </tr>
+          </table>
+        `
+      : '';
+    const feedbackText = note ? `\n\nMessage from AfriRoar:\n${note}\n` : '';
+
+    if (status === 'accepted') {
+      return {
+        subject: `Congratulations — your application for ${jobTitle} was accepted`,
+        text: `Hi ${userName},\n\nGreat news. Your application for ${jobTitle} at ${company} has been accepted.\n\nOur team will be in touch with next steps. You can also review the update in your AfriRoar dashboard.${feedbackText}\n\nView application: ${dashboardUrl}\n\nCongratulations again,\nThe AfriRoar Team`,
+        html: wrapEmail({
+          title: 'Application accepted',
+          preheader: `Congratulations — your application for ${jobTitle} at ${company} was accepted.`,
+          bodyHtml: `
+            ${heading('Congratulations')}
+            ${paragraph(`Hi ${name},`)}
+            ${paragraph(
+              `We are pleased to let you know that your application for <strong>${title}</strong> at <strong>${companyName}</strong> has been <strong>accepted</strong>.`,
+            )}
+            ${paragraph(
+              'Thank you for the care you put into your application. Our team will follow up with next steps shortly. In the meantime, you can review the decision and any notes in your dashboard.',
+            )}
+            ${feedbackHtml}
+            ${paragraph('We wish you every success in this next chapter.', { muted: true, bottom: 0 })}
+            ${ctaButton(dashboardUrl, 'View application')}
+          `,
+        }),
+      };
+    }
+
+    if (status === 'rejected') {
+      return {
+        subject: `Update on your application for ${jobTitle}`,
+        text: `Hi ${userName},\n\nThank you for applying for ${jobTitle} at ${company}. After careful review, we will not be moving forward with your application at this time.\n\nWe encourage you to keep exploring other opportunities on AfriRoar.${feedbackText}\n\nView application: ${dashboardUrl}\n\nKind regards,\nThe AfriRoar Team`,
+        html: wrapEmail({
+          title: 'Application update',
+          preheader: `An update on your application for ${jobTitle} at ${company}.`,
+          bodyHtml: `
+            ${heading('Application update')}
+            ${paragraph(`Hi ${name},`)}
+            ${paragraph(
+              `Thank you for applying for <strong>${title}</strong> at <strong>${companyName}</strong>. After careful review, we will not be moving forward with your application at this time.`,
+            )}
+            ${paragraph(
+              'This decision does not diminish the strength of your profile. We encourage you to keep exploring other roles on AfriRoar that match your goals.',
+            )}
+            ${feedbackHtml}
+            ${paragraph('We appreciate your interest and wish you the very best.', { muted: true, bottom: 0 })}
+            ${ctaButton(dashboardUrl, 'Browse opportunities')}
+          `,
+        }),
+      };
+    }
+
+    // under_review (and any other allowed status)
     return {
-      subject: `Job application update - ${jobTitle}`,
-      text: `Hi ${userName},\n\nYour application for ${jobTitle} at ${company} is now ${status}.\n\nView: ${site}/dashboard/job-applications`,
+      subject: `Your application for ${jobTitle} is under review`,
+      text: `Hi ${userName},\n\nYour application for ${jobTitle} at ${company} is now under review. We will email you again when a decision is made.${feedbackText}\n\nView application: ${dashboardUrl}\n\nKind regards,\nThe AfriRoar Team`,
       html: wrapEmail({
-        title: 'Job application update',
-        preheader: `Your application for ${jobTitle} is now ${status}.`,
+        title: 'Application under review',
+        preheader: `Your application for ${jobTitle} is now under review.`,
         bodyHtml: `
-          ${heading('Job application update')}
+          ${heading('Application under review')}
           ${paragraph(`Hi ${name},`)}
           ${paragraph(
-            `Your application for <strong>${title}</strong> at <strong>${companyName}</strong> is now <strong style="text-transform:capitalize;">${safeStatus}</strong>.`,
+            `Your application for <strong>${title}</strong> at <strong>${companyName}</strong> is now <strong>under review</strong>. Our team is carefully assessing your submission.`,
           )}
-          ${paragraph('Open your dashboard for full details and next steps.', { muted: true, bottom: 0 })}
-          ${ctaButton(`${site}/dashboard/job-applications`, 'View details')}
+          ${paragraph('We will email you again as soon as a decision is made.', { muted: true, bottom: 8 })}
+          ${feedbackHtml}
+          ${ctaButton(dashboardUrl, 'View application')}
         `,
       }),
     };

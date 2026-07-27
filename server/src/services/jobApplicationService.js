@@ -313,15 +313,30 @@ const updateJobApplicationStatus = async (id, status, feedback, adminId, req) =>
       application.jobId?.title,
       application.jobId?.company,
       status,
+      application.feedback,
     );
     sendEmail({ to: application.userId.email, ...emailTemplate });
   }
 
+  const statusLabel = status.replace(/_/g, ' ');
+  const notifyTitle =
+    status === 'accepted'
+      ? 'Job application accepted'
+      : status === 'rejected'
+        ? 'Job application update'
+        : `Job application ${statusLabel}`;
+  const notifyMessage =
+    status === 'accepted'
+      ? `Congratulations — your application for ${application.jobId?.title || 'a role'} was accepted.`
+      : status === 'rejected'
+        ? `Your application for ${application.jobId?.title || 'a role'} was not successful this time.`
+        : `Your application for ${application.jobId?.title || 'a role'} is now ${statusLabel}.`;
+
   await Notification.create({
     userId: application.userId?._id || application.userId,
     type,
-    title: `Job application ${status.replace('_', ' ')}`,
-    message: `Your application for ${application.jobId?.title || 'a role'} was marked ${status.replace('_', ' ')}.`,
+    title: notifyTitle,
+    message: notifyMessage,
     link: `/dashboard/job-applications/${application._id}`,
     metadata: { jobApplicationId: String(application._id) },
   });
