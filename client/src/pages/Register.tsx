@@ -136,7 +136,7 @@ export default function Register() {
         />
       </Helmet>
 
-      <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-sr-bg)] lg:grid lg:grid-cols-2">
+      <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col bg-[var(--color-sr-bg)] lg:grid lg:min-h-[calc(100vh-4rem)] lg:grid-cols-2">
         <aside className="relative hidden overflow-hidden bg-[var(--color-sr-navy-deeper)] lg:block">
           <picture>
             <source srcSet="/sr/hero/panel-2.webp" type="image/webp" />
@@ -187,7 +187,7 @@ export default function Register() {
           </div>
         </aside>
 
-        <section className="flex items-center justify-center px-4 py-10 sm:px-8 lg:py-14">
+        <section className="flex flex-1 items-center justify-center px-4 py-8 sm:px-8 lg:py-14">
           <div className="w-full max-w-[440px]">
             <h1 className="sr-only">Create your AfriRoar account</h1>
             <p className="text-[15px] leading-relaxed text-[var(--color-sr-muted)]">

@@ -115,7 +115,7 @@ export default function Login() {
         <meta name="description" content="Sign in to AfriRoar to track scholarship applications and drafts." />
       </Helmet>
 
-      <div className="min-h-[calc(100vh-4rem)] bg-[var(--color-sr-bg)] lg:grid lg:grid-cols-2">
+      <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col bg-[var(--color-sr-bg)] lg:grid lg:min-h-[calc(100vh-4rem)] lg:grid-cols-2">
         {/* Brand panel, full-bleed visual */}
         <aside className="relative hidden overflow-hidden bg-[var(--color-sr-navy-deeper)] lg:block">
           <picture>
@@ -167,9 +167,9 @@ export default function Login() {
           </div>
         </aside>
 
-        {/* Form panel */}
-        <section className="flex items-center justify-center px-4 py-10 sm:px-8 lg:py-16">
-          <div className="w-full max-w-[420px]">
+        {/* Form panel — vertically centered on mobile so bottom dead space is balanced */}
+        <section className="flex flex-1 items-center justify-center px-4 py-8 sm:px-8 lg:py-16">
+          <div className="w-full max-w-[420px] lg:my-0">
             <h1 className="sr-only">Log in to AfriRoar</h1>
             <p className="text-[15px] leading-relaxed text-[var(--color-sr-muted)]">
               Sign in to continue your scholarship applications.
