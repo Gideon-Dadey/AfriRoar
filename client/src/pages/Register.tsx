@@ -189,10 +189,6 @@ export default function Register() {
 
         <section className="flex items-center justify-center px-4 py-10 sm:px-8 lg:py-14">
           <div className="w-full max-w-[440px]">
-            <Link to="/" className="mb-8 inline-flex items-center gap-2.5 lg:hidden">
-              <img src="/sr/logo.png" alt="AfriRoar" className="h-9 object-contain" />
-            </Link>
-
             <h1 className="sr-only">Create your AfriRoar account</h1>
             <p className="text-[15px] leading-relaxed text-[var(--color-sr-muted)]">
               Verify your email, then apply for scholarships with a tracked draft.

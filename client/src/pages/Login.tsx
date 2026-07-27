@@ -170,10 +170,6 @@ export default function Login() {
         {/* Form panel */}
         <section className="flex items-center justify-center px-4 py-10 sm:px-8 lg:py-16">
           <div className="w-full max-w-[420px]">
-            <Link to="/" className="mb-8 inline-flex items-center gap-2.5 lg:hidden">
-              <img src="/sr/logo.png" alt="AfriRoar" className="h-9 object-contain" />
-            </Link>
-
             <h1 className="sr-only">Log in to AfriRoar</h1>
             <p className="text-[15px] leading-relaxed text-[var(--color-sr-muted)]">
               Sign in to continue your scholarship applications.
