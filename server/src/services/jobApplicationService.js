@@ -6,6 +6,7 @@ const { NotFoundError, ForbiddenError, BadRequestError } = require('../utils/err
 const { createAuditLog } = require('../utils/auditLog');
 const { assertJobOpenForApply } = require('./jobService');
 const { uploadToCloudinary } = require('../utils/cloudinary');
+const { sendEmail, templates } = require('../utils/email');
 
 const splitName = (name = '') => {
   const parts = String(name).trim().split(/\s+/).filter(Boolean);
@@ -222,6 +223,16 @@ const submitJobApplication = async (id, userId, req) => {
   job.applicationCount = (job.applicationCount || 0) + 1;
   await job.save({ validateBeforeSave: false });
 
+  const user = await User.findById(userId).select('name email');
+  if (user?.email) {
+    const emailTemplate = templates.jobApplicationSubmitted(
+      user.name,
+      job.title,
+      job.company,
+    );
+    sendEmail({ to: user.email, ...emailTemplate });
+  }
+
   await Notification.create({
     userId,
     type: 'application_submitted',
@@ -278,7 +289,9 @@ const updateJobApplicationStatus = async (id, status, feedback, adminId, req) =>
     throw new BadRequestError('Invalid status.');
   }
 
-  const application = await JobApplication.findById(id).populate('jobId', 'title company');
+  const application = await JobApplication.findById(id)
+    .populate('jobId', 'title company')
+    .populate('userId', 'name email');
   if (!application) throw new NotFoundError('Job application not found.');
 
   application.status = status;
@@ -294,8 +307,18 @@ const updateJobApplicationStatus = async (id, status, feedback, adminId, req) =>
         ? 'application_rejected'
         : 'application_review';
 
+  if (application.userId?.email) {
+    const emailTemplate = templates.jobApplicationStatusUpdate(
+      application.userId.name,
+      application.jobId?.title,
+      application.jobId?.company,
+      status,
+    );
+    sendEmail({ to: application.userId.email, ...emailTemplate });
+  }
+
   await Notification.create({
-    userId: application.userId,
+    userId: application.userId?._id || application.userId,
     type,
     title: `Job application ${status.replace('_', ' ')}`,
     message: `Your application for ${application.jobId?.title || 'a role'} was marked ${status.replace('_', ' ')}.`,

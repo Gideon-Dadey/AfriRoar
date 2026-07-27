@@ -317,6 +317,58 @@ const templates = {
     };
   },
 
+  jobApplicationSubmitted: (userName, jobTitle, company) => {
+    const name = escapeHtml(userName || 'there');
+    const title = escapeHtml(jobTitle || 'the role');
+    const companyName = escapeHtml(company || 'the employer');
+    const site = clientUrl();
+    return {
+      subject: `Job application received - ${jobTitle}`,
+      text: `Hi ${userName},\n\nYour application for ${jobTitle} at ${company} was submitted successfully. We will notify you when the status changes.\n\nView: ${site}/dashboard/job-applications`,
+      html: wrapEmail({
+        title: 'Job application submitted',
+        preheader: `Your application for ${jobTitle} was received.`,
+        bodyHtml: `
+          ${heading('Job application submitted')}
+          ${paragraph(`Hi ${name},`)}
+          ${paragraph(
+            `Your application for <strong>${title}</strong> at <strong>${companyName}</strong> was submitted successfully. We will email you when the status changes.`,
+          )}
+          ${paragraph('You can track progress anytime from your job applications dashboard.', {
+            muted: true,
+            bottom: 0,
+          })}
+          ${ctaButton(`${site}/dashboard/job-applications`, 'View application')}
+        `,
+      }),
+    };
+  },
+
+  jobApplicationStatusUpdate: (userName, jobTitle, company, status) => {
+    const name = escapeHtml(userName || 'there');
+    const title = escapeHtml(jobTitle || 'the role');
+    const companyName = escapeHtml(company || 'the employer');
+    const safeStatus = escapeHtml(String(status || '').replace(/_/g, ' '));
+    const site = clientUrl();
+    return {
+      subject: `Job application update - ${jobTitle}`,
+      text: `Hi ${userName},\n\nYour application for ${jobTitle} at ${company} is now ${status}.\n\nView: ${site}/dashboard/job-applications`,
+      html: wrapEmail({
+        title: 'Job application update',
+        preheader: `Your application for ${jobTitle} is now ${status}.`,
+        bodyHtml: `
+          ${heading('Job application update')}
+          ${paragraph(`Hi ${name},`)}
+          ${paragraph(
+            `Your application for <strong>${title}</strong> at <strong>${companyName}</strong> is now <strong style="text-transform:capitalize;">${safeStatus}</strong>.`,
+          )}
+          ${paragraph('Open your dashboard for full details and next steps.', { muted: true, bottom: 0 })}
+          ${ctaButton(`${site}/dashboard/job-applications`, 'View details')}
+        `,
+      }),
+    };
+  },
+
   welcome: (userName) => {
     const name = escapeHtml(userName || 'there');
     const site = clientUrl();
