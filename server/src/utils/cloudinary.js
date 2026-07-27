@@ -6,10 +6,23 @@ const config = require('../config');
 const logger = require('./logger');
 const { resolveUploadExt } = require('./fileTypes');
 
+const hasRealValue = (value) => {
+  const v = String(value || '').trim();
+  if (!v) return false;
+  const lowered = v.toLowerCase();
+  return !(
+    lowered.includes('your_') ||
+    lowered.includes('your-') ||
+    lowered === 'changeme' ||
+    lowered === 'xxx' ||
+    lowered === 'placeholder'
+  );
+};
+
 const hasCloudinary =
-  Boolean(config.cloudinary.cloudName) &&
-  Boolean(config.cloudinary.apiKey) &&
-  Boolean(config.cloudinary.apiSecret);
+  hasRealValue(config.cloudinary.cloudName) &&
+  hasRealValue(config.cloudinary.apiKey) &&
+  hasRealValue(config.cloudinary.apiSecret);
 
 if (hasCloudinary) {
   cloudinary.config({

@@ -266,13 +266,14 @@ export default function JobApplicationWizard() {
     try {
       const fd = new FormData();
       Array.from(files).forEach((f) => fd.append('documents', f));
-      await api.post(`/job-applications/${id}/documents`, fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      await api.post(`/job-applications/${id}/documents`, fd);
       await refetch();
       toast.success('Document uploaded');
-    } catch {
-      toast.error('Could not upload document');
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Could not upload document';
+      toast.error(message);
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = '';
@@ -620,7 +621,7 @@ export default function JobApplicationWizard() {
                     Documents <span className="text-red-600">*</span>
                   </p>
                   <p className="mb-3 text-[13px] text-[var(--color-sr-muted)]">
-                    Upload your CV / resume (PDF preferred). Optional: portfolio or certificates.
+                    Upload your CV / resume (PDF preferred, max 10MB). Optional: portfolio or certificates.
                   </p>
                   <input
                     ref={fileRef}

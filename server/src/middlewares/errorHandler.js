@@ -61,6 +61,17 @@ const errorHandler = (err, req, res, next) => {
   if (err.code === 11000) error = handleDuplicateFieldsDB(err);
   if (err.name === 'ValidationError') error = handleValidationErrorDB(err);
 
+  // Multer upload failures (size / unexpected field / etc.)
+  if (err.name === 'MulterError') {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      error = new AppError('File is too large. Maximum size is 10MB.', 400);
+    } else if (err.code === 'LIMIT_FILE_COUNT') {
+      error = new AppError('Too many files. Upload up to 5 at a time.', 400);
+    } else {
+      error = new AppError(err.message || 'Upload failed.', 400);
+    }
+  }
+
   error.statusCode = error.statusCode || 500;
   error.status = error.status || 'error';
 
