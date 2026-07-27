@@ -1,6 +1,13 @@
 /* AfriRoar service worker - network-first shell, fast production updates */
-const CACHE = 'afriroar-shell-v3';
-const PRECACHE = ['/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
+const CACHE = 'afriroar-shell-v4';
+const PRECACHE = [
+  '/manifest.webmanifest',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/icons/icon-512-maskable.png',
+  '/icons/apple-touch-icon.png',
+  '/favicon.png',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
