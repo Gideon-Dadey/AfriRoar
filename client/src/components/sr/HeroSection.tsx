@@ -176,16 +176,15 @@ export default function HeroSection() {
 
       <div className="sr-container relative z-10 flex min-h-[76vh] items-center py-16 md:min-h-[82vh] md:py-20">
         <div className="max-w-xl lg:max-w-2xl">
-          <h1 className="sr-hero-headline text-[2.35rem] font-bold leading-[1.12] md:text-[3.4rem] md:leading-[1.08]">
+          <p className="sr-hero-kicker mb-4 text-[13px] font-semibold uppercase tracking-[0.22em] text-[var(--color-sr-yellow)]">
             AfriRoar
-          </h1>
-          <p className="mt-3 text-[1.15rem] font-semibold leading-snug text-[var(--color-sr-yellow)] md:text-[1.35rem]">
-            Scholarships that open Africa to the world
           </p>
+          <h1 className="sr-hero-headline text-[2.35rem] font-bold leading-[1.12] md:text-[3.4rem] md:leading-[1.08]">
+            Scholarships that open Africa to the world
+          </h1>
           <p className="sr-hero-copy mt-5 max-w-lg text-[17px] leading-relaxed text-white/85 md:text-[18px]">
-            AfriRoar is a scholarship and careers platform for African students. Create an account
-            to discover verified funding and internships, save applications, upload documents, and
-            follow clear guides from search to submit.
+            Discover verified funding, internships, and application guidance built for African
+            students ready to study, lead, and return impact home.
           </p>
 
           <div className="sr-hero-cta mt-7 flex w-full flex-col gap-3 sm:mt-8 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
