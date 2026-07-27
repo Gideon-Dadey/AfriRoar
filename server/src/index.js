@@ -28,18 +28,37 @@ app.set('trust proxy', 1);
 
 // Security middleware
 // Allow same-origin images (local flags/covers) plus https CDNs if used later.
+// Google Identity Services needs accounts.google.com scripts/frames + allow-popups COOP.
 app.use(
   helmet({
     contentSecurityPolicy: {
       useDefaults: true,
       directives: {
         'img-src': ["'self'", 'data:', 'blob:', 'https:'],
+        'script-src': [
+          "'self'",
+          'https://accounts.google.com',
+          'https://apis.google.com',
+        ],
+        'script-src-elem': [
+          "'self'",
+          'https://accounts.google.com',
+          'https://apis.google.com',
+        ],
+        'frame-src': ["'self'", 'https://accounts.google.com'],
+        'connect-src': [
+          "'self'",
+          'https://accounts.google.com',
+          'https://oauth2.googleapis.com',
+          'https://www.googleapis.com',
+        ],
         'worker-src': ["'self'", 'blob:'],
         'manifest-src': ["'self'"],
         'upgrade-insecure-requests': null,
       },
     },
     crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
   })
 );
 app.use(cors({

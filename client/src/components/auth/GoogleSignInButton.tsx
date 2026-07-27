@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
+import { useEffect, useRef, useState } from 'react';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
@@ -37,11 +37,49 @@ function GoogleMark({ className }: { className?: string }) {
 function GoogleButtonInner({ onSuccessNavigate, label = 'signin' }: GoogleSignInButtonProps) {
   const { login } = useAuthStore();
   const [busy, setBusy] = useState(false);
+  const [btnWidth, setBtnWidth] = useState(320);
+  const shellRef = useRef<HTMLDivElement>(null);
   const buttonText = label === 'signup' ? 'Sign up with Google' : 'Continue with Google';
+
+  useEffect(() => {
+    const el = shellRef.current;
+    if (!el) return;
+    const sync = () => setBtnWidth(Math.max(240, Math.floor(el.getBoundingClientRect().width)));
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const handleCredential = async (credential?: string) => {
+    if (!credential) {
+      toast.error('Google did not return a credential.');
+      return;
+    }
+    setBusy(true);
+    try {
+      const { data } = await api.post('/auth/google', { credential });
+      login(data.data.user, data.data.accessToken);
+      toast.success(
+        data.data.isNewUser
+          ? `Welcome to AfriRoar, ${data.data.user.name.split(' ')[0]}.`
+          : `Welcome back, ${data.data.user.name.split(' ')[0]}.`,
+      );
+      onSuccessNavigate(Boolean(data.data.isNewUser));
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Google sign-in failed.';
+      toast.error(message);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="w-full">
       <div
+        ref={shellRef}
         className={[
           'relative flex h-12 w-full items-center justify-center overflow-hidden border border-[var(--color-sr-border)] bg-white transition-colors',
           busy ? 'pointer-events-none opacity-60' : 'hover:border-[var(--color-sr-navy)]',
@@ -52,41 +90,24 @@ function GoogleButtonInner({ onSuccessNavigate, label = 'signin' }: GoogleSignIn
           {buttonText}
         </span>
 
-        <div className="absolute inset-0 z-10 opacity-0 [&_div]:!h-full [&_div]:!w-full [&_iframe]:!h-full [&_iframe]:!w-full [&_iframe]:!max-w-none">
+        {/* Real Google button sits on top (near-invisible) so clicks always hit GIS */}
+        <div
+          className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden opacity-[0.02]"
+          aria-hidden={false}
+        >
           <GoogleLogin
-            onSuccess={async (response) => {
-              if (!response.credential) {
-                toast.error('Google did not return a credential.');
-                return;
-              }
-              setBusy(true);
-              try {
-                const { data } = await api.post('/auth/google', {
-                  credential: response.credential,
-                });
-                login(data.data.user, data.data.accessToken);
-                toast.success(
-                  data.data.isNewUser
-                    ? `Welcome to AfriRoar, ${data.data.user.name.split(' ')[0]}.`
-                    : `Welcome back, ${data.data.user.name.split(' ')[0]}.`,
-                );
-                onSuccessNavigate(Boolean(data.data.isNewUser));
-              } catch (err: unknown) {
-                const message =
-                  (err as { response?: { data?: { message?: string } } })?.response?.data
-                    ?.message || 'Google sign-in failed.';
-                toast.error(message);
-              } finally {
-                setBusy(false);
-              }
-            }}
+            onSuccess={(response) => void handleCredential(response.credential)}
             onError={() => toast.error('Google sign-in was cancelled or failed.')}
             useOneTap={false}
             theme="outline"
             size="large"
             text={label === 'signup' ? 'signup_with' : 'continue_with'}
             shape="rectangular"
-            width="400"
+            width={String(btnWidth)}
+            containerProps={{
+              style: { width: '100%', height: '100%' },
+              className: 'flex h-full w-full items-center justify-center',
+            }}
           />
         </div>
       </div>
