@@ -228,6 +228,10 @@ if (serveClient) {
     if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
       return next(new NotFoundError(`Cannot find ${req.originalUrl} on this server.`));
     }
+    // Never fall back to index.html for static asset paths (Safari probes /apple-touch-icon.png etc.)
+    if (/\.(png|jpe?g|gif|webp|svg|ico|woff2?|ttf|eot|map|txt|xml|webmanifest|json)$/i.test(req.path)) {
+      return next(new NotFoundError(`Cannot find ${req.originalUrl} on this server.`));
+    }
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');

@@ -1,7 +1,8 @@
 /* AfriRoar service worker - network-first shell, fast production updates */
-const CACHE = 'afriroar-shell-v4';
+const CACHE = 'afriroar-shell-v5';
 const PRECACHE = [
   '/manifest.webmanifest',
+  '/apple-touch-icon.png',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-512-maskable.png',
